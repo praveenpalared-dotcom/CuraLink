@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database
+mediflow.db
+*.db
+*.sqlite
+
+# Environments & Keys
+.env
+.env.*
+venv/
+backend/venv/
+.agents/
+.gemini/
+.system_generated/
+
+# Node modules & build artifacts
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+frontend/.oxlintrc.json
+
+# Log files
+*.log
