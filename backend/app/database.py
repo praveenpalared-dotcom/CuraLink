@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Fallback to sqlite for ease of development during hackathons
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./mediflow.db")
+if os.getenv("VERCEL"):
+    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////tmp/mediflow.db")
+else:
+    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./mediflow.db")
 
 # For SQLite, we need connect_args={"check_same_thread": False}
 if DATABASE_URL.startswith("sqlite"):
