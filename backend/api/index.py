@@ -5,7 +5,7 @@ try:
     # On Vercel, the backend directory is mounted at /var/task.
     # To resolve 'backend.app' imports properly, we create a symlink
     # /tmp/backend -> /var/task and add /tmp to sys.path.
-    if not os.path.exists("/tmp/backend"):
+    if not os.path.exists("/tmp/backend") and not os.path.islink("/tmp/backend"):
         os.symlink("/var/task", "/tmp/backend")
     if "/tmp" not in sys.path:
         sys.path.insert(0, "/tmp")
