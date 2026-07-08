@@ -23,7 +23,7 @@ export default function NurseDashboard({ onLogout, onNavigate }) {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/appointments/');
+      const res = await fetch('/api/v1/appointments/');
       if (res.ok) {
         const data = await res.json();
         setAppointments(data.reverse());
@@ -57,7 +57,7 @@ export default function NurseDashboard({ onLogout, onNavigate }) {
       // Perform database check-in or update status to checked_in/triage completed
       // If patient is not yet checked in, check them in
       if (selectedAppt.status !== 'checked_in' && selectedAppt.status !== 'in_consultation') {
-        await fetch(`http://127.0.0.1:8000/api/v1/queue/check-in?appointment_id=${selectedAppt.id}`, {
+        await fetch(`/api/v1/queue/check-in?appointment_id=${selectedAppt.id}`, {
           method: 'POST'
         });
       }

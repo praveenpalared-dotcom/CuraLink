@@ -30,10 +30,10 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
   // Fetch appointments, queue, and metadata
   const fetchData = async () => {
     try {
-      const apptRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/');
-      const qRes = await fetch('http://127.0.0.1:8000/api/v1/queue/');
-      const docRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/doctors');
-      const deptRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/departments');
+      const apptRes = await fetch('/api/v1/appointments/');
+      const qRes = await fetch('/api/v1/queue/');
+      const docRes = await fetch('/api/v1/appointments/doctors');
+      const deptRes = await fetch('/api/v1/appointments/departments');
 
       if (apptRes.ok) {
         const appts = await apptRes.json();
@@ -70,7 +70,7 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
       const startStr = `${todayStr}T10:00:00`;
       const endStr = `${todayStr}T10:30:00`;
 
-      const response = await fetch('http://127.0.0.1:8000/api/v1/appointments/', {
+      const response = await fetch('/api/v1/appointments/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -87,7 +87,7 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
       if (response.ok) {
         const apptData = await response.json();
         // Automatically check them in to insert into live queue
-        await fetch(`http://127.0.0.1:8000/api/v1/queue/check-in?appointment_id=${apptData.id}`, {
+        await fetch(`/api/v1/queue/check-in?appointment_id=${apptData.id}`, {
           method: 'POST'
         });
 
@@ -113,7 +113,7 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
       return;
     }
     try {
-      await fetch(`http://127.0.0.1:8000/api/v1/queue/${nextWaiting.id}/call-room`, {
+      await fetch(`/api/v1/queue/${nextWaiting.id}/call-room`, {
         method: 'POST'
       });
       alert(`Patient from Slot #${nextWaiting.appointment_id} called to consultation room.`);
@@ -127,7 +127,7 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
     if (!callTokenInput) return;
     const qId = Number(callTokenInput);
     try {
-      await fetch(`http://127.0.0.1:8000/api/v1/queue/${qId}/call-room`, {
+      await fetch(`/api/v1/queue/${qId}/call-room`, {
         method: 'POST'
       });
       alert(`Calling Queue ID #${qId} to Consultation.`);
@@ -140,7 +140,7 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
 
   const handleTriggerDoctorDelay = async (doctorId, delayMins) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/appointments/doctor-delay?doctor_id=${doctorId}&delay_minutes=${delayMins}`, {
+      const response = await fetch(`/api/v1/appointments/doctor-delay?doctor_id=${doctorId}&delay_minutes=${delayMins}`, {
         method: 'POST'
       });
       const data = await response.json();
@@ -160,7 +160,7 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
 
   const handleCancelAppt = async (apptId) => {
     try {
-      await fetch(`http://127.0.0.1:8000/api/v1/appointments/${apptId}/status?status_str=cancelled`, {
+      await fetch(`/api/v1/appointments/${apptId}/status?status_str=cancelled`, {
         method: 'PUT'
       });
       alert("Appointment marked as cancelled.");

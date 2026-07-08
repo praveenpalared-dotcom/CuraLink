@@ -39,9 +39,9 @@ export default function AdminDashboard({ onLogout, onNavigate }) {
   // Fetch appointments & queue data
   const fetchData = async () => {
     try {
-      const apptRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/');
-      const qRes = await fetch('http://127.0.0.1:8000/api/v1/queue/');
-      const deptRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/departments');
+      const apptRes = await fetch('/api/v1/appointments/');
+      const qRes = await fetch('/api/v1/queue/');
+      const deptRes = await fetch('/api/v1/appointments/departments');
 
       if (apptRes.ok) setAppointments(await apptRes.json());
       if (qRes.ok) setQueue(await qRes.json());

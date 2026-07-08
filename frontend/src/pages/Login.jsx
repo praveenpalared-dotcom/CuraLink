@@ -77,7 +77,7 @@ export default function Login({ onLogin }) {
   useEffect(() => {
     async function loadAuthMetadata() {
       try {
-        const patientsRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/patients');
+        const patientsRes = await fetch('/api/v1/appointments/patients');
         if (patientsRes.ok) {
           const data = await patientsRes.json();
           setPatients(data);
@@ -87,7 +87,7 @@ export default function Login({ onLogin }) {
       }
 
       try {
-        const doctorsRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/doctors');
+        const doctorsRes = await fetch('/api/v1/appointments/doctors');
         if (doctorsRes.ok) {
           const data = await doctorsRes.json();
           setDoctors(data);
@@ -189,7 +189,7 @@ export default function Login({ onLogin }) {
 
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/v1/appointments/patients', {
+      const response = await fetch('/api/v1/appointments/patients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

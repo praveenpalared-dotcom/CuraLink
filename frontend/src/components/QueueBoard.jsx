@@ -16,7 +16,7 @@ export default function QueueBoard() {
   const fetchQueue = async () => {
     setLoading(true);
     try {
-      const qRes = await fetch('http://127.0.0.1:8000/api/v1/queue/');
+      const qRes = await fetch('/api/v1/queue/');
       if (!qRes.ok) throw new Error('Failed to fetch queue logs');
       const qData = await qRes.json();
       setQueue(qData);
@@ -45,7 +45,7 @@ export default function QueueBoard() {
 
   const handleCallRoom = async (id) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/queue/${id}/call-room`, { method: 'POST' });
+      const res = await fetch(`/api/v1/queue/${id}/call-room`, { method: 'POST' });
       if (res.ok) fetchQueue();
     } catch (e) {
       console.error(e);
@@ -54,7 +54,7 @@ export default function QueueBoard() {
 
   const handleComplete = async (id) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/queue/${id}/complete`, { method: 'POST' });
+      const res = await fetch(`/api/v1/queue/${id}/complete`, { method: 'POST' });
       if (res.ok) fetchQueue();
     } catch (e) {
       console.error(e);
@@ -63,13 +63,13 @@ export default function QueueBoard() {
 
   const handleCheckInSimulate = async () => {
     try {
-      const apptRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/');
+      const apptRes = await fetch('/api/v1/appointments/');
       if (apptRes.ok) {
         const appts = await apptRes.json();
         // Find appointments that are scheduled but not checked in (status !== checked_in and status !== completed)
         const scheduled = appts.find(a => a.status === 'scheduled' || a.status === 'confirmed');
         if (scheduled) {
-          const res = await fetch(`http://127.0.0.1:8000/api/v1/queue/check-in?appointment_id=${scheduled.id}`, { method: 'POST' });
+          const res = await fetch(`/api/v1/queue/check-in?appointment_id=${scheduled.id}`, { method: 'POST' });
           if (res.ok) fetchQueue();
         } else {
           alert("All scheduled/confirmed appointments are already checked in. Use the AI chatbot or Patient Portal to book a new appointment first!");

@@ -25,7 +25,7 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/appointments/');
+      const res = await fetch('/api/v1/appointments/');
       if (res.ok) {
         const data = await res.json();
         // Sort appointments by date
@@ -53,19 +53,19 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
     if (!selectedAppt) return;
     try {
       // Find the queue item for this appointment to mark it complete
-      const queueRes = await fetch('http://127.0.0.1:8000/api/v1/queue/');
+      const queueRes = await fetch('/api/v1/queue/');
       if (queueRes.ok) {
         const queueData = await queueRes.json();
         const activeQueueItem = queueData.find(q => q.appointment_id === selectedAppt.id);
         if (activeQueueItem) {
-          await fetch(`http://127.0.0.1:8000/api/v1/queue/${activeQueueItem.id}/complete`, {
+          await fetch(`/api/v1/queue/${activeQueueItem.id}/complete`, {
             method: 'POST'
           });
         }
       }
       
       // Update appointment status to completed
-      await fetch(`http://127.0.0.1:8000/api/v1/appointments/${selectedAppt.id}/status?status_str=completed`, {
+      await fetch(`/api/v1/appointments/${selectedAppt.id}/status?status_str=completed`, {
         method: 'PUT'
       });
       

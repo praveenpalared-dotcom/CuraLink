@@ -89,8 +89,8 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
   const fetchMetadata = async () => {
     setLoadingMetadata(true);
     try {
-      const deptRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/departments');
-      const docRes = await fetch('http://127.0.0.1:8000/api/v1/appointments/doctors');
+      const deptRes = await fetch('/api/v1/appointments/departments');
+      const docRes = await fetch('/api/v1/appointments/doctors');
       
       if (deptRes.ok && docRes.ok) {
         const deptData = await deptRes.json();
@@ -135,7 +135,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
   const fetchPatientData = async () => {
     try {
-      const apptResponse = await fetch('http://127.0.0.1:8000/api/v1/appointments/');
+      const apptResponse = await fetch('/api/v1/appointments/');
       if (apptResponse.ok) {
         const apptData = await apptResponse.json();
         const patientId = patientData?.id || 1;
@@ -143,7 +143,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
         setAppointments(patientAppts.reverse());
       }
 
-      const queueResponse = await fetch('http://127.0.0.1:8000/api/v1/queue/');
+      const queueResponse = await fetch('/api/v1/queue/');
       if (queueResponse.ok) {
         const queueData = await queueResponse.json();
         const patientId = patientData?.id || 1;
@@ -166,7 +166,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
   const handleCancelAppointment = async (apptId) => {
     if (!confirm("Are you sure you want to cancel this appointment?")) return;
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/appointments/${apptId}/status?status_str=cancelled`, {
+      const res = await fetch(`/api/v1/appointments/${apptId}/status?status_str=cancelled`, {
         method: 'PUT'
       });
       if (res.ok) {
@@ -205,7 +205,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
       const formattedEndTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}:00`;
       const endDateTimeStr = `${selectedDate}T${formattedEndTime}`;
 
-      const res = await fetch('http://127.0.0.1:8000/api/v1/appointments/', {
+      const res = await fetch('/api/v1/appointments/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -237,7 +237,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
   const handleCheckIn = async (apptId) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/queue/check-in?appointment_id=${apptId}`, {
+      const res = await fetch(`/api/v1/queue/check-in?appointment_id=${apptId}`, {
         method: 'POST'
       });
       if (res.ok) {
@@ -255,7 +255,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
     if (!medicalText.trim()) return;
     setLoadingExplain(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/appointments/explain-report', {
+      const res = await fetch('/api/v1/appointments/explain-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: medicalText })
@@ -275,7 +275,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
     if (!dietCondition.trim()) return;
     setLoadingDiet(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/appointments/diet-suggestion', {
+      const res = await fetch('/api/v1/appointments/diet-suggestion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ condition: dietCondition })
@@ -295,7 +295,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
     if (!symptomTriageMsg.trim()) return;
     setLoadingTriage(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/appointments/triage', {
+      const res = await fetch('/api/v1/appointments/triage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: symptomTriageMsg })

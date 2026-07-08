@@ -107,7 +107,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
   const fetchAppointments = async () => {
     setLoadingAppts(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/appointments/');
+      const res = await fetch('/api/v1/appointments/');
       if (res.ok) {
         const data = await res.json();
         setAppointments(data.reverse());
@@ -122,7 +122,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
   // Fetch queue from backend
   const fetchQueue = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/queue/');
+      const res = await fetch('/api/v1/queue/');
       if (res.ok) {
         const data = await res.json();
         setQueue(data);
@@ -173,7 +173,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
   // Trigger Doctor Delay Rescheduling
   const handleTriggerDelay = async (doctorId, mins) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/appointments/doctor-delay?doctor_id=${doctorId}&delay_minutes=${mins}`, {
+      const response = await fetch(`/api/v1/appointments/doctor-delay?doctor_id=${doctorId}&delay_minutes=${mins}`, {
         method: 'POST'
       });
       const data = await response.json();
@@ -274,7 +274,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
         chief_complaint: walkInComplaint
       };
 
-      const res = await fetch('http://127.0.0.1:8000/api/v1/appointments/', {
+      const res = await fetch('/api/v1/appointments/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -285,7 +285,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
       if (res.ok) {
         const appt = await res.json();
         // Check in
-        const checkInRes = await fetch(`http://127.0.0.1:8000/api/v1/queue/check-in?appointment_id=${appt.id}`, { method: 'POST' });
+        const checkInRes = await fetch(`/api/v1/queue/check-in?appointment_id=${appt.id}`, { method: 'POST' });
         if (checkInRes.ok) {
           alert(`Success! Checked in walk-in patient ${walkInName}. Queue token issued.`);
           setWalkInName('');
