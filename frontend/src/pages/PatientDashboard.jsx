@@ -1332,7 +1332,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
         {/* Optional Floating/Sliding AI Chat Concierge Sidebar */}
         {isAiPanelOpen && (
-          <div className="w-full sm:w-[380px] bg-brand-card border-l border-brand-border h-full sm:h-[calc(100vh-60px)] shadow-2xl flex flex-col z-20 animate-in slide-in-from-right duration-300 fixed sm:relative right-0 top-0 sm:top-auto">
+          <div className="fixed bottom-6 right-6 w-full sm:w-[380px] h-[600px] max-h-[85vh] bg-brand-card border border-brand-border rounded-2xl shadow-2xl flex flex-col z-50 animate-in slide-in-from-bottom-8 duration-300 overflow-hidden">
             <AgentChat 
               onClose={() => setIsAiPanelOpen(false)}
               patientId={patientData?.id || 1}
