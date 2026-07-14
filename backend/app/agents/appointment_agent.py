@@ -66,7 +66,7 @@ def classify_intent(message: str) -> str:
             return "explain_report"
         elif "diet" in msg_lower or "eat" in msg_lower or "food" in msg_lower or "nutri" in msg_lower:
             return "diet_suggestions"
-        elif "hello" in msg_lower or "hi" in msg_lower or "thank" in msg_lower:
+        elif "hello" in msg_lower or msg_lower == "hi" or msg_lower.startswith("hi ") or "thank" in msg_lower:
             return "general_chat"
         else:
             return "book_appointment"
