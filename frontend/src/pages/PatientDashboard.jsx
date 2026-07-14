@@ -1339,7 +1339,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
             />
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
