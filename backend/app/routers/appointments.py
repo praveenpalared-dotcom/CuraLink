@@ -23,6 +23,10 @@ def get_departments(db: Session = Depends(get_db)):
 def get_patients(db: Session = Depends(get_db)):
     return db.query(Patient).all()
 
+@router.get("/patients/{patient_id}/history", response_model=List[AppointmentResponse])
+def get_patient_history(patient_id: int, db: Session = Depends(get_db)):
+    return db.query(Appointment).filter(Appointment.patient_id == patient_id).order_by(Appointment.start_time.desc()).all()
+
 @router.post("/patients", response_model=PatientResponse)
 def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
     # Check if patient with this email already exists

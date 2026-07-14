@@ -10,6 +10,12 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
   const [loading, setLoading] = useState(false);
   const [doctors, setDoctors] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [patients, setPatients] = useState([]);
+
+  // Patient History Lookup State
+  const [lookupMRN, setLookupMRN] = useState('');
+  const [patientHistory, setPatientHistory] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   // Walk-in form state
   const [walkInName, setWalkInName] = useState('');
@@ -34,6 +40,7 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
       const qRes = await fetch('/api/v1/queue/');
       const docRes = await fetch('/api/v1/appointments/doctors');
       const deptRes = await fetch('/api/v1/appointments/departments');
+      const patientRes = await fetch('/api/v1/appointments/patients');
 
       if (apptRes.ok) {
         const appts = await apptRes.json();
@@ -42,6 +49,7 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
       if (qRes.ok) setQueue(await qRes.json());
       if (docRes.ok) setDoctors(await docRes.json());
       if (deptRes.ok) setDepartments(await deptRes.json());
+      if (patientRes.ok) setPatients(await patientRes.json());
     } catch (e) {
       console.error("Failed to load reception desk telemetry data:", e);
     }
@@ -167,6 +175,27 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
       fetchData();
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleLookupHistory = async (e) => {
+    e.preventDefault();
+    if (!lookupMRN) return;
+    const patient = patients.find(p => p.medical_record_number === lookupMRN || p.email === lookupMRN);
+    if (!patient) {
+      alert("Patient not found in system.");
+      return;
+    }
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`/api/v1/appointments/patients/${patient.id}/history`);
+      if (res.ok) {
+        setPatientHistory(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -448,6 +477,53 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Patient History Lookup */}
+          <div className="glass-panel p-4 rounded-2xl border border-brand-border space-y-3 shadow-sm text-xs">
+            <h3 className="font-extrabold text-xs uppercase tracking-wider text-brand-text border-b border-brand-border pb-1.5 font-display">
+              Patient EHR Lookup
+            </h3>
+            <form onSubmit={handleLookupHistory} className="flex gap-2">
+              <input 
+                type="text"
+                placeholder="Search MRN or Email..."
+                value={lookupMRN}
+                onChange={(e) => setLookupMRN(e.target.value)}
+                className="w-2/3 px-2 py-1.5 bg-brand-bg border border-brand-border rounded-xl focus:outline-none focus:border-brand-accent text-brand-text font-semibold font-mono text-[10px]"
+              />
+              <button 
+                type="submit"
+                className="w-1/3 py-1.5 bg-brand-accent text-white font-extrabold rounded-xl transition cursor-pointer text-[10px]"
+              >
+                Lookup
+              </button>
+            </form>
+            
+            {historyLoading ? (
+              <div className="text-[10px] text-brand-muted py-2">Fetching history...</div>
+            ) : patientHistory ? (
+              <div className="space-y-1.5 max-h-[120px] overflow-y-auto">
+                {patientHistory.length === 0 ? (
+                  <div className="text-[10px] text-brand-muted py-2">No history records found.</div>
+                ) : (
+                  patientHistory.map(h => (
+                    <div key={h.id} className="p-2 bg-brand-bg/50 rounded-xl border border-brand-border/60 text-[10px]">
+                      <div className="flex justify-between font-bold text-brand-text">
+                        <span>{new Date(h.start_time).toLocaleDateString()}</span>
+                        <span className="text-brand-accent uppercase">{h.status}</span>
+                      </div>
+                      <div className="text-brand-muted truncate mt-0.5" title={h.chief_complaint}>
+                        {h.chief_complaint || 'No complaint recorded'}
+                      </div>
+                      <div className="text-brand-muted text-[9px] mt-0.5">
+                        Dr. {h.doctor?.last_name} ({h.doctor?.specialty})
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            ) : null}
           </div>
 
           {/* Doctor status & delay logs */}

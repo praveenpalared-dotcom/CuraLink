@@ -10,6 +10,8 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
   const [loading, setLoading] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [notes, setNotes] = useState('');
+  const [patientHistory, setPatientHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   
   // Prescription State
   const [prescriptions, setPrescriptions] = useState([
@@ -44,9 +46,28 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSelectPatient = (appt) => {
+  const handleSelectPatient = async (appt) => {
     setSelectedAppt(appt);
     setNotes(appt.chief_complaint ? `Patient presenting with: ${appt.chief_complaint}. \nClinical Exam findings:\n- Lungs: Clear bilaterally\n- CVS: S1 S2 heard, no murmurs\n- Plan: Support care.` : '');
+    
+    // Fetch patient history
+    if (appt.patient?.id) {
+      setHistoryLoading(true);
+      try {
+        const res = await fetch(`/api/v1/appointments/patients/${appt.patient.id}/history`);
+        if (res.ok) {
+          const data = await res.json();
+          // Filter out the current appointment
+          setPatientHistory(data.filter(a => a.id !== appt.id));
+        }
+      } catch (e) {
+        console.error("Failed to load history:", e);
+      } finally {
+        setHistoryLoading(false);
+      }
+    } else {
+      setPatientHistory([]);
+    }
   };
 
   const handleCompleteConsult = async () => {
@@ -331,9 +352,33 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
                         <span className="text-brand-muted">Recent Surgery:</span>
                         <span className="text-brand-text">None</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border-b border-brand-border/30 pb-1">
                         <span className="text-brand-muted">Blood Group:</span>
                         <span className="text-brand-text">O positive</span>
+                      </div>
+                      
+                      <div className="mt-2 pt-2 border-t border-brand-border/50">
+                        <h4 className="font-extrabold text-[9px] text-brand-muted uppercase tracking-wider mb-1 font-display">Past Consultations</h4>
+                        {historyLoading ? (
+                          <div className="text-brand-muted text-[9px] py-1">Loading records...</div>
+                        ) : patientHistory.length > 0 ? (
+                          <div className="space-y-1 max-h-[100px] overflow-y-auto">
+                            {patientHistory.map(hist => (
+                              <div key={hist.id} className="p-1.5 bg-brand-bg/50 rounded border border-brand-border/40 text-[9px]">
+                                <div className="flex justify-between font-bold text-brand-text">
+                                  <span>{new Date(hist.start_time).toLocaleDateString()}</span>
+                                  <span className="text-brand-accent">{hist.status}</span>
+                                </div>
+                                <div className="text-brand-muted mt-0.5 line-clamp-1">Complaint: {hist.chief_complaint}</div>
+                                {hist.doctor && (
+                                  <div className="text-brand-muted text-[8px]">Dr. {hist.doctor.last_name} ({hist.doctor.specialty})</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-brand-muted text-[9px] py-1">No past records.</div>
+                        )}
                       </div>
                     </div>
                   </div>

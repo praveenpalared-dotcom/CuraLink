@@ -19,6 +19,9 @@ export default function NurseDashboard({ onLogout, onNavigate }) {
   const [notes, setNotes] = useState('');
   const [emergencyFlag, setEmergencyFlag] = useState(false);
 
+  const [patientHistory, setPatientHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
   // Fetch appointments
   const fetchAppointments = async () => {
     setLoading(true);
@@ -41,11 +44,30 @@ export default function NurseDashboard({ onLogout, onNavigate }) {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSelectPatient = (appt) => {
+  const handleSelectPatient = async (appt) => {
     setSelectedAppt(appt);
     setComplaint(appt.chief_complaint || '');
     setDeptId(appt.department_id || 1);
     setEmergencyFlag(appt.chief_complaint?.toLowerCase().includes('chest') || false);
+
+    // Fetch patient history
+    if (appt.patient?.id) {
+      setHistoryLoading(true);
+      try {
+        const res = await fetch(`/api/v1/appointments/patients/${appt.patient.id}/history`);
+        if (res.ok) {
+          const data = await res.json();
+          // Filter out the current appointment
+          setPatientHistory(data.filter(a => a.id !== appt.id));
+        }
+      } catch (e) {
+        console.error("Failed to load history:", e);
+      } finally {
+        setHistoryLoading(false);
+      }
+    } else {
+      setPatientHistory([]);
+    }
   };
 
   const handleSaveTriage = async (e) => {
@@ -222,17 +244,35 @@ export default function NurseDashboard({ onLogout, onNavigate }) {
             <form onSubmit={handleSaveTriage} className="space-y-4 animate-in fade-in duration-200">
               
               {/* Profile Card Banner */}
-              <div className="p-3 bg-gradient-to-r from-emerald-500/10 to-brand-accent/5 border border-emerald-500/20 rounded-2xl flex justify-between items-center">
+              <div className="p-3 bg-gradient-to-r from-emerald-500/10 to-brand-accent/5 border border-emerald-500/20 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
                   <h3 className="text-sm font-black text-brand-text font-display">Clinical Intake: {selectedAppt.patient?.first_name} {selectedAppt.patient?.last_name}</h3>
                   <p className="text-[9px] text-brand-muted font-mono mt-0.5">
                     MRN: {selectedAppt.patient?.medical_record_number} • Age: 36 • DOB: {selectedAppt.patient?.date_of_birth?.split('T')[0] || '1990-05-12'}
                   </p>
                 </div>
-                <div className="text-right">
-                  <span className="text-[9px] bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 font-bold px-2 py-0.5 rounded">
+                <div className="text-left sm:text-right w-full sm:w-auto">
+                  <span className="text-[9px] bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 font-bold px-2 py-0.5 rounded mb-2 inline-block">
                     Slot #{selectedAppt.id}
                   </span>
+                  
+                  <div className="bg-brand-card/80 border border-brand-border p-2 rounded-lg text-left mt-2 sm:mt-0 min-w-[200px]">
+                    <h4 className="text-[9px] font-bold text-brand-muted uppercase mb-1">Past History</h4>
+                    {historyLoading ? (
+                      <div className="text-[9px] text-brand-muted">Loading...</div>
+                    ) : patientHistory.length > 0 ? (
+                      <div className="max-h-[60px] overflow-y-auto space-y-1">
+                        {patientHistory.map(h => (
+                          <div key={h.id} className="text-[9px] flex justify-between">
+                            <span className="text-brand-text font-mono">{new Date(h.start_time).toLocaleDateString()}</span>
+                            <span className="text-brand-muted truncate max-w-[100px] ml-2" title={h.chief_complaint}>{h.chief_complaint}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-[9px] text-brand-muted">No past records</div>
+                    )}
+                  </div>
                 </div>
               </div>
 
