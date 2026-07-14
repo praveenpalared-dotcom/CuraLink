@@ -83,7 +83,7 @@ export default function AgentChat({ onClose, patientId }) {
   return (
     <div className="flex flex-col h-full w-full bg-brand-card text-brand-text">
       {/* Panel Header */}
-      <div className="p-4 border-b border-brand-border flex items-center justify-between bg-brand-bg/10">
+      <div className="chat-drag-handle p-4 border-b border-brand-border flex items-center justify-between bg-brand-bg/10 cursor-move">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-brand-accent/10 border border-brand-accent/20">
             <Sparkles className="w-5 h-5 text-brand-accent animate-pulse" />

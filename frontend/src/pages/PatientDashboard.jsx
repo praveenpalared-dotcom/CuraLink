@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Draggable from 'react-draggable';
 import AgentChat from '../components/AgentChat';
 import { 
   Calendar, User, Clock, ChevronLeft, RefreshCw, AlertCircle, CheckCircle, 
@@ -1332,12 +1333,24 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
         {/* Optional Floating/Sliding AI Chat Concierge Sidebar */}
         {isAiPanelOpen && (
-          <div className="fixed bottom-6 right-6 w-full sm:w-[380px] h-[600px] max-h-[85vh] bg-brand-card border border-brand-border rounded-2xl shadow-2xl flex flex-col z-50 animate-in slide-in-from-bottom-8 duration-300 overflow-hidden">
-            <AgentChat 
-              onClose={() => setIsAiPanelOpen(false)}
-              patientId={patientData?.id || 1}
-            />
-          </div>
+          <Draggable handle=".chat-drag-handle">
+            <div className="fixed bottom-24 right-6 w-full sm:w-[380px] h-[600px] max-h-[80vh] bg-brand-card border border-brand-border rounded-2xl shadow-2xl flex flex-col z-50 animate-in zoom-in-95 duration-300 overflow-hidden">
+              <AgentChat 
+                onClose={() => setIsAiPanelOpen(false)}
+                patientId={patientData?.id || 1}
+              />
+            </div>
+          </Draggable>
+        )}
+
+        {/* Floating Action Button for AI Copilot */}
+        {!isAiPanelOpen && (
+          <button 
+            onClick={() => setIsAiPanelOpen(true)}
+            className="fixed bottom-6 right-6 p-4 bg-brand-teal text-white rounded-full shadow-2xl hover:bg-brand-teal/90 transition-all z-50 animate-in zoom-in duration-300 cursor-pointer flex items-center justify-center hover:scale-105 group"
+          >
+            <Bot className="w-6 h-6 group-hover:animate-bounce" />
+          </button>
         )}
       </main>
     </div>
