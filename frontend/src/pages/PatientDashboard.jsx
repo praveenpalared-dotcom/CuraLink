@@ -4,7 +4,7 @@ import {
   Calendar, User, Clock, ChevronLeft, RefreshCw, AlertCircle, CheckCircle, 
   Activity, Star, DollarSign, ArrowRight, ShieldAlert, Award, FileText,
   UserCheck, Download, Printer, CalendarRange, MapPin, Compass, Bot, LogOut,
-  Pill, Sparkles, Send, Stethoscope, Heart, Eye, Siren, Volume2, Video, Settings, Upload, Save, Moon, Sun, History
+  Pill, Sparkles, Send, Stethoscope, Heart, Eye, Siren, Volume2, Video, Settings, Upload, Save, Moon, Sun, History, Search
 } from 'lucide-react';
 
 export default function PatientDashboard({ onNavigate, userRole, setUserRole, sessionType, patientData, onLogout }) {
