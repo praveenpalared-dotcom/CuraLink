@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Draggable from 'react-draggable';
 import AgentChat from '../components/AgentChat';
 import { 
@@ -14,6 +14,8 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
   const [activeQueueItem, setActiveQueueItem] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  const dragNodeRef = useRef(null);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
 
   // Doctors & Departments dynamic state
@@ -1333,12 +1335,14 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
         {/* Optional Floating/Sliding AI Chat Concierge Sidebar */}
         {isAiPanelOpen && (
-          <Draggable handle=".chat-drag-handle">
-            <div className="fixed bottom-24 right-6 w-full sm:w-[380px] h-[600px] max-h-[80vh] bg-brand-card border border-brand-border rounded-2xl shadow-2xl flex flex-col z-50 animate-in zoom-in-95 duration-300 overflow-hidden">
-              <AgentChat 
-                onClose={() => setIsAiPanelOpen(false)}
-                patientId={patientData?.id || 1}
-              />
+          <Draggable handle=".chat-drag-handle" nodeRef={dragNodeRef}>
+            <div ref={dragNodeRef} className="fixed bottom-24 right-6 z-[60]">
+              <div className="w-full sm:w-[380px] h-[600px] max-h-[80vh] bg-brand-card border border-brand-border rounded-2xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-300 overflow-hidden">
+                <AgentChat 
+                  onClose={() => setIsAiPanelOpen(false)}
+                  patientId={patientData?.id || 1}
+                />
+              </div>
             </div>
           </Draggable>
         )}
