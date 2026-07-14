@@ -4,7 +4,7 @@ import {
   Calendar, User, Clock, ChevronLeft, RefreshCw, AlertCircle, CheckCircle, 
   Activity, Star, DollarSign, ArrowRight, ShieldAlert, Award, FileText,
   UserCheck, Download, Printer, CalendarRange, MapPin, Compass, Bot, LogOut,
-  Pill, Sparkles, Send, Stethoscope, Heart, Eye, Siren, Volume2, Video
+  Pill, Sparkles, Send, Stethoscope, Heart, Eye, Siren, Volume2, Video, Settings, Upload, Save, Moon, Sun, History
 } from 'lucide-react';
 
 export default function PatientDashboard({ onNavigate, userRole, setUserRole, sessionType, patientData, onLogout }) {
@@ -52,6 +52,27 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
   const [dispatchAddress, setDispatchAddress] = useState('123 Cyber Way, Cyberabad');
   const [emergencySymptoms, setEmergencySymptoms] = useState('');
   const [emergencyDispatched, setEmergencyDispatched] = useState(false);
+
+  // Settings & History State
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [fileInput, setFileInput] = useState('');
+  
+  const [pastHistory] = useState([
+    { id: 1, date: '2025-11-15', doc: 'Dr. Marcus Vance', diagnosis: 'Acute Bronchitis', type: 'Outpatient' },
+    { id: 2, date: '2024-03-22', doc: 'Dr. Sarah Chen', diagnosis: 'Annual Wellness Exam', type: 'Preventive' },
+    { id: 3, date: '2022-09-10', doc: 'Dr. Robert King', diagnosis: 'Ankle Sprain (Grade 2)', type: 'Emergency' }
+  ]);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [theme]);
 
   // Doctor list filters
   const [docSearch, setDocSearch] = useState('');
@@ -335,208 +356,239 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
   ];
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col font-sans">
-      {/* Header navbar */}
-      <header className="bg-brand-card border-b border-brand-border px-4 py-2.5 flex justify-between items-center z-10">
-        <div className="flex items-center gap-2">
+    <div className="min-h-screen bg-brand-bg flex flex-col md:flex-row font-sans">
+      {/* Sidebar Navigation */}
+      <aside className="w-full md:w-64 bg-brand-card border-r border-brand-border flex flex-col shrink-0 z-20 h-screen">
+        <div className="p-4 border-b border-brand-border flex items-center gap-2">
           <div className="p-1.5 bg-brand-accent/10 border border-brand-accent/20 rounded-xl">
             <Activity className="w-5 h-5 text-brand-accent animate-pulse" />
           </div>
-          <span className="font-extrabold text-sm sm:text-lg text-brand-text font-display">
+          <span className="font-extrabold text-lg text-brand-text font-display">
             CuraLink
           </span>
-          <span className="hidden sm:inline-block text-[10px] bg-brand-accent/10 border border-brand-accent/25 text-brand-accent px-2 py-0.5 rounded-full font-bold ml-2">
-            PATIENT PORTAL
+          <span className="text-[9px] bg-brand-accent/10 border border-brand-accent/25 text-brand-accent px-1.5 py-0.5 rounded-full font-bold ml-1">
+            PATIENT
           </span>
         </div>
-
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden md:block text-right">
-            <span className="text-xs font-black block text-brand-text">{patientName}</span>
-            <span className="text-[9px] text-brand-muted font-mono block">MRN: {patientMrn}</span>
-          </div>
-          
-          <button 
-            onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
-            className="px-2.5 py-1.5 bg-brand-teal text-white hover:bg-brand-teal/90 rounded-xl text-xs font-extrabold shadow-md shadow-brand-teal/10 flex items-center gap-1.5 cursor-pointer"
+        
+        <nav className="p-3 space-y-1 overflow-y-auto flex-1">
+          <button
+            onClick={() => setActiveTab('home')}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all ${activeTab === 'home' ? 'bg-brand-accent/10 text-brand-accent border border-brand-accent/20' : 'text-brand-muted hover:bg-brand-hover hover:text-brand-text border border-transparent'}`}
           >
-            <Bot className="w-4 h-4" /> <span className="hidden sm:inline">AI Assistant</span>
+            <Compass className="w-4 h-4" /> Dashboard Home
           </button>
           
+          {quickActions.map(action => {
+            if (action.id === 'home') return null;
+            const isEmergency = action.id === 'emergency';
+            return (
+              <button
+                key={action.id}
+                onClick={() => {
+                  setActiveTab(action.id);
+                  if (action.id === 'booking') {
+                    setBookingStep(1);
+                    setBookingSuccessData(null);
+                  }
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all ${activeTab === action.id ? 'bg-brand-accent/10 text-brand-accent border border-brand-accent/20' : 'text-brand-muted hover:bg-brand-hover hover:text-brand-text border border-transparent'} ${isEmergency ? 'text-red-500 hover:text-red-600' : ''}`}
+              >
+                <action.icon className={`w-4 h-4 ${activeTab === action.id ? (isEmergency ? 'text-red-500' : 'text-brand-accent') : ''} ${isEmergency ? 'animate-pulse' : ''}`} />
+                {action.label}
+              </button>
+            )
+          })}
+          
+          <div className="pt-3 mt-3 border-t border-brand-border">
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all ${activeTab === 'settings' ? 'bg-brand-accent/10 text-brand-accent border border-brand-accent/20' : 'text-brand-muted hover:bg-brand-hover hover:text-brand-text border border-transparent'}`}
+            >
+              <User className="w-4 h-4" /> Settings & History
+            </button>
+          </div>
+        </nav>
+        
+        <div className="p-4 border-t border-brand-border bg-brand-card">
+          <div className="mb-3">
+             <span className="text-xs font-black block text-brand-text">{patientName}</span>
+             <span className="text-[9px] text-brand-muted font-mono block">MRN: {patientMrn}</span>
+          </div>
           {sessionType === 'hospital' ? (
-            <button 
-              onClick={() => onNavigate('landing')}
-              className="px-2.5 py-1.5 border border-brand-border text-brand-text hover:bg-brand-hover rounded-xl text-xs font-semibold cursor-pointer"
-            >
-              Exit <span className="hidden sm:inline">Portal</span>
-            </button>
+            <button onClick={() => onNavigate('landing')} className="w-full px-2 py-1.5 border border-brand-border text-brand-text hover:bg-brand-hover rounded-xl text-[11px] font-bold transition cursor-pointer">Exit Portal</button>
           ) : (
-            <button 
-              onClick={onLogout}
-              className="px-2.5 py-1.5 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-50 hover:text-white rounded-xl text-xs font-bold transition cursor-pointer"
-            >
-              Log Out
-            </button>
+            <button onClick={onLogout} className="w-full px-2 py-1.5 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-50 hover:text-white rounded-xl text-[11px] font-bold transition cursor-pointer flex justify-center items-center gap-2"><LogOut className="w-3.5 h-3.5" /> Log Out</button>
           )}
         </div>
-      </header>
+      </aside>
 
-      {/* Workspace Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Main Content Area */}
-        <div className="flex-1 p-4 overflow-y-auto max-h-[calc(100vh-60px)] space-y-4">
+      {/* Main Workspace Area */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
+        {/* Header */}
+        <header className="bg-brand-bg/80 backdrop-blur-md border-b border-brand-border px-4 md:px-6 py-3 flex justify-between items-center shrink-0 z-10 sticky top-0">
+          <h2 className="text-lg font-black text-brand-text font-display capitalize flex items-center gap-2">
+            {activeTab.replace('_', ' ')}
+          </h2>
+          <button 
+             onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
+             className="px-3 py-1.5 bg-brand-teal text-white hover:bg-brand-teal/90 rounded-xl text-[10px] font-extrabold shadow-md shadow-brand-teal/10 flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+          >
+             <Bot className="w-3.5 h-3.5" /> <span className="hidden sm:inline">AI Copilot</span>
+          </button>
+        </header>
+
+        <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-5">
           
           {/* Active Queue Banner if patient is checked in */}
           {activeQueueItem && (
-            <div className="p-3 bg-brand-teal/10 border border-brand-teal/20 text-brand-teal rounded-2xl flex justify-between items-center text-xs shadow-sm">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-brand-teal animate-spin" />
-                <span>You are currently checked in for consultation. Position: <strong className="text-brand-text font-black">#{activeQueueItem.current_position} in line</strong>. Est wait time: <strong className="text-brand-text font-black">{activeQueueItem.estimated_wait_minutes} mins</strong>.</span>
+            <div className="p-3.5 bg-gradient-to-r from-brand-teal/10 to-brand-accent/5 border border-brand-teal/20 text-brand-text rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs shadow-sm gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-brand-teal/20 rounded-full">
+                  <Clock className="w-4 h-4 text-brand-teal animate-spin" />
+                </div>
+                <div>
+                  <span className="block font-bold">You are currently checked in for consultation.</span>
+                  <span className="text-[10px] text-brand-muted mt-0.5 block font-mono">
+                    Position: <strong className="text-brand-teal font-black">#{activeQueueItem.current_position}</strong> • Est wait: <strong className="text-brand-teal font-black">{activeQueueItem.estimated_wait_minutes} mins</strong>
+                  </span>
+                </div>
               </div>
               <button 
                 onClick={() => setActiveTab('queue_status')}
-                className="px-3 py-1 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/95 font-bold text-[10px] cursor-pointer"
+                className="px-3.5 py-1.5 bg-brand-teal text-white rounded-xl hover:bg-brand-teal/95 font-bold text-[10px] cursor-pointer shadow-sm w-full sm:w-auto"
               >
-                Track Live
+                Track Live Map
               </button>
             </div>
           )}
 
-          {/* Tab: HOME (The 8-Card Grid Dashboard) */}
+          {/* Tab: HOME (Modern Premium Dashboard Grid) */}
           {activeTab === 'home' && (
-            <div className="space-y-4 animate-in fade-in duration-200">
-              <div className="p-5 rounded-2xl bg-gradient-to-r from-brand-accent/5 to-brand-teal/5 border border-brand-border/60">
-                <h1 className="text-xl font-black text-brand-text font-display">Welcome to CuraLink Health Hub</h1>
-                <p className="text-xs text-brand-muted mt-1 max-w-2xl font-medium leading-relaxed">
-                  Access your electronic health records, request ambulance dispatch, book clinical consultation slots manually, or request AI triage assistance.
-                </p>
+            <div className="space-y-5 animate-in fade-in duration-300">
+              {/* Hero welcome banner */}
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-brand-accent/10 via-brand-teal/5 to-brand-bg border border-brand-accent/15 relative overflow-hidden">
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-accent/10 rounded-full blur-3xl"></div>
+                <div className="absolute right-20 -bottom-10 w-32 h-32 bg-brand-teal/10 rounded-full blur-2xl"></div>
+                <div className="relative z-10">
+                  <h1 className="text-2xl md:text-3xl font-black text-brand-text font-display tracking-tight">Good morning, {patientData?.first_name || 'John'}.</h1>
+                  <p className="text-xs text-brand-muted mt-1.5 max-w-lg font-semibold leading-relaxed">
+                    Your health snapshot is looking good. You have {appointments.filter(a => a.status === 'scheduled').length} upcoming appointments this week.
+                  </p>
+                  <div className="mt-4 flex gap-3">
+                    <button onClick={() => { setActiveTab('booking'); setBookingStep(1); }} className="px-4 py-2 bg-brand-accent hover:bg-brand-accent/90 text-white rounded-xl text-xs font-extrabold cursor-pointer transition shadow-md shadow-brand-accent/10 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Book Appointment</button>
+                    <button onClick={() => setActiveTab('medical_records')} className="px-4 py-2 bg-brand-card hover:bg-brand-hover text-brand-text border border-brand-border rounded-xl text-xs font-bold cursor-pointer transition flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-brand-muted" /> View Records</button>
+                  </div>
+                </div>
               </div>
 
-              {/* 8-Card grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {quickActions.map((action) => {
-                  const Icon = action.icon;
-                  const isEmergency = action.id === 'emergency';
-                  return (
-                    <div 
-                      key={action.id}
-                      onClick={() => {
-                        setActiveTab(action.id);
-                        if (action.id === 'booking') {
-                          setBookingStep(1);
-                          setBookingSuccessData(null);
-                        }
-                      }}
-                      className={
-                        isEmergency
-                          ? "bg-gradient-to-br from-red-600 to-red-800 p-4.5 rounded-2xl border border-red-500 hover:from-red-500 hover:to-red-700 cursor-pointer flex flex-col justify-between h-[115px] group shadow-lg shadow-red-600/30 hover:shadow-red-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all relative overflow-hidden duration-200"
-                          : "glass-panel p-4.5 rounded-2xl border border-brand-border/60 hover:border-brand-accent hover:bg-brand-hover/50 cursor-pointer flex flex-col justify-between h-[115px] group shadow-sm transition-all duration-200"
-                      }
-                    >
-                      {isEmergency && (
-                        <div className="absolute inset-0 bg-red-500/10 animate-pulse pointer-events-none" />
-                      )}
-                      <div className="flex justify-between items-start z-10">
-                        <div className={
-                          isEmergency
-                            ? "p-2.5 rounded-xl bg-white/20 border border-white/30 text-white"
-                            : `p-2.5 rounded-xl border border-transparent ${action.color}`
-                        }>
-                          <Icon className={`w-5 h-5 ${isEmergency ? 'animate-pulse' : ''}`} />
-                        </div>
-                        <ArrowRight className={
-                          isEmergency
-                            ? "w-4 h-4 text-white/80 group-hover:translate-x-1 transition-transform"
-                            : "w-4 h-4 text-brand-muted group-hover:translate-x-1 transition-transform"
-                        } />
-                      </div>
-                      <div className="z-10">
-                        <strong className={
-                          isEmergency
-                            ? "text-xs font-black text-white block uppercase tracking-wide"
-                            : "text-xs font-bold text-brand-text block"
-                        }>{action.label}</strong>
-                        <span className={
-                          isEmergency
-                            ? "text-[10px] text-red-100 block mt-0.5 font-bold leading-tight"
-                            : "text-[10px] text-brand-muted block mt-0.5 font-semibold leading-tight"
-                        }>{action.desc}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Dynamic health highlights */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="glass-panel p-4 rounded-2xl border border-brand-border/60 space-y-3 text-xs">
-                  <h3 className="font-extrabold text-xs uppercase tracking-wider text-brand-text border-b border-brand-border pb-1.5 font-display">
-                    Upcoming Scheduled Appointments
-                  </h3>
-                  
-                  <div className="space-y-2">
+              {/* Grid Widgets */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                
+                {/* Upcoming Appointments Widget (col-span-8) */}
+                <div className="md:col-span-8 glass-panel p-5 rounded-2xl border border-brand-border/80 flex flex-col shadow-sm">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-extrabold text-xs uppercase tracking-wider text-brand-text font-display flex items-center gap-1.5">
+                      <CalendarRange className="w-4 h-4 text-brand-accent" /> Upcoming Schedule
+                    </h3>
+                    <button onClick={() => setActiveTab('booking')} className="text-[10px] text-brand-accent font-bold hover:underline cursor-pointer">View All</button>
+                  </div>
+                  <div className="flex-1 space-y-2.5 overflow-y-auto max-h-[220px] pr-1">
                     {appointments.filter(a => a.status === 'scheduled' || a.status === 'confirmed').map((appt) => (
-                      <div key={appt.id} className="p-2.5 bg-brand-bg rounded-xl border border-brand-border/50 flex justify-between items-center font-semibold">
-                        <div>
-                          <span className="text-brand-text block text-xs">Dr. {appt.doctor?.first_name} {appt.doctor?.last_name}</span>
-                          <span className="text-[9px] text-brand-muted block font-mono">Date: {appt.start_time?.split('T')[0]} • {appt.doctor?.specialty}</span>
+                      <div key={appt.id} className="p-3 bg-brand-bg/50 rounded-xl border border-brand-border/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 group hover:border-brand-accent/40 transition">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-brand-accent/10 text-brand-accent flex flex-col items-center justify-center border border-brand-accent/20 shrink-0">
+                            <span className="text-[9px] font-black uppercase">{new Date(appt.start_time).toLocaleString('default', { month: 'short' })}</span>
+                            <span className="text-sm font-black leading-none mt-0.5">{new Date(appt.start_time).getDate()}</span>
+                          </div>
+                          <div>
+                            <span className="font-bold text-brand-text text-xs flex items-center gap-1.5">
+                              Consultation w/ Dr. {appt.doctor?.last_name || 'Unassigned'}
+                            </span>
+                            <span className="text-[10px] text-brand-muted font-mono mt-0.5 block flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> {new Date(appt.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </span>
+                          </div>
                         </div>
-                        
-                        <div className="flex gap-2 items-center">
-                          {appt.status === 'scheduled' && (
-                            <button 
-                              onClick={() => handleCheckIn(appt.id)}
-                              className="px-2 py-1 bg-brand-teal hover:bg-brand-teal/90 text-white rounded text-[10px] font-black cursor-pointer active:scale-95 shadow-sm"
-                            >
-                              Check In Lobby
-                            </button>
-                          )}
-                          <button 
-                            onClick={() => handleCancelAppointment(appt.id)}
-                            className="px-2 py-1 text-red-500 hover:bg-red-50 rounded text-[9px] font-bold cursor-pointer"
-                          >
-                            Cancel
+                        <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                          <span className="text-[9px] bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded font-extrabold border border-amber-500/20 uppercase tracking-wide">
+                            {appt.status}
+                          </span>
+                          <button onClick={() => handleCancelAppointment(appt.id)} className="p-1.5 text-brand-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Cancel">
+                            <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
                     ))}
                     {appointments.filter(a => a.status === 'scheduled' || a.status === 'confirmed').length === 0 && (
-                      <div className="py-4 text-center text-xs text-brand-muted">You have no upcoming appointments.</div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="glass-panel p-4 rounded-2xl border border-brand-border/60 space-y-3 text-xs">
-                  <h3 className="font-extrabold text-xs uppercase tracking-wider text-brand-text border-b border-brand-border pb-1.5 font-display flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-brand-accent animate-pulse" />
-                    AI Post-Visit Recovery Advisor
-                  </h3>
-                  <div className="space-y-2.5">
-                    <div className="flex gap-2">
-                      <input 
-                        type="text"
-                        placeholder="Enter condition (e.g. Flu, Hypertension)"
-                        value={dietCondition}
-                        onChange={(e) => setDietCondition(e.target.value)}
-                        className="flex-1 p-2 bg-brand-bg border border-brand-border rounded-xl text-xs focus:outline-none"
-                      />
-                      <button 
-                        onClick={handleGetDiet}
-                        disabled={loadingDiet}
-                        className="px-3 bg-brand-accent hover:bg-brand-accent/90 text-white font-bold rounded-xl text-xs cursor-pointer active:scale-97 disabled:opacity-50"
-                      >
-                        {loadingDiet ? 'Generating...' : 'Get Diet Suggestions'}
-                      </button>
-                    </div>
-
-                    {dietSuggestion && (
-                      <div className="p-3 bg-brand-accent/5 border border-brand-accent/15 rounded-xl text-[10px] font-mono leading-relaxed text-brand-text whitespace-pre-line">
-                        {dietSuggestion}
+                      <div className="h-full flex flex-col items-center justify-center text-brand-muted py-6 border border-dashed border-brand-border rounded-xl bg-brand-bg/30">
+                        <Calendar className="w-6 h-6 mb-2 opacity-50" />
+                        <span className="text-[11px] font-bold">No upcoming appointments</span>
+                        <span className="text-[9px] mt-1">Book one from the navigation menu.</span>
                       </div>
                     )}
                   </div>
                 </div>
+
+                {/* Right Side Widgets (col-span-4) */}
+                <div className="md:col-span-4 flex flex-col gap-5">
+                  {/* Active Prescriptions Mini-Widget */}
+                  <div className="glass-panel p-4 rounded-2xl border border-brand-border/80 shadow-sm flex-1">
+                    <h3 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted font-display flex items-center gap-1.5 mb-3 border-b border-brand-border pb-2">
+                      <Pill className="w-3.5 h-3.5" /> Active Medications
+                    </h3>
+                    <div className="space-y-2">
+                      {prescriptions.filter(p => p.active).slice(0, 2).map(p => (
+                        <div key={p.id} className="p-2.5 bg-brand-bg rounded-xl border border-brand-border/50">
+                          <div className="flex justify-between items-start">
+                            <span className="text-[11px] font-black text-brand-text">{p.drug}</span>
+                            <span className="text-[8px] bg-brand-teal/10 text-brand-teal font-extrabold px-1.5 py-0.5 rounded border border-brand-teal/20">{p.frequency}</span>
+                          </div>
+                          <span className="text-[9px] text-brand-muted font-medium mt-1 block">Take {p.dosage} for {p.duration}</span>
+                        </div>
+                      ))}
+                      <button onClick={() => setActiveTab('prescriptions')} className="w-full mt-1 text-[9px] font-bold text-brand-accent hover:underline py-1">View all medications →</button>
+                    </div>
+                  </div>
+
+                  {/* AI Diet Recovery Mini-Widget */}
+                  <div className="glass-panel p-4 rounded-2xl border border-brand-accent/20 bg-gradient-to-b from-brand-accent/5 to-transparent shadow-sm flex-1 flex flex-col">
+                    <h3 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-accent font-display flex items-center gap-1.5 mb-2">
+                      <Sparkles className="w-3.5 h-3.5" /> Post-Visit Diet Advisor
+                    </h3>
+                    <p className="text-[9px] text-brand-muted font-semibold leading-relaxed mb-3">
+                      Get AI-curated nutrition advice for fast recovery based on your condition.
+                    </p>
+                    <div className="flex flex-col gap-2 mt-auto">
+                      <input 
+                        type="text"
+                        placeholder="e.g. Flu, Hypertension..."
+                        value={dietCondition}
+                        onChange={(e) => setDietCondition(e.target.value)}
+                        className="w-full p-2 bg-brand-card border border-brand-border rounded-xl text-[10px] font-semibold focus:outline-none focus:border-brand-accent transition shadow-sm"
+                      />
+                      <button 
+                        onClick={handleGetDiet}
+                        disabled={loadingDiet}
+                        className="w-full py-1.5 bg-brand-text text-brand-bg hover:bg-brand-muted font-bold rounded-xl text-[10px] cursor-pointer transition active:scale-[0.98] disabled:opacity-50"
+                      >
+                        {loadingDiet ? 'Generating...' : 'Get Diet Suggestions'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
+              
+              {/* Diet Suggestion Modal/Inline view if active */}
+              {dietSuggestion && (
+                <div className="p-4 bg-brand-card border border-brand-accent/20 rounded-2xl text-xs font-mono leading-relaxed text-brand-text whitespace-pre-line shadow-lg shadow-brand-accent/5 animate-in slide-in-from-bottom-2">
+                  <div className="flex justify-between items-center mb-2 border-b border-brand-border pb-2">
+                    <span className="font-bold text-brand-accent flex items-center gap-1.5"><Sparkles className="w-4 h-4"/> AI Diet Suggestion for {dietCondition}</span>
+                    <button onClick={() => setDietSuggestion('')} className="p-1 text-brand-muted hover:text-brand-text"><X className="w-4 h-4"/></button>
+                  </div>
+                  {dietSuggestion}
+                </div>
+              )}
             </div>
           )}
 
@@ -1159,6 +1211,120 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                   </button>
                 </form>
               )}
+            </div>
+          )}
+
+          {/* Tab: SETTINGS & HISTORY */}
+          {activeTab === 'settings' && (
+            <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-300 pb-10">
+              <div className="flex items-center gap-3 pb-3 border-b border-brand-border">
+                <div className="p-2 bg-brand-accent/10 rounded-xl text-brand-accent">
+                  <Settings className="w-6 h-6" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-black text-brand-text font-display">Settings & History</h1>
+                  <p className="text-[11px] text-brand-muted font-medium mt-0.5">Manage preferences, view past medical history, and upload documents.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                
+                {/* Preferences */}
+                <div className="glass-panel p-5 rounded-2xl border border-brand-border/60 shadow-sm space-y-4">
+                  <h3 className="font-extrabold text-xs uppercase tracking-wider text-brand-text font-display flex items-center gap-1.5 border-b border-brand-border pb-2">
+                    <Compass className="w-4 h-4 text-brand-accent" /> Preferences
+                  </h3>
+                  
+                  <div className="flex justify-between items-center p-3 bg-brand-bg rounded-xl border border-brand-border/50">
+                    <div>
+                      <span className="font-bold text-brand-text block text-xs">App Theme</span>
+                      <span className="text-[10px] text-brand-muted">Switch between light and dark mode.</span>
+                    </div>
+                    <button 
+                      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                      className="px-3 py-1.5 bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent border border-brand-accent/20 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer"
+                    >
+                      {theme === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
+                      {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* File Uploads */}
+                <div className="glass-panel p-5 rounded-2xl border border-brand-border/60 shadow-sm space-y-4">
+                  <h3 className="font-extrabold text-xs uppercase tracking-wider text-brand-text font-display flex items-center gap-1.5 border-b border-brand-border pb-2">
+                    <Upload className="w-4 h-4 text-brand-accent" /> Upload Documents
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input 
+                        type="text"
+                        placeholder="File name (e.g. Previous MRI Scan)"
+                        value={fileInput}
+                        onChange={(e) => setFileInput(e.target.value)}
+                        className="flex-1 p-2 bg-brand-bg border border-brand-border rounded-xl text-xs focus:outline-none"
+                      />
+                      <button 
+                        onClick={() => {
+                          if(fileInput.trim()) {
+                            setUploadedFiles([...uploadedFiles, { id: Date.now(), name: fileInput, date: new Date().toISOString().split('T')[0] }]);
+                            setFileInput('');
+                          }
+                        }}
+                        className="px-3 bg-brand-accent hover:bg-brand-accent/90 text-white font-bold rounded-xl text-xs cursor-pointer active:scale-97 flex items-center gap-1.5"
+                      >
+                        <Save className="w-3.5 h-3.5" /> Save
+                      </button>
+                    </div>
+
+                    {uploadedFiles.length > 0 ? (
+                      <div className="space-y-2 mt-3">
+                        {uploadedFiles.map(f => (
+                          <div key={f.id} className="flex justify-between items-center p-2.5 bg-brand-bg/50 border border-brand-border/40 rounded-xl text-[10px]">
+                            <span className="font-bold text-brand-text flex items-center gap-1.5"><FileText className="w-3 h-3 text-brand-muted" /> {f.name}</span>
+                            <span className="text-brand-muted font-mono">{f.date}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] text-brand-muted italic py-2 text-center bg-brand-bg/30 rounded-xl border border-dashed border-brand-border/50">
+                        No files uploaded yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Past History */}
+                <div className="md:col-span-2 glass-panel p-5 rounded-2xl border border-brand-border/60 shadow-sm space-y-4">
+                  <h3 className="font-extrabold text-xs uppercase tracking-wider text-brand-text font-display flex items-center gap-1.5 border-b border-brand-border pb-2">
+                    <History className="w-4 h-4 text-brand-accent" /> Past Medical History
+                  </h3>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-brand-border/80 text-[10px] text-brand-muted font-black uppercase tracking-wider">
+                          <th className="py-2.5 px-3">Date</th>
+                          <th className="py-2.5 px-3">Diagnosis</th>
+                          <th className="py-2.5 px-3">Physician</th>
+                          <th className="py-2.5 px-3">Type</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pastHistory.map(record => (
+                          <tr key={record.id} className="border-b border-brand-border/40 hover:bg-brand-bg/50 transition">
+                            <td className="py-2.5 px-3 text-xs font-mono text-brand-muted">{record.date}</td>
+                            <td className="py-2.5 px-3 text-xs font-bold text-brand-text">{record.diagnosis}</td>
+                            <td className="py-2.5 px-3 text-[11px] font-semibold text-brand-text">{record.doc}</td>
+                            <td className="py-2.5 px-3 text-[10px]"><span className="px-2 py-0.5 rounded bg-brand-teal/10 text-brand-teal font-extrabold border border-brand-teal/20">{record.type}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
             </div>
           )}
 

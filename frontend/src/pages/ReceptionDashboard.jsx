@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Users, Clock, AlertCircle, ShieldAlert, Calendar, Plus, RefreshCw, Check, X,
-  UserPlus, UserCheck, Play, ArrowRight, Sparkles, Phone, FileText, CheckCircle
+  UserPlus, UserCheck, Play, ArrowRight, Sparkles, Phone, FileText, CheckCircle, Moon, Sun, Settings
 } from 'lucide-react';
 
 export default function ReceptionDashboard({ onLogout, onNavigate }) {
@@ -16,6 +16,19 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
   const [lookupMRN, setLookupMRN] = useState('');
   const [patientHistory, setPatientHistory] = useState(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  // Settings State
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [theme]);
 
   // Walk-in form state
   const [walkInName, setWalkInName] = useState('');
@@ -229,6 +242,13 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
             <span className="text-xs font-black block text-brand-text">Receptionist Sarah</span>
             <span className="text-[9px] text-brand-muted block font-extrabold uppercase tracking-wider">Admissions & Registrar Coordinator</span>
           </div>
+          <button 
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            className="p-1.5 bg-brand-bg hover:bg-brand-hover border border-brand-border text-brand-text rounded-xl transition cursor-pointer"
+            title="Toggle Theme"
+          >
+            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
           <button 
             onClick={() => onNavigate('landing')}
             className="px-2.5 py-1.5 bg-brand-bg hover:bg-brand-hover border border-brand-border text-brand-text rounded-xl text-xs font-semibold transition cursor-pointer"

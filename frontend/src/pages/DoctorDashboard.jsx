@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, Clock, AlertCircle, ShieldAlert, Star, LogOut, ChevronRight, 
   Search, FileText, Pill, Clipboard, Sparkles, BookOpen, Calendar, 
-  CheckCircle, Plus, Check
+  CheckCircle, Plus, Check, Paperclip, Upload, X
 } from 'lucide-react';
 
 export default function DoctorDashboard({ onLogout, onNavigate }) {
@@ -22,6 +22,10 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
   const [newDosage, setNewDosage] = useState('');
   const [newFreq, setNewFreq] = useState('');
   const [newDuration, setNewDuration] = useState('');
+
+  // Attachments State
+  const [attachments, setAttachments] = useState([]);
+  const [newAttachmentName, setNewAttachmentName] = useState('');
 
   // Fetch appointments
   const fetchAppointments = async () => {
@@ -498,6 +502,59 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
                         Add Prescription
                       </button>
                     </form>
+                  </div>
+
+                  {/* Clinical Attachments Panel */}
+                  <div className="glass-panel p-3 rounded-xl border border-brand-border space-y-2">
+                    <h3 className="font-extrabold text-[10px] text-brand-muted uppercase tracking-wider border-b border-brand-border pb-1 font-display flex items-center gap-1.5">
+                      <Paperclip className="w-3 h-3" /> Clinical Attachments
+                    </h3>
+                    
+                    {/* Attachment List */}
+                    {attachments.length > 0 ? (
+                      <div className="space-y-1.5 max-h-[80px] overflow-y-auto">
+                        {attachments.map((file) => (
+                          <div key={file.id} className="p-1.5 bg-brand-bg rounded-lg flex justify-between items-center text-[10px] border border-brand-border/40">
+                            <span className="font-bold text-brand-text flex items-center gap-1.5">
+                              <FileText className="w-3 h-3 text-brand-muted" /> {file.name}
+                            </span>
+                            <button 
+                              onClick={() => setAttachments(attachments.filter(a => a.id !== file.id))}
+                              className="text-brand-muted hover:text-red-500 transition"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-[9px] text-brand-muted italic py-1 text-center bg-brand-bg/30 rounded-lg border border-dashed border-brand-border/50">
+                        No files attached.
+                      </div>
+                    )}
+
+                    {/* Quick Add Attachment */}
+                    <div className="flex gap-1.5 pt-1.5 border-t border-brand-border/40">
+                      <input 
+                        type="text"
+                        placeholder="File name (e.g. Lab Results PDF)"
+                        value={newAttachmentName}
+                        onChange={(e) => setNewAttachmentName(e.target.value)}
+                        className="flex-1 p-1.5 bg-brand-bg border border-brand-border rounded-lg text-[10px] focus:outline-none font-semibold"
+                      />
+                      <button 
+                        onClick={() => {
+                          if(newAttachmentName.trim()) {
+                            setAttachments([...attachments, { id: Date.now(), name: newAttachmentName }]);
+                            setNewAttachmentName('');
+                          }
+                        }}
+                        className="px-2.5 py-1 bg-brand-card hover:bg-brand-hover text-brand-text border border-brand-border rounded-lg text-[10px] font-bold transition flex items-center gap-1 cursor-pointer shadow-sm"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        Attach
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

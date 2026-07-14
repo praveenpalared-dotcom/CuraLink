@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Users, Clock, AlertCircle, ShieldAlert, Heart, Clipboard, Check, Plus, Thermometer,
-  Activity, Star, LogOut, Sparkles, Navigation, Send, ArrowRight
+  Activity, Star, LogOut, Sparkles, Navigation, Send, ArrowRight, Printer
 } from 'lucide-react';
 
 export default function NurseDashboard({ onLogout, onNavigate }) {
@@ -401,6 +401,17 @@ export default function NurseDashboard({ onLogout, onNavigate }) {
 
               {/* Action buttons */}
               <div className="flex justify-end gap-3 pt-3 border-t border-brand-border">
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const telemetryData = `BP: ${bp} | Temp: ${temp}°F | Pulse: ${pulse} bpm | O2: ${o2}%`;
+                    navigator.clipboard.writeText(telemetryData);
+                    alert('Triage telemetry copied to clipboard!\n\n' + telemetryData);
+                  }}
+                  className="px-4 py-2 border border-brand-border bg-brand-bg hover:bg-brand-hover text-brand-text rounded-xl text-xs font-semibold cursor-pointer flex items-center gap-1.5"
+                >
+                  <Printer className="w-4 h-4" /> Export Telemetry
+                </button>
                 <button 
                   type="button"
                   onClick={() => setSelectedAppt(null)}
