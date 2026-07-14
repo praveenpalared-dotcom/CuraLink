@@ -870,7 +870,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
               <div className="space-y-3 pt-2 max-h-[380px] overflow-y-auto pr-1">
                 {doctors.filter(d => {
-                  const matchesSearch = `${d.first_name} ${d.last_name}`.toLowerCase().includes(docSearch.toLowerCase()) || d.specialty.toLowerCase().includes(docSearch.toLowerCase());
+                  const matchesSearch = `${d.first_name} ${d.last_name}`.toLowerCase().includes(docSearch.toLowerCase()) || (d.specialty || '').toLowerCase().includes(docSearch.toLowerCase());
                   const matchesSpec = specialtyFilter === 'all' || d.specialty === specialtyFilter;
                   return matchesSearch && matchesSpec;
                 }).map((doc) => (
