@@ -120,7 +120,7 @@ export default function NurseDashboard({ onLogout, onNavigate }) {
     <div className="min-h-screen bg-brand-bg flex flex-col">
       {/* Header bar */}
       <header className="bg-brand-card border-b border-brand-border px-4 py-2.5 flex justify-between items-center z-10">
-        <div onClick={() => onNavigate('landing')} className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
+        <div onClick={onLogout} className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
           <div className="p-1.5 rounded-lg bg-brand-accent/10 border border-brand-accent/20">
             <Activity className="w-5 h-5 text-brand-accent animate-pulse" />
           </div>

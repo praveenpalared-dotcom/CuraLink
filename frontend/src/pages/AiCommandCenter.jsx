@@ -78,7 +78,7 @@ export default function AiCommandCenter({ onLogout, onNavigate }) {
 
       {/* Header bar */}
       <header className="border-b border-[#141F3B] bg-[#0A0F1D]/80 backdrop-blur px-4 py-3 flex justify-between items-center z-10">
-        <div onClick={() => onNavigate('landing')} className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
+        <div onClick={onLogout} className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
           <div className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/30 animate-pulse">
             <Cpu className="w-5 h-5 text-red-500" />
           </div>

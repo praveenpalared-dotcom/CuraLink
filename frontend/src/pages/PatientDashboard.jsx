@@ -362,7 +362,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
     <div className="min-h-screen bg-brand-bg flex flex-col md:flex-row font-sans">
       {/* Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-brand-card border-r border-brand-border flex flex-col shrink-0 z-20 h-screen">
-        <div onClick={() => onNavigate('landing')} className="p-4 border-b border-brand-border flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
+        <div onClick={onLogout} className="p-4 border-b border-brand-border flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
           <div className="p-1.5 bg-brand-accent/10 border border-brand-accent/20 rounded-xl">
             <Activity className="w-5 h-5 text-brand-accent animate-pulse" />
           </div>

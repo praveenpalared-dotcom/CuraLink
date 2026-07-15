@@ -3,14 +3,7 @@ import { Sparkles, Calendar, Activity, Shield, Users, ArrowRight, HeartPulse, Us
 
 export default function Landing({ onNavigate, onSelectRole, sessionType, onLogout }) {
   const roles = [
-    {
-      id: 'patient',
-      title: 'Patient Portal',
-      description: 'Book consultations, search specialists, monitor live queues, view EHR files and explain reports.',
-      icon: HeartPulse,
-      color: 'text-brand-teal bg-brand-teal/10 border-brand-teal/20',
-      actionText: 'Enter Patient Portal'
-    },
+
     {
       id: 'doctor',
       title: 'Doctor Portal',
@@ -53,10 +46,8 @@ export default function Landing({ onNavigate, onSelectRole, sessionType, onLogou
     }
   ];
 
-  // If logged in as hospital, filter out patient role option
-  const visibleRoles = sessionType === 'hospital' 
-    ? roles.filter(role => role.id !== 'patient') 
-    : roles;
+  // Since patient is removed from roles, all roles in Landing are hospital staff roles
+  const visibleRoles = roles;
 
   return (
     <div className="min-h-screen bg-[#070A13] text-[#F1F5F9] relative overflow-hidden flex flex-col justify-between selection:bg-brand-teal selection:text-white">
@@ -66,7 +57,7 @@ export default function Landing({ onNavigate, onSelectRole, sessionType, onLogou
 
       {/* Header navbar */}
       <header className="w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center z-10">
-        <div className="flex items-center gap-2">
+        <div onClick={onLogout} className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
           <div className="p-2 rounded-xl bg-brand-teal/10 border border-brand-teal/20 animate-pulse">
             <Activity className="w-6 h-6 text-brand-teal" />
           </div>
