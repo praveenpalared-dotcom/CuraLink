@@ -4,15 +4,10 @@ import datetime
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 load_dotenv()
-import google.generativeai as genai
+from backend.app.agents.llm_client import generate_llm_content, api_key
 from backend.app.models.models import Doctor, HospitalDepartment, Appointment, AppointmentStatus, Patient, QueueStatus
 from backend.app.agents.triage_agent import triage_symptoms
 from backend.app.agents.clinical_expert_agent import explain_medical_report, generate_diet_suggestions
-
-# Configure Gemini
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
 
 CLASSIFICATION_SYSTEM_PROMPT = """
 You are the Intent Router for MediFlow AI. Your job is to classify the patient's message into one of these categories:
@@ -72,12 +67,7 @@ def classify_intent(message: str) -> str:
             return "book_appointment"
 
     try:
-        model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash",
-            system_instruction=CLASSIFICATION_SYSTEM_PROMPT
-        )
-        response = model.generate_content(message)
-        text = response.text.strip()
+        text = generate_llm_content(CLASSIFICATION_SYSTEM_PROMPT, message)
         if text.startswith("```json"):
             text = text[7:]
         if text.endswith("```"):
@@ -114,12 +104,7 @@ def parse_booking_request(message: str) -> dict:
         }
 
     try:
-        model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash",
-            system_instruction=SYSTEM_PROMPT
-        )
-        response = model.generate_content(message)
-        text = response.text.strip()
+        text = generate_llm_content(SYSTEM_PROMPT, message)
         if text.startswith("```json"):
             text = text[7:]
         if text.endswith("```"):
@@ -141,14 +126,6 @@ def generate_booking_confirmation_message(doctor_name: str, specialty: str, form
         return f"MediFlow has booked your appointment with {doctor_name} ({specialty}) for {formatted_time}.{triage_info}"
     
     try:
-        model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash",
-            system_instruction=(
-                "You are the Booking Confirmation Agent for MediFlow AI. Your job is to draft a warm, highly professional "
-                "booking confirmation message for the patient, detailing their upcoming appointment, recommended clinic, triage status, "
-                "and pre-visit care instructions. Do not use generic template text. Keep it concise, professional, and clear. Do not include markdown formatting or quotes."
-            )
-        )
         prompt = (
             f"Doctor Name: {doctor_name}\n"
             f"Specialty: {specialty}\n"
@@ -158,8 +135,12 @@ def generate_booking_confirmation_message(doctor_name: str, specialty: str, form
             f"Recommended Clinic: {recommended_dept}\n"
             f"Pre-visit Care Instructions: {pre_visit}"
         )
-        response = model.generate_content(prompt)
-        return response.text.strip()
+        system_instruction = (
+            "You are the Booking Confirmation Agent for MediFlow AI. Your job is to draft a warm, highly professional "
+            "booking confirmation message for the patient, detailing their upcoming appointment, recommended clinic, triage status, "
+            "and pre-visit care instructions. Do not use generic template text. Keep it concise, professional, and clear. Do not include markdown formatting or quotes."
+        )
+        return generate_llm_content(system_instruction, prompt)
     except Exception as e:
         print(f"Error generating confirmation message: {e}")
         triage_info = f"\n\n[AI Triage Rating: {triage_cat.upper()} (Priority Score: {urgency_score}/10)]\n*Recommended Clinic: {recommended_dept}*\n\nPre-visit Care: {pre_visit}"
@@ -182,16 +163,12 @@ def run_appointment_agent(db: Session, patient_id: int, message: str) -> dict:
             
             if api_key:
                 try:
-                    model = genai.GenerativeModel(
-                        model_name="gemini-3.5-flash",
-                        system_instruction=(
-                            "You are the Queue Telemetry Communicator for MediFlow AI. Your job is to draft a polite, reassuring update "
-                            "for the patient about their current queue position and estimated wait time. Be professional and brief (2-3 sentences)."
-                        )
+                    system_instruction = (
+                        "You are the Queue Telemetry Communicator for MediFlow AI. Your job is to draft a polite, reassuring update "
+                        "for the patient about their current queue position and estimated wait time. Be professional and brief (2-3 sentences)."
                     )
                     prompt = f"Patient ID: {patient_id}, Department: {dept_name}, Position in Line: #{position}, Estimated Wait: {wait_time} minutes."
-                    response = model.generate_content(prompt)
-                    msg_text = response.text.strip()
+                    msg_text = generate_llm_content(system_instruction, prompt)
                 except Exception:
                     msg_text = f"You are currently #{position} in line for the {dept_name} department. Your estimated wait time is {wait_time} minutes."
             else:
@@ -204,12 +181,8 @@ def run_appointment_agent(db: Session, patient_id: int, message: str) -> dict:
         else:
             if api_key:
                 try:
-                    model = genai.GenerativeModel(
-                        model_name="gemini-3.5-flash",
-                        system_instruction="You are the concierge assistant. Inform the patient politely that they do not have any active check-in tokens at the moment and explain how they can check in by choosing an appointment from their dashboard."
-                    )
-                    response = model.generate_content("No active queue item found.")
-                    msg_text = response.text.strip()
+                    system_instruction = "You are the concierge assistant. Inform the patient politely that they do not have any active check-in tokens at the moment and explain how they can check in by choosing an appointment from their dashboard."
+                    msg_text = generate_llm_content(system_instruction, "No active queue item found.")
                 except Exception:
                     msg_text = "You do not have any active check-in tokens in the queue. To check in, please select a scheduled appointment from your dashboard and click 'Check In Lobby'."
             else:
@@ -232,12 +205,7 @@ def run_appointment_agent(db: Session, patient_id: int, message: str) -> dict:
             preferred_time_of_day = "morning"
             if api_key:
                 try:
-                    model = genai.GenerativeModel(
-                        model_name="gemini-3.5-flash",
-                        system_instruction=RESCHEDULE_PROMPT
-                    )
-                    response = model.generate_content(message)
-                    text = response.text.strip()
+                    text = generate_llm_content(RESCHEDULE_PROMPT, message)
                     if text.startswith("```json"):
                         text = text[7:]
                     if text.endswith("```"):
@@ -291,16 +259,12 @@ def run_appointment_agent(db: Session, patient_id: int, message: str) -> dict:
             
             if api_key:
                 try:
-                    model = genai.GenerativeModel(
-                        model_name="gemini-3.5-flash",
-                        system_instruction=(
-                            "You are the Rescheduling Assistant for MediFlow AI. Inform the patient politely and warmly that their appointment "
-                            "has been successfully rescheduled. Keep it brief and clear. Do not include quotes."
-                        )
+                    system_instruction = (
+                        "You are the Rescheduling Assistant for MediFlow AI. Inform the patient politely and warmly that their appointment "
+                        "has been successfully rescheduled. Keep it brief and clear. Do not include quotes."
                     )
                     prompt = f"Rescheduled appointment details: Doctor: {doctor_name}, Specialty: {appt.department.name}, New Time: {formatted_time}."
-                    response = model.generate_content(prompt)
-                    msg_text = response.text.strip()
+                    msg_text = generate_llm_content(system_instruction, prompt)
                 except Exception:
                     msg_text = f"Your appointment with {doctor_name} has been rescheduled to {formatted_time}."
             else:
@@ -317,12 +281,8 @@ def run_appointment_agent(db: Session, patient_id: int, message: str) -> dict:
         else:
             if api_key:
                 try:
-                    model = genai.GenerativeModel(
-                        model_name="gemini-3.5-flash",
-                        system_instruction="Politely inform the patient that they do not have any upcoming active appointments to reschedule."
-                    )
-                    response = model.generate_content("No upcoming appointments found.")
-                    msg_text = response.text.strip()
+                    system_instruction = "Politely inform the patient that they do not have any upcoming active appointments to reschedule."
+                    msg_text = generate_llm_content(system_instruction, "No upcoming appointments found.")
                 except Exception:
                     msg_text = "You do not have any upcoming scheduled appointments to reschedule. If you want to book one, please ask to book an appointment."
             else:
@@ -350,12 +310,8 @@ def run_appointment_agent(db: Session, patient_id: int, message: str) -> dict:
     elif intent == "general_chat":
         if api_key:
             try:
-                model = genai.GenerativeModel(
-                    model_name="gemini-3.5-flash",
-                    system_instruction="You are the CuraLink Clinical Assistant. Answer the patient's greeting or general question politely, warmly, and briefly. Guide them on how you can assist them (booking, rescheduling, queue status, medical explanation, diet suggestions)."
-                )
-                response = model.generate_content(message)
-                msg_text = response.text.strip()
+                system_instruction = "You are the CuraLink Clinical Assistant. Answer the patient's greeting or general question politely, warmly, and briefly. Guide them on how you can assist them (booking, rescheduling, queue status, medical explanation, diet suggestions)."
+                msg_text = generate_llm_content(system_instruction, message)
             except Exception:
                 msg_text = "Hello! I am your CuraLink Clinical Assistant. How can I help you today?"
         else:
