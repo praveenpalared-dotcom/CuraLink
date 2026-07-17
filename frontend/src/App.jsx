@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import Landing from './pages/Landing';
 import PatientDashboard from './pages/PatientDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
@@ -145,6 +146,7 @@ function App() {
           />
         )}
       </div>
+      <SpeedInsights />
     </ErrorBoundary>
   );
 }
