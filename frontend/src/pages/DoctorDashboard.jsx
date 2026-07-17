@@ -383,6 +383,8 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
                               </div>
                             ))}
                           </div>
+                        ) : (
+                          <div className="text-brand-muted text-[9px] py-1">No past records.</div>
                         )}
                       </div>
                       
