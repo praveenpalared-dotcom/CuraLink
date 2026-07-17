@@ -146,6 +146,10 @@ export default function Login({ onLogin }) {
         id: matchedPatient.email === 'john.doe@gmail.com' ? 1 : matchedPatient.email === 'jane.smith@gmail.com' ? 2 : 3,
         first_name: matchedPatient.name ? matchedPatient.name.split(' ')[0] : matchedPatient.first_name || '',
         last_name: matchedPatient.name ? (matchedPatient.name.split(' ')[1] || '') : matchedPatient.last_name || '',
+        medical_record_number: matchedPatient.mrn || 'MRN-848202',
+        phone_number: matchedPatient.phone || '+1 555-0000',
+        date_of_birth: matchedPatient.dob || '1990-01-01',
+        gender: matchedPatient.name === 'Jane Smith' ? 'Female' : 'Male'
       };
     }
 
@@ -244,21 +248,26 @@ export default function Login({ onLogin }) {
     }
   };
 
-  const handleQuickPatientLogin = (p) => {
-    onLogin({
-      sessionType: 'patient',
-      role: 'patient',
-      user: {
-        id: p.email === 'john.doe@gmail.com' ? 1 : p.email === 'jane.smith@gmail.com' ? 2 : 3,
-        first_name: p.name.split(' ')[0],
-        last_name: p.name.split(' ')[1] || '',
-        email: p.email,
-        phone_number: p.phone || '+1 555-0199',
-        date_of_birth: p.dob || '1990-05-12',
-        gender: p.name === 'Jane Smith' ? 'Female' : 'Male',
-        medical_record_number: p.mrn
-      }
-    });
+  const handleQuickPatientLogin = (e, p) => {
+    e.preventDefault();
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      onLogin({
+        sessionType: 'patient',
+        role: 'patient',
+        user: {
+          id: p.email === 'john.doe@gmail.com' ? 1 : p.email === 'jane.smith@gmail.com' ? 2 : 3,
+          first_name: p.name.split(' ')[0],
+          last_name: p.name.split(' ')[1] || '',
+          email: p.email,
+          phone_number: p.phone || '+1 555-0199',
+          date_of_birth: p.dob || '1990-05-12',
+          gender: p.name === 'Jane Smith' ? 'Female' : 'Male',
+          medical_record_number: p.mrn
+        }
+      });
+    }, 600);
   };
 
   const handleQuickStaffLogin = (staff) => {
@@ -501,7 +510,7 @@ export default function Login({ onLogin }) {
                               <button
                                 key={p.email}
                                 type="button"
-                                onClick={() => handleQuickPatientLogin(p)}
+                                onClick={(e) => handleQuickPatientLogin(e, p)}
                                 className="p-2 bg-brand-bg hover:bg-brand-teal/5 border border-brand-border hover:border-brand-teal/30 rounded-xl text-left cursor-pointer transition-all active:scale-95 flex flex-col justify-between min-h-[50px] group"
                               >
                                 <span className="text-[10px] font-extrabold text-brand-text truncate block group-hover:text-brand-teal transition-colors">{p.name}</span>
