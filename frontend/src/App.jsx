@@ -4,6 +4,7 @@ import PatientDashboard from './pages/PatientDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
 import NurseDashboard from './pages/NurseDashboard';
 import ReceptionDashboard from './pages/ReceptionDashboard';
+import PharmacistDashboard from './pages/PharmacistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AiCommandCenter from './pages/AiCommandCenter';
 import Login from './pages/Login';
@@ -27,6 +28,8 @@ function App() {
       setCurrentPage('nurse');
     } else if (role === 'receptionist') {
       setCurrentPage('receptionist');
+    } else if (role === 'pharmacist') {
+      setCurrentPage('pharmacist');
     } else if (role === 'admin') {
       setCurrentPage('admin');
     } else if (role === 'command_center') {
@@ -60,6 +63,8 @@ function App() {
         setCurrentPage('nurse');
       } else if (role === 'receptionist') {
         setCurrentPage('receptionist');
+      } else if (role === 'pharmacist') {
+        setCurrentPage('pharmacist');
       } else if (role === 'admin') {
         setCurrentPage('admin');
       } else if (role === 'command_center') {
@@ -117,6 +122,12 @@ function App() {
         )}
         {currentPage === 'receptionist' && (
           <ReceptionDashboard 
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {currentPage === 'pharmacist' && (
+          <PharmacistDashboard 
             onNavigate={navigate} 
             onLogout={handleLogout}
           />

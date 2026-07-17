@@ -32,7 +32,7 @@ export default function Login({ onLogin }) {
 
   // Hospital Sign In fields
   const [hospitalEmail, setHospitalEmail] = useState('');
-  const [hospitalRole, setHospitalRole] = useState('admin'); // 'admin' | 'doctor' | 'nurse' | 'receptionist'
+  const [hospitalRole, setHospitalRole] = useState('admin'); // 'admin' | 'doctor' | 'nurse' | 'receptionist' | 'pharmacist'
   const [hospitalPassword, setHospitalPassword] = useState('password123');
   const [showHospitalPassword, setShowHospitalPassword] = useState(false);
 
@@ -109,6 +109,7 @@ export default function Login({ onLogin }) {
   const demoStaff = [
     { name: 'Dr. Richard Patel', email: 'richard.patel@mediflow.com', role: 'doctor' },
     { name: 'Nurse Jessica Taylor', email: 'jessica.taylor@mediflow.com', role: 'nurse' },
+    { name: 'Pharmacist Michael', email: 'michael.rx@mediflow.com', role: 'pharmacist' },
     { name: 'Receptionist Sarah', email: 'sarah.reception@mediflow.com', role: 'receptionist' },
     { name: 'Operations Admin', email: 'admin@mediflow.com', role: 'admin' }
   ];
@@ -551,7 +552,8 @@ export default function Login({ onLogin }) {
                               <option value="admin">Operations Admin</option>
                               <option value="doctor">Doctor Portal</option>
                               <option value="nurse">Nurse Portal</option>
-                              <option value="receptionist">Reception Desk</option>
+                              <option value="receptionist">Receptionist</option>
+                              <option value="pharmacist">Pharmacist</option>
                             </select>
                           </div>
 
@@ -599,7 +601,7 @@ export default function Login({ onLogin }) {
                               >
                                 <span className="text-[10px] font-extrabold text-brand-text truncate block group-hover:text-brand-accent transition-colors">{staff.name}</span>
                                 <span className="text-[9px] uppercase font-bold tracking-wider mt-0.5" style={{
-                                  color: staff.role === 'admin' ? '#A855F7' : staff.role === 'doctor' ? '#3B82F6' : staff.role === 'nurse' ? '#10B981' : '#F59E0B'
+                                  color: staff.role === 'admin' ? '#A855F7' : staff.role === 'doctor' ? '#3B82F6' : staff.role === 'nurse' ? '#10B981' : staff.role === 'pharmacist' ? '#F43F5E' : '#F59E0B'
                                 }}>{staff.role}</span>
                               </button>
                             ))}
