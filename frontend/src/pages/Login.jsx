@@ -598,6 +598,22 @@ export default function Login({ onLogin }) {
                         </div>
                       </form>
                     )}
+                    
+                    {/* Direct link to all dashboards portal */}
+                    <div className="pt-4 border-t border-brand-border/60 mt-4">
+                      <button
+                        type="button"
+                        onClick={() => onLogin({
+                          sessionType: 'hospital',
+                          role: 'landing_portal',
+                          user: { email: 'portal@mediflow.com', name: 'DEMO' }
+                        })}
+                        className="w-full py-2.5 bg-gradient-to-r from-brand-accent/10 to-brand-teal/10 hover:from-brand-accent/15 hover:to-brand-teal/15 border border-brand-border hover:border-brand-accent/40 text-brand-text rounded-xl font-bold text-[11px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-brand-accent" />
+                        Explore All Dashboards Portal
+                      </button>
+                    </div>
                   </>
                 )}
 

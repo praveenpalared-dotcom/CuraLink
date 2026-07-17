@@ -53,7 +53,19 @@ function App() {
       setCurrentPage('patient');
     } else {
       setPatientData(null);
-      setCurrentPage('landing');
+      if (role === 'doctor') {
+        setCurrentPage('doctor');
+      } else if (role === 'nurse') {
+        setCurrentPage('nurse');
+      } else if (role === 'receptionist') {
+        setCurrentPage('receptionist');
+      } else if (role === 'admin') {
+        setCurrentPage('admin');
+      } else if (role === 'command_center') {
+        setCurrentPage('command_center');
+      } else {
+        setCurrentPage('landing');
+      }
     }
   };
 
