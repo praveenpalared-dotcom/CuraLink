@@ -17,6 +17,7 @@ class NotificationType(str, enum.Enum):
     sms = "sms"
     email = "email"
     whatsapp = "whatsapp"
+    app = "app"
 
 class StaffRole(str, enum.Enum):
     doctor = "doctor"
@@ -104,6 +105,7 @@ class Staff(Base):
 
     department = relationship("HospitalDepartment", back_populates="staff")
     schedules = relationship("Schedule", back_populates="staff")
+    notifications = relationship("Notification", back_populates="staff")
 
 class Schedule(Base):
     __tablename__ = "schedules"
@@ -136,15 +138,18 @@ class Notification(Base):
     __tablename__ = "notifications"
 
     id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=True)
+    staff_id = Column(Integer, ForeignKey("staff.id", ondelete="CASCADE"), nullable=True)
     appointment_id = Column(Integer, ForeignKey("appointments.id", ondelete="SET NULL"))
-    type = Column(Enum(NotificationType), nullable=False)
-    recipient_address = Column(String(150), nullable=False)
+    type = Column(Enum(NotificationType), nullable=False, default=NotificationType.app)
+    recipient_address = Column(String(150), nullable=True)
     message_body = Column(Text, nullable=False)
     status = Column(String(50), default="pending", index=True)
+    is_read = Column(Boolean, default=False)
     sent_at = Column(DateTime)
 
     patient = relationship("Patient", back_populates="notifications")
+    staff = relationship("Staff", back_populates="notifications")
     appointment = relationship("Appointment", back_populates="notifications")
 
 class AnalyticsLog(Base):

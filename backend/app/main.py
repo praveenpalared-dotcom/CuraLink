@@ -3,7 +3,7 @@ try:
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
     from backend.app.database import engine, Base, SessionLocal
-    from backend.app.routers import appointments, queue
+    from backend.app.routers import appointments, queue, notifications
     from backend.app.models.models import HospitalDepartment, Doctor, Patient, Appointment, AppointmentStatus, QueueStatus
 
     # Create database tables automatically
@@ -27,6 +27,7 @@ try:
     # Register routers
     app.include_router(appointments.router, prefix="/api/v1")
     app.include_router(queue.router, prefix="/api/v1")
+    app.include_router(notifications.router, prefix="/api/v1")
 
     # Middleware to ensure database is seeded on the first request (safe for serverless imports)
     IS_SEEDED = False
@@ -236,6 +237,14 @@ try:
                             chief_complaint=random.choice(["Routine checkup", "Medication refill", "Consultation", "Vaccination"])
                         )
                         db.add(appt)
+                        
+                    from backend.app.models.models import Notification, NotificationType
+                    if db.query(Notification).count() == 0:
+                        db.add(Notification(patient_id=1, type=NotificationType.app, message_body="Your appointment with Dr. Richard Patel has been confirmed for tomorrow at 10:00 AM.", status="sent", sent_at=now))
+                        db.add(Notification(patient_id=1, type=NotificationType.app, message_body="Please remember to fast for 12 hours before your upcoming lipid panel test.", status="sent", sent_at=now - datetime.timedelta(hours=2)))
+                        db.add(Notification(staff_id=1, type=NotificationType.app, message_body="Urgent: Patient John Doe has checked into the waiting room.", status="sent", sent_at=now))
+                        db.add(Notification(staff_id=2, type=NotificationType.app, message_body="Triage alert: A patient in Lobby B requires immediate vital checks.", status="sent", sent_at=now - datetime.timedelta(minutes=15)))
+                        db.commit()
                         
                     db.commit()
                 IS_SEEDED = True

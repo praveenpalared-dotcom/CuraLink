@@ -4,6 +4,7 @@ import {
   Search, FileText, Pill, Clipboard, Sparkles, BookOpen, Calendar, 
   CheckCircle, Plus, Check, Paperclip, Upload, X
 } from 'lucide-react';
+import NotificationBell from '../components/NotificationBell';
 
 export default function DoctorDashboard({ onLogout, onNavigate }) {
   const [appointments, setAppointments] = useState([]);
@@ -143,6 +144,7 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
         </div>
         
         <div className="flex items-center gap-2 sm:gap-3">
+          <NotificationBell userType="staff" userId={1} />
           <div className="hidden md:block text-right">
             <span className="text-xs font-black block text-brand-text">Dr. Richard Patel</span>
             <span className="text-[9px] text-brand-muted font-bold block uppercase tracking-wider">Department of General Medicine</span>

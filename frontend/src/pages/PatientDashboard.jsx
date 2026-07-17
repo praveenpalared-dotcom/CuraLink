@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Draggable from 'react-draggable';
 import AgentChat from '../components/AgentChat';
+import NotificationBell from '../components/NotificationBell';
 import { 
   Calendar, User, Clock, ChevronLeft, RefreshCw, AlertCircle, CheckCircle, 
   Activity, Star, DollarSign, ArrowRight, ShieldAlert, Award, FileText,
@@ -433,12 +434,15 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
           <h2 className="text-lg font-black text-brand-text font-display capitalize flex items-center gap-2">
             {activeTab.replace('_', ' ')}
           </h2>
-          <button 
-             onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
-             className="px-3 py-1.5 bg-brand-teal text-white hover:bg-brand-teal/90 rounded-xl text-[10px] font-extrabold shadow-md shadow-brand-teal/10 flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
-          >
-             <Bot className="w-3.5 h-3.5" /> <span className="hidden sm:inline">AI Copilot</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <NotificationBell userType="patient" userId={patientData?.id || 1} />
+            <button 
+               onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
+               className="px-3 py-1.5 bg-brand-teal text-white hover:bg-brand-teal/90 rounded-xl text-[10px] font-extrabold shadow-md shadow-brand-teal/10 flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+            >
+               <Bot className="w-3.5 h-3.5" /> <span className="hidden sm:inline">AI Copilot</span>
+            </button>
+          </div>
         </header>
 
         <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-5">
