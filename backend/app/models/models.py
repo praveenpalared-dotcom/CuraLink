@@ -54,6 +54,7 @@ class Patient(Base):
 
     appointments = relationship("Appointment", back_populates="patient")
     notifications = relationship("Notification", back_populates="patient")
+    recovery_tasks = relationship("PostRecoveryTask", back_populates="patient")
 
 class Doctor(Base):
     __tablename__ = "doctors"
@@ -161,3 +162,24 @@ class AnalyticsLog(Base):
     metric_value = Column(Numeric(12, 2), nullable=False)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
     meta_json = Column(Text) # Storing as text (JSON stringified) for SQLite compatibility
+
+class PostRecoveryTaskType(str, enum.Enum):
+    medicine = "medicine"
+    follow_up = "follow_up"
+    exercise = "exercise"
+    other = "other"
+
+class PostRecoveryTask(Base):
+    __tablename__ = "post_recovery_tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    type = Column(Enum(PostRecoveryTaskType), default=PostRecoveryTaskType.medicine)
+    due_date = Column(DateTime, nullable=False)
+    status = Column(String(50), default="pending", index=True) # pending, completed, missed
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    patient = relationship("Patient", back_populates="recovery_tasks")

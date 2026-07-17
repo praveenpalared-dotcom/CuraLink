@@ -16,6 +16,9 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
+  // Post-Recovery State
+  const [postRecoveryTasks, setPostRecoveryTasks] = useState([]);
+  
   const dragNodeRef = useRef(null);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
 
@@ -178,6 +181,44 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
     } catch (err) {
       console.error(err);
       setError('Could not connect to health database.');
+    }
+  };
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchAppointments();
+    fetchQueueStatus();
+  }, []);
+
+  const fetchPostRecoveryTasks = async () => {
+    try {
+      const pId = patientData?.id || 1;
+      const res = await fetch(`http://127.0.0.1:8000/api/v1/post-recovery/patient/${pId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPostRecoveryTasks(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch post recovery tasks', err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'post_recovery') {
+      fetchPostRecoveryTasks();
+    }
+  }, [activeTab]);
+
+  const markTaskComplete = async (taskId) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/v1/post-recovery/${taskId}/complete`, {
+        method: 'PUT'
+      });
+      if (res.ok) {
+        fetchPostRecoveryTasks();
+      }
+    } catch (err) {
+      console.error('Error completing task', err);
     }
   };
 
@@ -354,6 +395,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
     { id: 'queue_status', label: 'Check Queue Status', desc: 'Live token telemetry & wait times', icon: Clock, color: 'text-amber-500 bg-amber-500/10' },
     { id: 'medical_records', label: 'View Medical Records', desc: 'EHR records & clinical explainer', icon: FileText, color: 'text-purple-500 bg-purple-500/10' },
     { id: 'prescriptions', label: 'View Prescriptions', desc: 'Manage active medications & refills', icon: Pill, color: 'text-indigo-500 bg-indigo-500/10' },
+    { id: 'post_recovery', label: 'Post-Recovery Tracking', desc: 'Medicine intake & follow-ups', icon: Heart, color: 'text-pink-500 bg-pink-500/10' },
     { id: 'reports', label: 'Download Reports', desc: 'Access diagnostic lab diagnostics', icon: Download, color: 'text-emerald-500 bg-emerald-500/10' },
     { id: 'teleconsultation', label: 'Teleconsultation', desc: 'Join mock virtual video consult room', icon: Video, color: 'text-cyan-500 bg-cyan-500/10' },
     { id: 'emergency', label: 'Emergency Request', desc: 'Immediate cardiac/trauma ambulance dispatch', icon: Siren, color: 'text-red-500 bg-red-500/10 border-red-500/20' }
@@ -1012,6 +1054,74 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                       {explanation}
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab: POST RECOVERY */}
+          {activeTab === 'post_recovery' && (
+            <div className="space-y-6">
+              <div className="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-sm">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h3 className="text-lg font-black text-brand-text flex items-center gap-2"><Heart className="w-5 h-5 text-pink-500" /> Post-Recovery & Follow-up</h3>
+                    <p className="text-[11px] text-brand-muted mt-1">Track your medication schedule and post-op tasks to ensure a fast recovery.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {postRecoveryTasks.filter(t => t.status === 'pending').length === 0 && (
+                    <div className="text-center p-8 bg-brand-bg rounded-xl border border-brand-border">
+                      <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm font-bold text-brand-muted">You're all caught up!</p>
+                      <p className="text-[10px] text-brand-muted">No pending recovery tasks for today.</p>
+                    </div>
+                  )}
+
+                  {postRecoveryTasks.filter(t => t.status === 'pending').map((task) => (
+                    <div key={task.id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-brand-bg rounded-xl border border-brand-border shadow-sm">
+                      <div className="flex gap-4">
+                        <div className={`p-3 rounded-xl flex items-center justify-center ${task.type === 'medicine' ? 'bg-indigo-500/10 text-indigo-500' : task.type === 'follow_up' ? 'bg-brand-teal/10 text-brand-teal' : 'bg-pink-500/10 text-pink-500'}`}>
+                          {task.type === 'medicine' ? <Pill className="w-5 h-5" /> : task.type === 'follow_up' ? <Calendar className="w-5 h-5" /> : <Activity className="w-5 h-5" />}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-brand-text">{task.title}</h4>
+                          <p className="text-[11px] text-brand-muted mt-0.5">{task.description}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="px-2 py-0.5 bg-brand-accent/10 text-brand-accent rounded text-[9px] font-black uppercase tracking-wider">Due: {new Date(task.due_date).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => markTaskComplete(task.id)}
+                        className="mt-3 md:mt-0 px-4 py-2 bg-brand-accent hover:bg-brand-accent/90 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm"
+                      >
+                        <CheckCircle className="w-4 h-4" /> Mark Complete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Completed Tasks History */}
+              <div className="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-sm opacity-70">
+                <h4 className="text-xs font-black text-brand-text uppercase tracking-wider mb-4 border-b border-brand-border pb-2">Completed Tasks History</h4>
+                <div className="space-y-2">
+                  {postRecoveryTasks.filter(t => t.status === 'completed').length === 0 && (
+                    <p className="text-[11px] text-brand-muted">No completed tasks yet.</p>
+                  )}
+                  {postRecoveryTasks.filter(t => t.status === 'completed').map((task) => (
+                    <div key={task.id} className="flex justify-between items-center p-3 bg-brand-bg rounded-lg border border-brand-border">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-4 h-4 text-emerald-500" />
+                        <div>
+                          <p className="text-xs font-bold text-brand-text line-through opacity-80">{task.title}</p>
+                          <p className="text-[9px] text-brand-muted">Completed at {new Date(task.completed_at).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

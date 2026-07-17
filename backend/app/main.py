@@ -3,7 +3,7 @@ try:
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
     from backend.app.database import engine, Base, SessionLocal
-    from backend.app.routers import appointments, queue, notifications
+    from backend.app.routers import appointments, queue, notifications, post_recovery
     from backend.app.models.models import HospitalDepartment, Doctor, Patient, Appointment, AppointmentStatus, QueueStatus
 
     # Create database tables automatically
@@ -28,6 +28,7 @@ try:
     app.include_router(appointments.router, prefix="/api/v1")
     app.include_router(queue.router, prefix="/api/v1")
     app.include_router(notifications.router, prefix="/api/v1")
+    app.include_router(post_recovery.router, prefix="/api/v1")
 
     # Middleware to ensure database is seeded on the first request (safe for serverless imports)
     IS_SEEDED = False
@@ -238,12 +239,19 @@ try:
                         )
                         db.add(appt)
                         
-                    from backend.app.models.models import Notification, NotificationType
+                    from backend.app.models.models import Notification, NotificationType, PostRecoveryTask, PostRecoveryTaskType
                     if db.query(Notification).count() == 0:
                         db.add(Notification(patient_id=1, type=NotificationType.app, message_body="Your appointment with Dr. Richard Patel has been confirmed for tomorrow at 10:00 AM.", status="sent", sent_at=now))
                         db.add(Notification(patient_id=1, type=NotificationType.app, message_body="Please remember to fast for 12 hours before your upcoming lipid panel test.", status="sent", sent_at=now - datetime.timedelta(hours=2)))
                         db.add(Notification(staff_id=1, type=NotificationType.app, message_body="Urgent: Patient John Doe has checked into the waiting room.", status="sent", sent_at=now))
                         db.add(Notification(staff_id=2, type=NotificationType.app, message_body="Triage alert: A patient in Lobby B requires immediate vital checks.", status="sent", sent_at=now - datetime.timedelta(minutes=15)))
+                        db.commit()
+
+                    if db.query(PostRecoveryTask).count() == 0:
+                        db.add(PostRecoveryTask(patient_id=1, title="Take Amoxicillin 500mg", description="Take 1 tablet after food.", type=PostRecoveryTaskType.medicine, due_date=now - datetime.timedelta(hours=1), status="pending"))
+                        db.add(PostRecoveryTask(patient_id=1, title="Take Ibuprofen 400mg", description="Take for pain if needed.", type=PostRecoveryTaskType.medicine, due_date=now + datetime.timedelta(hours=4), status="pending"))
+                        db.add(PostRecoveryTask(patient_id=1, title="Post-Op Follow Up Visit", description="Review stitches with Dr. Patel.", type=PostRecoveryTaskType.follow_up, due_date=now + datetime.timedelta(days=7), status="pending"))
+                        db.add(PostRecoveryTask(patient_id=1, title="Daily Breathing Exercises", description="15 minutes of deep breathing.", type=PostRecoveryTaskType.exercise, due_date=now, status="completed", completed_at=now - datetime.timedelta(hours=5)))
                         db.commit()
                         
                     db.commit()
