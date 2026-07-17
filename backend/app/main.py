@@ -253,3 +253,32 @@ def read_root():
         "service": "Neuralink Care Backend",
         "api_docs_url": "/docs"
     }
+
+@app.get("/api/v1/debug")
+def debug_info():
+    import traceback
+    try:
+        db = SessionLocal()
+        try:
+            from backend.app.models.models import HospitalDepartment
+            dept_count = db.query(HospitalDepartment).count()
+            db_url = str(db.bind.url)
+            return {
+                "success": True,
+                "db_url": db_url,
+                "dept_count": dept_count,
+            }
+        except Exception as db_err:
+            return {
+                "success": False,
+                "error": str(db_err),
+                "traceback": traceback.format_exc(),
+            }
+        finally:
+            db.close()
+    except Exception as e:
+        return {
+            "success": False,
+            "error_outer": str(e),
+            "traceback_outer": traceback.format_exc(),
+        }
