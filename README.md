@@ -1,174 +1,141 @@
-# MediFlow AI Starter Kit
+# CuraLink: AI-Powered Hospital Operations Platform
 
-Welcome to the **MediFlow AI** repository! This project is structured to help your 4-member hackathon team build, demo, and deploy an AI-powered hospital operations platform in 48 hours.
-
----
-
-## Repository Structure
-
-```
-Takeover Hackathon/
-├── backend/
-│   ├── app/
-│   │   ├── agents/           # Gemini AI agent controllers
-│   │   │   ├── client.py
-│   │   │   └── appointment_agent.py
-│   │   ├── models/           # SQLAlchemy models
-│   │   │   └── models.py
-│   │   ├── routers/          # API endpoint routes
-│   │   │   ├── appointments.py
-│   │   │   └── queue.py
-│   │   ├── schemas/          # Pydantic validation schemas
-│   │   │   └── schemas.py
-│   │   ├── database.py       # DB connection (SQLite/Postgres)
-│   │   └── main.py           # FastAPI server entrypoint
-│   └── requirements.txt      # Backend Python dependencies
-├── README.md                 # Setup & running instructions
-└── .env                      # API keys & environments (Create this)
-```
+CuraLink is a next-generation, AI-driven healthcare operations platform designed to streamline patient intake, automate appointment management, and intelligently triage emergency situations. Built for the modern clinic, CuraLink provides dedicated portals for Patients, Doctors, and Nurses, all orchestrated by autonomous AI agents.
 
 ---
 
-## 1. Backend Setup & Run
+## 1. System Architecture
+
+CuraLink is built on a decoupled client-server architecture deployed on **Vercel** utilizing Edge/Serverless computing.
+
+```text
++---------------------+       +-----------------------+       +------------------------+
+|   Frontend (Vite)   |       |   Backend (FastAPI)   |       |   Database (SQLite)    |
+|                     |       |                       |       |                        |
+|  - Patient Portal   | <---> |  - Notification API   | <---> |  - Patients / Staff    |
+|  - Doctor Portal    | HTTP  |  - Appointments API   | ORM   |  - Appointments        |
+|  - Nurse Portal     |       |  - AI Agent Routers   |       |  - Notifications       |
++---------------------+       +-----------+-----------+       +------------------------+
+                                          |
+                                          v
+                              +-----------------------+
+                              |   LLM Providers API   |
+                              |   (Groq / OpenRouter) |
+                              +-----------------------+
+```
+
+### Component Interactions
+- **Dashboards**: Real-time polling fetches queue data and in-app notifications (e.g., via `NotificationBell.jsx`).
+- **Backend Services**: The FastAPI backend serves as the primary data layer and AI orchestrator, securely interacting with the database via SQLAlchemy.
+- **Serverless Scaling**: The backend is optimized for Vercel's `@vercel/python` builder, utilizing a stateless API design with fallback debugging routes.
+
+---
+
+## 2. AI/ML Flow
+
+The AI pipeline is designed for high-speed, dynamic inference to assist both patients (via Copilot) and staff (via Clinical Experts).
+
+1. **Ingestion & Prompt Assembly**: User input (e.g., chief complaints) or system events (e.g., appointment rescheduling) trigger an agent. The `llm_client.py` assembles the system prompt with relevant contextual data from the database.
+2. **Provider Routing**: CuraLink uses a dual-provider routing strategy:
+   - **Groq (Primary)**: Routes to `llama-3.3-70b-versatile` for ultra-fast, low-latency inference.
+   - **OpenRouter (Fallback)**: Acts as a secondary provider if Groq is unavailable.
+3. **Inference**: The LLM processes the clinical text, extracting intent, severity, or generating medical summaries.
+4. **Evaluation**: Outputs are validated through Pydantic schemas (e.g., JSON structure for appointment booking) before being returned to the UI or stored in the database.
+
+---
+
+## 3. Agent Architecture
+
+CuraLink employs a multi-agent architecture where specialized agents handle distinct domains of the hospital ecosystem.
+
+### Agent Types
+- **Appointment Agent**: Handles autonomous booking, verifying doctor availability and department match.
+- **Rescheduling Agent**: Analyzes scheduling conflicts and proposes alternative time slots.
+- **Triage Agent**: Evaluates patient symptoms and assigns emergency severity levels to alert nurses.
+- **Clinical Expert Agent**: Acts as an AI Copilot for doctors, analyzing lab reports and summarizing patient history.
+
+### Decision-Making Logic
+Agents maintain zero persistent state in memory (optimizing them for Serverless execution). Instead, they fetch the necessary conversational history and patient data from the SQLite database upon invocation. Tool usage is simulated via deterministic prompt parsing, allowing the LLM to output structured JSON commands that the backend Python logic executes (e.g., triggering a database commit and dispatching a `Notification`).
+
+---
+
+## 4. Tech Stack
+
+| Category | Technology |
+| :--- | :--- |
+| **Frontend Framework** | React.js, Vite |
+| **Styling & UI** | Tailwind CSS, Lucide React (Icons) |
+| **Backend Framework** | Python, FastAPI |
+| **Database & ORM** | SQLite, SQLAlchemy, Pydantic |
+| **AI / ML Models** | LLaMA 3.3 (70B) |
+| **LLM Infrastructure** | Groq API, OpenRouter API |
+| **Deployment & Hosting** | Vercel (Vite Builder, `@vercel/python` Builder) |
+
+---
+
+## 5. Getting Started & Installation
 
 ### Prerequisites
-* Python 3.9+ installed on your system.
+- Node.js (v18+)
+- Python 3.9+
 
-### Steps
-1. **Navigate to the backend directory:**
-   ```bash
-   cd backend
-   ```
+### Backend Setup
+1. Navigate to the backend directory: `cd backend`
+2. Create a virtual environment: `python -m venv .venv`
+3. Activate it: 
+   - Mac/Linux: `source .venv/bin/activate`
+   - Windows: `.venv\Scripts\activate`
+4. Install dependencies: `pip install -r requirements.txt`
+5. Run the local server: `uvicorn app.main:app --reload --port 8000`
 
-2. **Create a virtual environment:**
-   ```bash
-   python -m venv venv
-   ```
+### Frontend Setup
+1. Navigate to the frontend directory: `cd frontend`
+2. Install dependencies: `npm install`
+3. Start the dev server: `npm run dev`
 
-3. **Activate the virtual environment:**
-   * **Windows (PowerShell):**
-     ```powershell
-     .\venv\Scripts\Activate.ps1
-     ```
-   * **Windows (CMD):**
-     ```cmd
-     .\venv\Scripts\activate.bat
-     ```
-   * **macOS/Linux:**
-     ```bash
-     source venv/bin/activate
-     ```
-
-4. **Install Python dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. **Set up your environment variables:**
-   Create a file named `.env` in the root of the project (`Takeover Hackathon/`) and add:
-   ```env
-   GEMINI_API_KEY="your-google-gemini-api-key-here"
-   DATABASE_URL="sqlite:///./mediflow.db"
-   ```
-   *Note: If no `GEMINI_API_KEY` is set, the system automatically falls back to a simulated response mode so you can test all features without API limits or costs.*
-
-6. **Start the FastAPI server:**
-   ```bash
-   uvicorn backend.app.main:app --reload
-   ```
-   * The server will run at: **`http://127.0.0.1:8000`**
-   * Access interactive Swagger Documentation at: **`http://127.0.0.1:8000/docs`**
-   * *The database will automatically initialize and seed with mock departments, doctors, and patients upon startup.*
+### Environment Variables
+Duplicate `.env.example` to `.env` in the root directory and populate your keys:
+```env
+GROQ_API_KEY=your_groq_key
+OPENROUTER_API_KEY=your_openrouter_key
+```
 
 ---
 
-## 2. Frontend Setup (Vite + React + Tailwind)
+## 6. API & Interface Specifications
 
-Follow these commands to quickly set up your React and Tailwind workspace:
+The backend exposes a RESTful API with automated Swagger documentation available at `/docs` when running locally.
 
-1. **Initialize Vite React Project in the root directory:**
-   ```bash
-   # From the root directory:
-   npm create vite@latest frontend -- --template react
-   ```
-
-2. **Navigate into the frontend directory & install dependencies:**
-   ```bash
-   cd frontend
-   ```
-
-3. **Install Tailwind CSS and its peer dependencies:**
-   ```bash
-   npm install -D tailwindcss postcss autoprefixer
-   npx tailwindcss init -p
-   ```
-
-4. **Configure your template paths:**
-   Open `tailwind.config.js` in the frontend directory and replace it with:
-   ```javascript
-   /** @type {import('tailwindcss').Config} */
-   export default {
-     content: [
-       "./index.html",
-       "./src/**/*.{js,ts,jsx,tsx}",
-     ],
-     theme: {
-       extend: {
-         colors: {
-           brand: {
-             dark: "#0F172A",
-             accent: "#10B981",
-             card: "#1E293B",
-           }
-         }
-       },
-     },
-     plugins: [],
-   }
-   ```
-
-5. **Add Tailwind directives to your CSS:**
-   Open `src/index.css` and replace its contents with:
-   ```css
-   @tailwind base;
-   @tailwind components;
-   @tailwind utilities;
-
-   body {
-     background-color: #0F172A;
-     color: #F8FAFC;
-     font-family: 'Inter', sans-serif;
-   }
-   ```
-
-6. **Start the Vite development server:**
-   ```bash
-   npm run dev
-   ```
-   * The frontend will boot locally (typically at **`http://localhost:5173`**).
+### Primary Endpoints
+- `GET /api/v1/appointments/departments`: Fetches all hospital departments.
+- `GET /api/v1/appointments/queue`: Retrieves the active triage/waiting queue.
+- `POST /api/v1/appointments/book`: Submits a new appointment (handled by the Appointment Agent).
+- `GET /api/v1/notifications/{patient|staff}/{id}`: Retrieves in-app notifications for the respective user.
+- `PUT /api/v1/notifications/{id}/read`: Marks a notification as read.
 
 ---
 
-## 3. Demo API Workflows (Self-Testing)
+## 7. Security & Compliance
 
-Use the Swagger dashboard (`/docs`) or `curl` commands to test the system:
+- **Stateless Authentication**: (In Progress) The platform is designed to use JWT-based authentication for stateless validation on Vercel Edge functions.
+- **Credential Management**: API keys and database URIs are strictly managed via Vercel Environment Variables. The local `.env` is isolated and ignored in version control.
+- **AI Output Handling**: Clinical outputs generated by LLaMA are explicitly marked as "AI-Generated" in the UI. Pydantic strictly strips malicious injections from JSON payloads before database insertion.
 
-### A. Conversational AI Appointment Booking
-Sends raw text from a patient and gets back a scheduled appointment slot.
-```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/appointments/book-agent" \
-     -H "Content-Type: application/json" \
-     -d '{"patient_id": 1, "message": "I need to book a pediatric appointment for my daughter on Friday morning"}'
-```
+---
 
-### B. Patient Check-In (Queue Insertion)
-Simulates checking in John Doe (Patient ID 1, who has an appointment).
-```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/queue/check-in?appointment_id=1"
-```
+## 8. Contributing & Roadmap
 
-### C. Live Department Wait Times
-Fetches the active load and wait estimates for Pediatrics (Department ID 3).
-```bash
-curl -X GET "http://127.0.0.1:8000/api/v1/queue/department/3/wait-time"
-```
+### Roadmap
+- [x] Integrate Groq for sub-second LLM inference.
+- [x] Implement in-app notifications for Patients, Doctors, and Nurses.
+- [ ] Migrate SQLite to PostgreSQL (Vercel Postgres/Supabase) for production scale.
+- [ ] Add WebSockets for real-time Queue Board updates instead of polling.
+- [ ] Implement robust RBAC (Role-Based Access Control) using JWTs.
+
+### Contributing
+We welcome contributions! Please follow standard GitHub flow:
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes (`git commit -m 'feat: Add amazing feature'`).
+4. Push to the branch (`git push origin feature/amazing-feature`).
+5. Open a Pull Request.
