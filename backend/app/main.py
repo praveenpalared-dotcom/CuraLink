@@ -4,6 +4,7 @@ try:
     from fastapi.middleware.cors import CORSMiddleware
     from backend.app.database import engine, Base, SessionLocal
     from backend.app.routers import appointments, queue, notifications, post_recovery
+    from backend.app.auth.security import hash_password
     from backend.app.models.models import HospitalDepartment, Doctor, Patient, Appointment, AppointmentStatus, QueueStatus
 
     # Create database tables automatically
@@ -32,6 +33,8 @@ try:
 
     # Middleware to ensure database is seeded on the first request (safe for serverless imports)
     IS_SEEDED = False
+
+    DEMO_PASSWORD_HASH = hash_password("password123")
 
     def ensure_database_seeded():
         global IS_SEEDED
@@ -95,17 +98,17 @@ try:
                 # 3. Seed Patients if empty
                 if db.query(Patient).count() == 0:
                     patients = [
-                        Patient(first_name="John", last_name="Doe", email="john.doe@gmail.com", phone_number="+15550199", date_of_birth=datetime.date(1990, 5, 12), gender="Male", medical_record_number="MRN-848202"),
-                        Patient(first_name="Jane", last_name="Smith", email="jane.smith@gmail.com", phone_number="+15550299", date_of_birth=datetime.date(1995, 9, 23), gender="Female", medical_record_number="MRN-193848"),
-                        Patient(first_name="Tom", last_name="Johnson", email="tom.j@gmail.com", phone_number="+15550399", date_of_birth=datetime.date(1982, 12, 1), gender="Male", medical_record_number="MRN-729482"),
-                        Patient(first_name="Alice", last_name="Williams", email="alice.w@gmail.com", phone_number="+15550499", date_of_birth=datetime.date(1975, 4, 15), gender="Female", medical_record_number="MRN-382910"),
-                        Patient(first_name="Bob", last_name="Miller", email="bob.m@gmail.com", phone_number="+15550599", date_of_birth=datetime.date(2010, 8, 30), gender="Male", medical_record_number="MRN-482019"),
-                        Patient(first_name="Charlie", last_name="Davis", email="charlie.d@gmail.com", phone_number="+15550699", date_of_birth=datetime.date(1950, 2, 20), gender="Male", medical_record_number="MRN-582930"),
-                        Patient(first_name="Diana", last_name="Garcia", email="diana.g@gmail.com", phone_number="+15550799", date_of_birth=datetime.date(1988, 11, 5), gender="Female", medical_record_number="MRN-682039"),
-                        Patient(first_name="Evan", last_name="Martinez", email="evan.m@gmail.com", phone_number="+15550899", date_of_birth=datetime.date(2001, 7, 19), gender="Male", medical_record_number="MRN-928103"),
-                        Patient(first_name="Fiona", last_name="Clark", email="fiona.c@gmail.com", phone_number="+15550999", date_of_birth=datetime.date(1993, 3, 27), gender="Female", medical_record_number="MRN-301928"),
-                        Patient(first_name="George", last_name="Rodriguez", email="george.r@gmail.com", phone_number="+15551099", date_of_birth=datetime.date(1968, 10, 14), gender="Male", medical_record_number="MRN-491029"),
-                        Patient(first_name="Hannah", last_name="Lewis", email="hannah.l@gmail.com", phone_number="+15551199", date_of_birth=datetime.date(1985, 1, 8), gender="Female", medical_record_number="MRN-847291")
+                        Patient(first_name="John", last_name="Doe", email="john.doe@gmail.com", phone_number="+15550199", date_of_birth=datetime.date(1990, 5, 12), gender="Male", medical_record_number="MRN-848202", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="Jane", last_name="Smith", email="jane.smith@gmail.com", phone_number="+15550299", date_of_birth=datetime.date(1995, 9, 23), gender="Female", medical_record_number="MRN-193848", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="Tom", last_name="Johnson", email="tom.j@gmail.com", phone_number="+15550399", date_of_birth=datetime.date(1982, 12, 1), gender="Male", medical_record_number="MRN-729482", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="Alice", last_name="Williams", email="alice.w@gmail.com", phone_number="+15550499", date_of_birth=datetime.date(1975, 4, 15), gender="Female", medical_record_number="MRN-382910", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="Bob", last_name="Miller", email="bob.m@gmail.com", phone_number="+15550599", date_of_birth=datetime.date(2010, 8, 30), gender="Male", medical_record_number="MRN-482019", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="Charlie", last_name="Davis", email="charlie.d@gmail.com", phone_number="+15550699", date_of_birth=datetime.date(1950, 2, 20), gender="Male", medical_record_number="MRN-582930", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="Diana", last_name="Garcia", email="diana.g@gmail.com", phone_number="+15550799", date_of_birth=datetime.date(1988, 11, 5), gender="Female", medical_record_number="MRN-682039", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="Evan", last_name="Martinez", email="evan.m@gmail.com", phone_number="+15550899", date_of_birth=datetime.date(2001, 7, 19), gender="Male", medical_record_number="MRN-928103", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="Fiona", last_name="Clark", email="fiona.c@gmail.com", phone_number="+15550999", date_of_birth=datetime.date(1993, 3, 27), gender="Female", medical_record_number="MRN-301928", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="George", last_name="Rodriguez", email="george.r@gmail.com", phone_number="+15551099", date_of_birth=datetime.date(1968, 10, 14), gender="Male", medical_record_number="MRN-491029", password_hash=DEMO_PASSWORD_HASH),
+                        Patient(first_name="Hannah", last_name="Lewis", email="hannah.l@gmail.com", phone_number="+15551199", date_of_birth=datetime.date(1985, 1, 8), gender="Female", medical_record_number="MRN-847291", password_hash=DEMO_PASSWORD_HASH)
                     ]
                     db.add_all(patients)
                     db.commit()
@@ -130,7 +133,8 @@ try:
                             last_name=l_name,
                             email=email,
                             role=role,
-                            department_id=dept_map[dept_name]
+                            department_id=dept_map[dept_name],
+                            password_hash=DEMO_PASSWORD_HASH
                         ))
                     # Also add doctors to staff list
                     for doc in db.query(Doctor).all():
@@ -139,7 +143,8 @@ try:
                             last_name=doc.last_name,
                             email=doc.email,
                             role=StaffRole.doctor,
-                            department_id=doc.department_id
+                            department_id=doc.department_id,
+                            password_hash=DEMO_PASSWORD_HASH
                         ))
                     db.commit()
 
