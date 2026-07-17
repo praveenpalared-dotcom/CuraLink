@@ -15,6 +15,7 @@ CuraLink is built on a decoupled client-server architecture deployed on **Vercel
 |  - Patient Portal   | <---> |  - Notification API   | <---> |  - Patients / Staff    |
 |  - Doctor Portal    | HTTP  |  - Appointments API   | ORM   |  - Appointments        |
 |  - Nurse Portal     |       |  - AI Agent Routers   |       |  - Notifications       |
+|  - Pharmacist Portal|       |  - Pharmacy API       |       |  - Deliveries          |
 +---------------------+       +-----------+-----------+       +------------------------+
                                           |
                                           v
@@ -66,10 +67,10 @@ Agents maintain zero persistent state in memory (optimizing them for Serverless 
 | **Frontend Framework** | React.js, Vite |
 | **Styling & UI** | Tailwind CSS, Lucide React (Icons) |
 | **Backend Framework** | Python, FastAPI |
-| **Database & ORM** | SQLite, SQLAlchemy, Pydantic |
+| **Database & ORM** | PostgreSQL, SQLAlchemy, Pydantic |
 | **AI / ML Models** | LLaMA 3.3 (70B) |
 | **LLM Infrastructure** | Groq API, OpenRouter API |
-| **Deployment & Hosting** | Vercel (Vite Builder, `@vercel/python` Builder) |
+| **Deployment & Hosting** | Vercel (Vite Builder, `@vercel/python` Builder), Vercel Postgres / Neon |
 
 ---
 
@@ -128,7 +129,8 @@ The backend exposes a RESTful API with automated Swagger documentation available
 ### Roadmap
 - [x] Integrate Groq for sub-second LLM inference.
 - [x] Implement in-app notifications for Patients, Doctors, and Nurses.
-- [ ] Migrate SQLite to PostgreSQL (Vercel Postgres/Supabase) for production scale.
+- [x] Migrate SQLite to PostgreSQL for production scale.
+- [x] Implement dedicated Pharmacist Dashboard with interactive HTML5 Drag-and-Drop flow.
 - [ ] Add WebSockets for real-time Queue Board updates instead of polling.
 - [ ] Implement robust RBAC (Role-Based Access Control) using JWTs.
 
