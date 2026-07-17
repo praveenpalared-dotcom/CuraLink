@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check, Info } from 'lucide-react';
-import { apiCall } from '../utils/api'; // assuming this exists, or we use fetch
 
 export default function NotificationBell({ userType, userId }) {
   const [notifications, setNotifications] = useState([]);
