@@ -7,6 +7,7 @@ import ReceptionDashboard from './pages/ReceptionDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AiCommandCenter from './pages/AiCommandCenter';
 import Login from './pages/Login';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -82,56 +83,58 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg text-brand-text">
-      {currentPage === 'landing' && (
-        <Landing 
-          onNavigate={navigate} 
-          onSelectRole={handleRoleChange} 
-          sessionType={sessionType}
-          onLogout={handleLogout}
-        />
-      )}
-      {currentPage === 'patient' && (
-        <PatientDashboard 
-          onNavigate={navigate} 
-          userRole={userRole} 
-          setUserRole={handleRoleChange} 
-          sessionType={sessionType}
-          patientData={patientData}
-          onLogout={handleLogout}
-        />
-      )}
-      {currentPage === 'doctor' && (
-        <DoctorDashboard 
-          onNavigate={navigate} 
-          onLogout={handleLogout}
-        />
-      )}
-      {currentPage === 'nurse' && (
-        <NurseDashboard 
-          onNavigate={navigate} 
-          onLogout={handleLogout}
-        />
-      )}
-      {currentPage === 'receptionist' && (
-        <ReceptionDashboard 
-          onNavigate={navigate} 
-          onLogout={handleLogout}
-        />
-      )}
-      {currentPage === 'admin' && (
-        <AdminDashboard 
-          onNavigate={navigate} 
-          onLogout={handleLogout}
-        />
-      )}
-      {currentPage === 'command_center' && (
-        <AiCommandCenter 
-          onNavigate={navigate} 
-          onLogout={handleLogout}
-        />
-      )}
-    </div>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-brand-bg text-brand-text">
+        {currentPage === 'landing' && (
+          <Landing 
+            onNavigate={navigate} 
+            onSelectRole={handleRoleChange} 
+            sessionType={sessionType}
+            onLogout={handleLogout}
+          />
+        )}
+        {currentPage === 'patient' && (
+          <PatientDashboard 
+            onNavigate={navigate} 
+            userRole={userRole} 
+            setUserRole={handleRoleChange} 
+            sessionType={sessionType}
+            patientData={patientData}
+            onLogout={handleLogout}
+          />
+        )}
+        {currentPage === 'doctor' && (
+          <DoctorDashboard 
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {currentPage === 'nurse' && (
+          <NurseDashboard 
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {currentPage === 'receptionist' && (
+          <ReceptionDashboard 
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {currentPage === 'admin' && (
+          <AdminDashboard 
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {currentPage === 'command_center' && (
+          <AiCommandCenter 
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+      </div>
+    </ErrorBoundary>
   );
 }
 
