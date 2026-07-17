@@ -115,3 +115,16 @@ class AppointmentReschedule(BaseModel):
     start_time: datetime.datetime
     end_time: datetime.datetime
 
+# Auth schemas
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+    session_type: str  # "patient" or "hospital"
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    session_type: str
+    role: str
+    user: dict
