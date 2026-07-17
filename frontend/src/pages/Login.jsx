@@ -108,13 +108,13 @@ export default function Login({ onLogin }) {
 
   const demoStaff = [
     { name: 'Dr. Richard Patel', email: 'richard.patel@mediflow.com', role: 'doctor' },
-    { name: 'Nurse Jessica Taylor', email: 'jessica.taylor@mediflow.com', role: 'nurse' },
+    { name: 'Nurse Emily Nightingale', email: 'emily.n@mediflow.com', role: 'nurse' },
     { name: 'Pharmacist Michael', email: 'michael.rx@mediflow.com', role: 'pharmacist' },
-    { name: 'Receptionist Sarah', email: 'sarah.reception@mediflow.com', role: 'receptionist' },
-    { name: 'Operations Admin', email: 'admin@mediflow.com', role: 'admin' }
+    { name: 'Receptionist Michael Scott', email: 'michael.s@mediflow.com', role: 'receptionist' },
+    { name: 'Operations Admin Angela Martin', email: 'angela.m@mediflow.com', role: 'admin' }
   ];
 
-  const handlePatientSubmit = (e) => {
+  const handlePatientSubmit = async (e) => {
     e.preventDefault();
     if (!patientEmail.trim()) {
       alert("Please enter your registered email address.");
@@ -122,49 +122,38 @@ export default function Login({ onLogin }) {
     }
 
     setLoading(true);
-    // Find matching patient from backend list, or fall back to demo list
-    let matchedPatient = patients.find(p => p.email && p.email.toLowerCase() === patientEmail.toLowerCase());
-    if (!matchedPatient) {
-      matchedPatient = demoPatients.find(p => p.email.toLowerCase() === patientEmail.toLowerCase());
-    }
-
-    if (!matchedPatient) {
-      // Fallback patient creation if name is not found
-      matchedPatient = {
-        id: 99,
-        first_name: patientEmail.split('@')[0],
-        last_name: 'User',
-        email: patientEmail,
-        phone_number: '+1 555-0000',
-        date_of_birth: '1990-01-01',
-        gender: 'Male',
-        medical_record_number: 'MRN-' + Math.floor(100000 + Math.random() * 900000)
-      };
-    } else if (matchedPatient.id === undefined) {
-      // Ensure we map appropriate ID if it comes from demo list
-      matchedPatient = {
-        ...matchedPatient,
-        id: matchedPatient.email === 'john.doe@gmail.com' ? 1 : matchedPatient.email === 'jane.smith@gmail.com' ? 2 : 3,
-        first_name: matchedPatient.name ? matchedPatient.name.split(' ')[0] : matchedPatient.first_name || '',
-        last_name: matchedPatient.name ? (matchedPatient.name.split(' ')[1] || '') : matchedPatient.last_name || '',
-        medical_record_number: matchedPatient.mrn || 'MRN-848202',
-        phone_number: matchedPatient.phone || '+1 555-0000',
-        date_of_birth: matchedPatient.dob || '1990-01-01',
-        gender: matchedPatient.name === 'Jane Smith' ? 'Female' : 'Male'
-      };
-    }
-
-    setTimeout(() => {
-      setLoading(false);
-      onLogin({
-        sessionType: 'patient',
-        role: 'patient',
-        user: matchedPatient
+    try {
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: patientEmail,
+          password: patientPassword,
+          session_type: 'patient',
+        }),
       });
-    }, 1200); // Quick elegant lag simulation for security handshake feel
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('curalink_token', data.access_token);
+        setLoading(false);
+        onLogin({
+          sessionType: 'patient',
+          role: 'patient',
+          user: data.user,
+        });
+      } else {
+        setLoading(false);
+        alert("Invalid email or password.");
+      }
+    } catch (err) {
+      console.error("Patient login request failed:", err);
+      setLoading(false);
+      alert("Unable to reach the authentication service. Please try again.");
+    }
   };
 
-  const handleHospitalSubmit = (e) => {
+  const handleHospitalSubmit = async (e) => {
     e.preventDefault();
     if (!hospitalEmail.trim()) {
       alert("Please enter your staff ID or email address.");
@@ -172,17 +161,35 @@ export default function Login({ onLogin }) {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onLogin({
-        sessionType: 'hospital',
-        role: hospitalRole,
-        user: {
+    try {
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           email: hospitalEmail,
-          name: hospitalEmail.split('@')[0].toUpperCase(),
-        }
+          password: hospitalPassword,
+          session_type: 'hospital',
+        }),
       });
-    }, 1200);
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('curalink_token', data.access_token);
+        setLoading(false);
+        onLogin({
+          sessionType: 'hospital',
+          role: data.role,
+          user: data.user,
+        });
+      } else {
+        setLoading(false);
+        alert("Invalid staff email or password.");
+      }
+    } catch (err) {
+      console.error("Hospital login request failed:", err);
+      setLoading(false);
+      alert("Unable to reach the authentication service. Please try again.");
+    }
   };
 
   const handlePatientSignUp = async (e) => {
@@ -249,37 +256,84 @@ export default function Login({ onLogin }) {
     }
   };
 
-  const handleQuickPatientLogin = (e, p) => {
+  const handleQuickPatientLogin = async (e, p) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onLogin({
-        sessionType: 'patient',
-        role: 'patient',
-        user: {
-          id: p.email === 'john.doe@gmail.com' ? 1 : p.email === 'jane.smith@gmail.com' ? 2 : 3,
-          first_name: p.name.split(' ')[0],
-          last_name: p.name.split(' ')[1] || '',
+    try {
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           email: p.email,
-          phone_number: p.phone || '+1 555-0199',
-          date_of_birth: p.dob || '1990-05-12',
-          gender: p.name === 'Jane Smith' ? 'Female' : 'Male',
-          medical_record_number: p.mrn
-        }
+          password: 'password123',
+          session_type: 'patient',
+        }),
       });
-    }, 600);
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('curalink_token', data.access_token);
+        setLoading(false);
+        onLogin({
+          sessionType: 'patient',
+          role: 'patient',
+          user: data.user,
+        });
+      } else {
+        setLoading(false);
+        alert("Demo account authentication failed.");
+      }
+    } catch (err) {
+      console.error("Quick patient login failed:", err);
+      setLoading(false);
+      alert("Unable to reach the authentication service.");
+    }
   };
 
-  const handleQuickStaffLogin = (staff) => {
-    onLogin({
-      sessionType: 'hospital',
-      role: staff.role,
-      user: {
-        email: staff.email,
-        name: staff.name
+  const handleQuickStaffLogin = async (staff) => {
+    if (staff.role === 'pharmacist') {
+      // No backend concept of a pharmacist Staff record exists yet.
+      onLogin({
+        sessionType: 'hospital',
+        role: 'pharmacist',
+        user: {
+          email: staff.email,
+          name: staff.name
+        }
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: staff.email,
+          password: 'password123',
+          session_type: 'hospital',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('curalink_token', data.access_token);
+        setLoading(false);
+        onLogin({
+          sessionType: 'hospital',
+          role: data.role,
+          user: data.user,
+        });
+      } else {
+        setLoading(false);
+        alert("Demo staff authentication failed.");
       }
-    });
+    } catch (err) {
+      console.error("Quick staff login failed:", err);
+      setLoading(false);
+      alert("Unable to reach the authentication service.");
+    }
   };
 
   return (
