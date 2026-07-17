@@ -184,16 +184,12 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
     }
   };
 
-  // Fetch data on mount
-  useEffect(() => {
-    fetchAppointments();
-    fetchQueueStatus();
-  }, []);
+
 
   const fetchPostRecoveryTasks = async () => {
     try {
       const pId = patientData?.id || 1;
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/post-recovery/patient/${pId}`);
+      const res = await fetch(`/api/v1/post-recovery/patient/${pId}`);
       if (res.ok) {
         const data = await res.json();
         setPostRecoveryTasks(data);
@@ -211,7 +207,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
   const markTaskComplete = async (taskId) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/post-recovery/${taskId}/complete`, {
+      const res = await fetch(`/api/v1/post-recovery/${taskId}/complete`, {
         method: 'PUT'
       });
       if (res.ok) {
