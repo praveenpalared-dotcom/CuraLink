@@ -1,5 +1,6 @@
 try:
     import datetime
+    import os
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
     from backend.app.database import engine, Base, SessionLocal
@@ -18,9 +19,12 @@ try:
     )
 
     # CORS Policy configuration
+    _cors_origins_env = os.getenv("FRONTEND_ORIGIN")
+    cors_origins = [o.strip() for o in _cors_origins_env.split(",")] if _cors_origins_env else ["*"]
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"], # Allow all for hackathon environment ease
+        allow_origins=cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
