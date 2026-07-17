@@ -284,10 +284,14 @@ try:
                 "traceback_outer": traceback.format_exc(),
             }
 
-except Exception as import_error:
+except Exception as _e:
+    import traceback
+    # Capture the string values before the exception is deleted from scope
+    import_error_msg = str(_e)
+    import_traceback = traceback.format_exc()
+
     # Safe fallback app to capture and return module-level import errors
     from fastapi import FastAPI
-    import traceback
     app = FastAPI()
 
     @app.get("/")
@@ -297,6 +301,6 @@ except Exception as import_error:
     def fallback_debug():
         return {
             "success": False,
-            "error_on_import": str(import_error),
-            "traceback": traceback.format_exc()
+            "error_on_import": import_error_msg,
+            "traceback": import_traceback
         }
