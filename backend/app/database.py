@@ -8,7 +8,8 @@ load_dotenv()
 
 # Fallback to sqlite for ease of development during hackathons
 if os.getenv("VERCEL"):
-    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////tmp/mediflow.db")
+    # Force SQLite on Vercel to prevent missing PostgreSQL driver (psycopg2) crashes
+    DATABASE_URL = "sqlite:////tmp/mediflow.db"
 else:
     DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./mediflow.db")
 
