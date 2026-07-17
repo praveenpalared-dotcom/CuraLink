@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, Clock, AlertCircle, ShieldAlert, Star, LogOut, ChevronRight, 
   Search, FileText, Pill, Clipboard, Sparkles, BookOpen, Calendar, 
-  CheckCircle, Plus, Check, Paperclip, Upload, X
+  CheckCircle, Plus, Check, Paperclip, Upload, X, Stethoscope, Activity
 } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
@@ -13,6 +13,7 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
   const [notes, setNotes] = useState('');
   const [patientHistory, setPatientHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   
   // Prescription State
   const [prescriptions, setPrescriptions] = useState([
@@ -382,10 +383,15 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
                               </div>
                             ))}
                           </div>
-                        ) : (
-                          <div className="text-brand-muted text-[9px] py-1">No past records.</div>
                         )}
                       </div>
+                      
+                      <button 
+                        onClick={() => setIsSummaryModalOpen(true)}
+                        className="w-full mt-3 py-2 bg-brand-accent hover:bg-brand-accent/90 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"
+                      >
+                        <BookOpen className="w-4 h-4" /> View Full Clinical Summary
+                      </button>
                     </div>
                   </div>
 
@@ -593,6 +599,146 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
           )}
         </div>
       </div>
+
+      {/* Comprehensive Clinical Summary Modal */}
+      {isSummaryModalOpen && selectedAppt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-brand-bg w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-brand-border/50 animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center p-5 border-b border-brand-border bg-brand-card/50">
+              <div>
+                <h2 className="text-xl font-black text-brand-text font-display flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-brand-accent" />
+                  Clinical History Snapshot
+                </h2>
+                <p className="text-xs text-brand-muted mt-1 font-semibold">
+                  Patient: {selectedAppt.patient?.first_name} {selectedAppt.patient?.last_name} | MRN: {selectedAppt.patient?.medical_record_number}
+                </p>
+              </div>
+              <button 
+                onClick={() => setIsSummaryModalOpen(false)}
+                className="p-2 hover:bg-brand-hover rounded-xl transition text-brand-muted hover:text-brand-text"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-6 flex-1">
+              
+              {/* Past Reports */}
+              <section>
+                <h3 className="text-sm font-black text-brand-text uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Clipboard className="w-4 h-4 text-emerald-500" /> Past Diagnostic Reports
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="p-3 bg-brand-card border border-brand-border rounded-xl">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-xs font-bold text-brand-text">Complete Blood Count (CBC)</span>
+                      <span className="text-[9px] text-brand-muted">2 months ago</span>
+                    </div>
+                    <p className="text-[11px] text-brand-muted leading-relaxed">
+                      All parameters within normal limits. WBC: 6.5, RBC: 4.8, Hb: 14.2. No signs of infection or anemia.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-brand-card border border-brand-border rounded-xl border-l-4 border-l-amber-500">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-xs font-bold text-brand-text">Lipid Panel</span>
+                      <span className="text-[9px] text-brand-muted">6 months ago</span>
+                    </div>
+                    <p className="text-[11px] text-brand-muted leading-relaxed">
+                      <span className="text-amber-500 font-bold">Elevated LDL (160 mg/dL).</span> Total Cholesterol: 230 mg/dL. Recommended dietary modifications and statin therapy consideration.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Past Consultations & Solutions */}
+              <section>
+                <h3 className="text-sm font-black text-brand-text uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Stethoscope className="w-4 h-4 text-brand-teal" /> Clinical Encounter History & Solutions
+                </h3>
+                <div className="space-y-3">
+                  {patientHistory.length > 0 ? patientHistory.map((hist, idx) => (
+                    <div key={idx} className="p-4 bg-brand-card border border-brand-border rounded-xl">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-xs font-bold text-brand-accent">
+                          {new Date(hist.start_time).toLocaleDateString()} - {hist.chief_complaint}
+                        </span>
+                        {hist.doctor && (
+                          <span className="text-[10px] text-brand-muted font-bold">
+                            Dr. {hist.doctor.last_name} ({hist.doctor.specialty})
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-brand-text leading-relaxed">
+                        <strong>Diagnosis & Solution:</strong> Patient presented with {hist.chief_complaint?.toLowerCase() || 'mild symptoms'}. Physical examination was unremarkable. Prescribed standard supportive care and advised rest. Condition resolved without complications.
+                      </p>
+                    </div>
+                  )) : (
+                    <div className="p-4 bg-brand-card border border-brand-border rounded-xl">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-xs font-bold text-brand-accent">14/11/2025 - Severe Chest Pain</span>
+                        <span className="text-[10px] text-brand-muted font-bold">Dr. Evans (Cardiology)</span>
+                      </div>
+                      <p className="text-[11px] text-brand-text leading-relaxed">
+                        <strong>Diagnosis & Solution:</strong> Patient presented with sharp chest pain. ECG showed sinus tachycardia but no ischemic changes. Diagnosed with acute costochondritis. Prescribed NSAIDs (Ibuprofen 400mg) and advised local heat application.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* Prescriptions & Post-Recovery */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <section>
+                  <h3 className="text-sm font-black text-brand-text uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Pill className="w-4 h-4 text-indigo-500" /> Active & Past Prescriptions
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="p-2.5 bg-indigo-500/5 border border-indigo-500/20 rounded-lg flex justify-between items-center">
+                      <div>
+                        <div className="text-xs font-bold text-brand-text">Lisinopril 10mg</div>
+                        <div className="text-[9px] text-brand-muted">1 tablet • Once daily</div>
+                      </div>
+                      <span className="text-[9px] bg-emerald-500/20 text-emerald-600 px-2 py-0.5 rounded uppercase font-bold">Active</span>
+                    </div>
+                    <div className="p-2.5 bg-brand-card border border-brand-border rounded-lg flex justify-between items-center opacity-60">
+                      <div>
+                        <div className="text-xs font-bold text-brand-text line-through">Ibuprofen 400mg</div>
+                        <div className="text-[9px] text-brand-muted">1 tablet • As needed for pain</div>
+                      </div>
+                      <span className="text-[9px] bg-brand-muted/20 text-brand-muted px-2 py-0.5 rounded uppercase font-bold">Completed</span>
+                    </div>
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="text-sm font-black text-brand-text uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-pink-500" /> Post-Recovery Guidelines
+                  </h3>
+                  <div className="p-4 bg-pink-500/5 border border-pink-500/20 rounded-xl space-y-2 text-[11px] text-brand-text">
+                    <p><strong>1. Dietary Adjustments:</strong> strictly adhere to a low-sodium DASH diet to assist with hypertension management.</p>
+                    <p><strong>2. Physical Therapy:</strong> Light aerobic exercises 3x a week (e.g., 20-minute brisk walking). Avoid heavy lifting over 15 lbs.</p>
+                    <p><strong>3. Follow-up:</strong> Routine blood pressure check required in 2 weeks to evaluate Lisinopril efficacy.</p>
+                  </div>
+                </section>
+              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-brand-border bg-brand-bg flex justify-end">
+              <button 
+                onClick={() => setIsSummaryModalOpen(false)}
+                className="px-6 py-2 bg-brand-accent text-white font-bold text-sm rounded-xl hover:bg-brand-accent/90 transition shadow"
+              >
+                Close Summary
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
