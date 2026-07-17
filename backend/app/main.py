@@ -27,8 +27,7 @@ app.add_middleware(
 app.include_router(appointments.router, prefix="/api/v1")
 app.include_router(queue.router, prefix="/api/v1")
 
-@app.on_event("startup")
-def seed_database():
+def seed_database_direct():
     db = SessionLocal()
     try:
         # 1. Seed Departments if missing
@@ -243,6 +242,9 @@ def seed_database():
             
     finally:
         db.close()
+
+# Run seeding immediately on import to support Vercel serverless environments
+seed_database_direct()
 
 @app.get("/")
 def read_root():
