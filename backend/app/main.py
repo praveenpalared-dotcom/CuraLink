@@ -5,6 +5,7 @@ try:
     from backend.app.database import engine, Base, SessionLocal
     from backend.app.routers import appointments, queue, notifications, post_recovery
     from backend.app.auth.security import hash_password
+    from backend.app.auth.router import router as auth_router
     from backend.app.models.models import HospitalDepartment, Doctor, Patient, Appointment, AppointmentStatus, QueueStatus
 
     # Create database tables automatically
@@ -30,6 +31,7 @@ try:
     app.include_router(queue.router, prefix="/api/v1")
     app.include_router(notifications.router, prefix="/api/v1")
     app.include_router(post_recovery.router, prefix="/api/v1")
+    app.include_router(auth_router, prefix="/api/v1")
 
     # Middleware to ensure database is seeded on the first request (safe for serverless imports)
     IS_SEEDED = False
