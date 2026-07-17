@@ -287,10 +287,8 @@ try:
             try:
                 from backend.app.models.models import HospitalDepartment
                 dept_count = db.query(HospitalDepartment).count()
-                db_url = str(db.bind.url)
                 return {
                     "success": True,
-                    "db_url": db_url,
                     "dept_count": dept_count,
                 }
             except Exception as db_err:
