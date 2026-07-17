@@ -594,6 +594,7 @@ export default function Login({ onLogin }) {
                                 }}>{staff.role}</span>
                               </button>
                             ))}
+                          </div>
                         </div>
                         
                         {/* Direct link to all dashboards portal */}
