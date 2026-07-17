@@ -44,9 +44,18 @@ function PharmacistDashboard({ onNavigate, onLogout }) {
   ]);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [draggedOrder, setDraggedOrder] = useState(null);
 
   const updateDeliveryStatus = (id, newStatus) => {
     setDeliveries(deliveries.map(d => d.id === id ? { ...d, status: newStatus } : d));
+  };
+
+  const handleDrop = (e, newStatus) => {
+    e.preventDefault();
+    if (draggedOrder) {
+      updateDeliveryStatus(draggedOrder, newStatus);
+      setDraggedOrder(null);
+    }
   };
 
   const filteredDeliveries = deliveries.filter(d => 
@@ -65,7 +74,12 @@ function PharmacistDashboard({ onNavigate, onLogout }) {
   };
 
   const renderDeliveryCard = (order) => (
-    <div key={order.id} className="p-4 bg-brand-bg/50 rounded-2xl border border-brand-border/60 hover:border-brand-teal/40 transition-all shadow-sm group">
+    <div 
+      key={order.id} 
+      draggable
+      onDragStart={() => setDraggedOrder(order.id)}
+      className="p-4 bg-brand-bg/50 rounded-2xl border border-brand-border/60 hover:border-brand-teal/40 transition-all shadow-sm cursor-grab active:cursor-grabbing group"
+    >
       <div className="flex justify-between items-start mb-3">
         <div>
           <h4 className="text-brand-text font-black text-sm flex items-center gap-1.5">
@@ -106,24 +120,7 @@ function PharmacistDashboard({ onNavigate, onLogout }) {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2 mt-auto pt-2 border-t border-brand-border/30">
-        {order.status === 'pending' && (
-          <button onClick={() => updateDeliveryStatus(order.id, 'packing')} className="flex-1 py-2 bg-brand-teal/10 hover:bg-brand-teal/20 text-brand-teal text-[10px] font-black uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-1.5 border border-brand-teal/20 cursor-pointer">
-            Start Packing <ArrowRight className="w-3 h-3" />
-          </button>
-        )}
-        {order.status === 'packing' && (
-          <button onClick={() => updateDeliveryStatus(order.id, 'dispatched')} className="flex-1 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 text-[10px] font-black uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-1.5 border border-blue-500/20 cursor-pointer">
-            Dispatch Order <Truck className="w-3 h-3" />
-          </button>
-        )}
-        {order.status === 'dispatched' && (
-          <button onClick={() => updateDeliveryStatus(order.id, 'delivered')} className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-1.5 border border-emerald-500/20 cursor-pointer">
-            Mark Delivered <CheckCircle2 className="w-3 h-3" />
-          </button>
-        )}
-      </div>
+      {/* Action Buttons Removed in favor of Drag & Drop */}
     </div>
   );
 
@@ -176,7 +173,11 @@ function PharmacistDashboard({ onNavigate, onLogout }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 items-start">
           
           {/* Pending Column */}
-          <div className="glass-panel p-4 rounded-3xl border border-brand-border/60 flex flex-col gap-4 min-h-[500px]">
+          <div 
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleDrop(e, 'pending')}
+            className="glass-panel p-4 rounded-3xl border border-brand-border/60 flex flex-col gap-4 min-h-[500px]"
+          >
             <div className="flex items-center justify-between border-b border-brand-border/60 pb-3">
               <h2 className="font-black text-sm uppercase tracking-wider flex items-center gap-2 text-amber-500">
                 <div className="w-2 h-2 rounded-full bg-amber-500"></div>
@@ -197,7 +198,11 @@ function PharmacistDashboard({ onNavigate, onLogout }) {
           </div>
 
           {/* Packing Column */}
-          <div className="glass-panel p-4 rounded-3xl border border-brand-border/60 flex flex-col gap-4 min-h-[500px]">
+          <div 
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleDrop(e, 'packing')}
+            className="glass-panel p-4 rounded-3xl border border-brand-border/60 flex flex-col gap-4 min-h-[500px]"
+          >
             <div className="flex items-center justify-between border-b border-brand-border/60 pb-3">
               <h2 className="font-black text-sm uppercase tracking-wider flex items-center gap-2 text-blue-500">
                 <div className="w-2 h-2 rounded-full bg-blue-500"></div>
@@ -218,7 +223,11 @@ function PharmacistDashboard({ onNavigate, onLogout }) {
           </div>
 
           {/* Dispatched Column */}
-          <div className="glass-panel p-4 rounded-3xl border border-brand-border/60 flex flex-col gap-4 min-h-[500px]">
+          <div 
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleDrop(e, 'dispatched')}
+            className="glass-panel p-4 rounded-3xl border border-brand-border/60 flex flex-col gap-4 min-h-[500px]"
+          >
             <div className="flex items-center justify-between border-b border-brand-border/60 pb-3">
               <h2 className="font-black text-sm uppercase tracking-wider flex items-center gap-2 text-emerald-500">
                 <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
