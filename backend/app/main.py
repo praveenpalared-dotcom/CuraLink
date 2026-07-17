@@ -31,7 +31,6 @@ app.include_router(queue.router, prefix="/api/v1")
 def seed_database():
     db = SessionLocal()
     try:
-        # 1. Seed Departments if empty
         # 1. Seed Departments if missing
         depts_to_seed = [
             ("General Medicine", "Floor 1, Block A", 20),
@@ -86,6 +85,10 @@ def seed_database():
         db.commit()
         print("Ensured all Doctors are seeded.")
 
+        # Import Staff, StaffRole, Schedule
+        from backend.app.models.models import Staff, StaffRole, Schedule, AnalyticsLog
+        import random
+
         # 3. Seed Patients if empty
         if db.query(Patient).count() == 0:
             patients = [
@@ -95,30 +98,78 @@ def seed_database():
                 Patient(first_name="Alice", last_name="Williams", email="alice.w@gmail.com", phone_number="+15550499", date_of_birth=datetime.date(1975, 4, 15), gender="Female", medical_record_number="MRN-382910"),
                 Patient(first_name="Bob", last_name="Miller", email="bob.m@gmail.com", phone_number="+15550599", date_of_birth=datetime.date(2010, 8, 30), gender="Male", medical_record_number="MRN-482019"),
                 Patient(first_name="Charlie", last_name="Davis", email="charlie.d@gmail.com", phone_number="+15550699", date_of_birth=datetime.date(1950, 2, 20), gender="Male", medical_record_number="MRN-582930"),
-                Patient(first_name="Diana", last_name="Garcia", email="diana.g@gmail.com", phone_number="+15550799", date_of_birth=datetime.date(1988, 11, 5), gender="Female", medical_record_number="MRN-682039")
+                Patient(first_name="Diana", last_name="Garcia", email="diana.g@gmail.com", phone_number="+15550799", date_of_birth=datetime.date(1988, 11, 5), gender="Female", medical_record_number="MRN-682039"),
+                Patient(first_name="Evan", last_name="Martinez", email="evan.m@gmail.com", phone_number="+15550899", date_of_birth=datetime.date(2001, 7, 19), gender="Male", medical_record_number="MRN-928103"),
+                Patient(first_name="Fiona", last_name="Clark", email="fiona.c@gmail.com", phone_number="+15550999", date_of_birth=datetime.date(1993, 3, 27), gender="Female", medical_record_number="MRN-301928"),
+                Patient(first_name="George", last_name="Rodriguez", email="george.r@gmail.com", phone_number="+15551099", date_of_birth=datetime.date(1968, 10, 14), gender="Male", medical_record_number="MRN-491029"),
+                Patient(first_name="Hannah", last_name="Lewis", email="hannah.l@gmail.com", phone_number="+15551199", date_of_birth=datetime.date(1985, 1, 8), gender="Female", medical_record_number="MRN-847291")
             ]
             db.add_all(patients)
             db.commit()
             print("Successfully seeded Patients.")
-        
-        # 4. Seed Appointments and Queue (if empty)
+
+        # 4. Seed Staff if empty
+        if db.query(Staff).count() == 0:
+            staff_data = [
+                ("Emily", "Nightingale", "emily.n@mediflow.com", StaffRole.nurse, "General Medicine"),
+                ("Michael", "Scott", "michael.s@mediflow.com", StaffRole.receptionist, "General Medicine"),
+                ("Pam", "Beesly", "pam.b@mediflow.com", StaffRole.receptionist, "General Medicine"),
+                ("Jim", "Halpert", "jim.h@mediflow.com", StaffRole.receptionist, "Ophthalmology"),
+                ("Dwight", "Schrute", "dwight.s@mediflow.com", StaffRole.nurse, "Orthopedics"),
+                ("Angela", "Martin", "angela.m@mediflow.com", StaffRole.admin, "General Medicine"),
+                ("Oscar", "Martinez", "oscar.m@mediflow.com", StaffRole.admin, "Cardiology"),
+                ("Kevin", "Malone", "kevin.m@mediflow.com", StaffRole.nurse, "Pediatrics"),
+                ("Toby", "Flenderson", "toby.f@mediflow.com", StaffRole.nurse, "Dermatology")
+            ]
+            for f_name, l_name, email, role, dept_name in staff_data:
+                db.add(Staff(
+                    first_name=f_name,
+                    last_name=l_name,
+                    email=email,
+                    role=role,
+                    department_id=dept_map[dept_name]
+                ))
+            # Also add doctors to staff list
+            for doc in db.query(Doctor).all():
+                db.add(Staff(
+                    first_name=doc.first_name,
+                    last_name=doc.last_name,
+                    email=doc.email,
+                    role=StaffRole.doctor,
+                    department_id=doc.department_id
+                ))
+            db.commit()
+            print("Successfully seeded Staff.")
+
+        # 5. Seed Schedules if empty
+        if db.query(Schedule).count() == 0:
+            staff_members = db.query(Staff).all()
+            now = datetime.datetime.utcnow()
+            for st in staff_members:
+                for day_offset in [-1, 0, 1]:
+                    day = now.date() + datetime.timedelta(days=day_offset)
+                    shift_start = datetime.datetime.combine(day, datetime.time(8, 0))
+                    shift_end = datetime.datetime.combine(day, datetime.time(16, 0))
+                    db.add(Schedule(
+                        staff_id=st.id,
+                        shift_start=shift_start,
+                        shift_end=shift_end,
+                        is_on_call=(random.random() > 0.7)
+                    ))
+            db.commit()
+            print("Successfully seeded Schedules.")
+
+        # 6. Seed Appointments and Queue (if empty)
         if db.query(Appointment).count() == 0:
             now = datetime.datetime.utcnow()
             patients_db = db.query(Patient).all()
             doctors_db = db.query(Doctor).all()
-            dept_db = db.query(HospitalDepartment).all()
-            
-            # Helper to get random doctor/patient
-            import random
-            
-            appointments_to_seed = []
-            queue_to_seed = []
             
             # Past Appointments (Completed)
-            for i in range(10):
+            for i in range(15):
                 p = random.choice(patients_db)
                 d = random.choice(doctors_db)
-                past_date = now - datetime.timedelta(days=random.randint(1, 30), hours=random.randint(1, 8))
+                past_date = now - datetime.timedelta(days=random.randint(1, 10), hours=random.randint(1, 8))
                 appt = Appointment(
                     patient_id=p.id,
                     doctor_id=d.id,
@@ -131,7 +182,7 @@ def seed_database():
                 db.add(appt)
                 db.commit()
                 db.refresh(appt)
-                # Past appointments don't need active queue status, but can have completed queue status
+                
                 q_item = QueueStatus(
                     appointment_id=appt.id,
                     department_id=appt.department_id,
@@ -143,10 +194,10 @@ def seed_database():
                 db.add(q_item)
 
             # Today's Active Appointments (Checked In & In Consultation)
-            for i in range(5):
+            for i in range(8):
                 p = random.choice(patients_db)
                 d = random.choice(doctors_db)
-                start = now - datetime.timedelta(minutes=random.randint(5, 60))
+                start = now - datetime.timedelta(minutes=random.randint(5, 45))
                 status = random.choice([AppointmentStatus.checked_in, AppointmentStatus.in_consultation])
                 appt = Appointment(
                     patient_id=p.id,
@@ -172,10 +223,10 @@ def seed_database():
                 db.add(q_item)
                 
             # Future Scheduled Appointments
-            for i in range(8):
+            for i in range(12):
                 p = random.choice(patients_db)
                 d = random.choice(doctors_db)
-                future = now + datetime.timedelta(days=random.randint(1, 14), hours=random.randint(1, 5))
+                future = now + datetime.timedelta(days=random.randint(1, 10), hours=random.randint(1, 5))
                 appt = Appointment(
                     patient_id=p.id,
                     doctor_id=d.id,

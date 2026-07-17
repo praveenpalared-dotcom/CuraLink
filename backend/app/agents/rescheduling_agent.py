@@ -1,12 +1,8 @@
 import os
 import datetime
 from sqlalchemy.orm import Session
-import google.generativeai as genai
+from backend.app.agents.llm_client import generate_llm_content, api_key
 from backend.app.models.models import Appointment, Patient, Doctor, Notification, NotificationType, AppointmentStatus
-
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
 
 SYSTEM_PROMPT = """
 You are the Rescheduling & Communications Agent for MediFlow AI. Your job is to draft a warm, highly professional, and empathetic SMS notification to a patient whose appointment has been pushed back due to a clinical backlog or surgical emergency.
@@ -32,19 +28,7 @@ def generate_delay_sms(patient_name: str, doctor_name: str, complaint: str, dela
         )
 
     try:
-        model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash",
-            system_instruction=SYSTEM_PROMPT
-        )
-        prompt = (
-            f"Patient: {patient_name}\n"
-            f"Doctor: Dr. {doctor_name}\n"
-            f"Symptom: {complaint}\n"
-            f"Delay: {delay_minutes} minutes\n"
-            f"New Time: {formatted_time}"
-        )
-        response = model.generate_content(prompt)
-        return response.text.strip()
+        return generate_llm_content(SYSTEM_PROMPT, prompt)
     except Exception as e:
         print(f"Error in Rescheduling Agent LLM: {e}")
         return (

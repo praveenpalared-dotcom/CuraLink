@@ -2,11 +2,7 @@ import os
 import json
 from dotenv import load_dotenv
 load_dotenv()
-import google.generativeai as genai
-
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+from backend.app.agents.llm_client import generate_llm_content, api_key
 
 SYSTEM_PROMPT = """
 You are the Patient Triage & Routing Agent for MediFlow AI. Your job is to assess the severity of a patient's symptoms and recommend the appropriate clinic routing.
@@ -74,12 +70,7 @@ def triage_symptoms(message: str) -> dict:
         }
 
     try:
-        model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash",
-            system_instruction=SYSTEM_PROMPT
-        )
-        response = model.generate_content(f"Symptoms complaint: {message}")
-        text = response.text.strip()
+        text = generate_llm_content(SYSTEM_PROMPT, f"Symptoms complaint: {message}")
         if text.startswith("```json"):
             text = text[7:]
         if text.endswith("```"):

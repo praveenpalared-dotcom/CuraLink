@@ -1,11 +1,7 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
-import google.generativeai as genai
-
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+from backend.app.agents.llm_client import generate_llm_content, api_key
 
 EXPLAIN_SYSTEM_PROMPT = """
 You are the Clinical Health Record Explainer for CuraLink. Your job is to translate complex medical reports, lab results, and jargon (e.g., elevated ESR, idiopathic hypersomnia, idiopathic pulmonary fibrosis) into patient-friendly, easy-to-understand language. Keep it clear, comforting, and accurate. Do not include markdown formatting other than bolding. Keep the response to 3-4 sentences.
@@ -32,12 +28,7 @@ def explain_medical_report(text: str) -> str:
         )
 
     try:
-        model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash",
-            system_instruction=EXPLAIN_SYSTEM_PROMPT
-        )
-        response = model.generate_content(f"Medical report text: {text}")
-        return response.text.strip()
+        return generate_llm_content(EXPLAIN_SYSTEM_PROMPT, f"Medical report text: {text}")
     except Exception as e:
         print(f"Error in Explain Medical Report Agent: {e}")
         return "Failed to analyze medical text. Please consult with a physician."
@@ -67,12 +58,7 @@ def generate_diet_suggestions(condition: str) -> str:
         )
 
     try:
-        model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash",
-            system_instruction=DIET_SYSTEM_PROMPT
-        )
-        response = model.generate_content(f"Patient health condition: {condition}")
-        return response.text.strip()
+        return generate_llm_content(DIET_SYSTEM_PROMPT, f"Patient health condition: {condition}")
     except Exception as e:
         print(f"Error in Diet Suggestion Agent: {e}")
         return "Failed to generate dietary suggestions. Please seek professional advice."
