@@ -50,6 +50,7 @@ class Patient(Base):
     date_of_birth = Column(DateTime, nullable=False)
     gender = Column(String(20))
     medical_record_number = Column(String(50), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     appointments = relationship("Appointment", back_populates="patient")
@@ -101,6 +102,7 @@ class Staff(Base):
     email = Column(String(150), unique=True, index=True, nullable=False)
     role = Column(Enum(StaffRole), nullable=False)
     department_id = Column(Integer, ForeignKey("hospital_departments.id", ondelete="SET NULL"))
+    password_hash = Column(String(255), nullable=True)
     max_weekly_hours = Column(Integer, default=40)
     is_active = Column(Boolean, default=True)
 
