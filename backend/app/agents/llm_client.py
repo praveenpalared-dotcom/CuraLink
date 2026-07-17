@@ -7,16 +7,26 @@ from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), "..", "..", ".env")
 load_dotenv(dotenv_path=dotenv_path)
 
-api_key = os.getenv("OPENROUTER_API_KEY")
-client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key) if api_key else None
+groq_api_key = os.getenv("GROQ_API_KEY")
+openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+
+if groq_api_key:
+    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_api_key)
+    default_model = "llama-3.3-70b-versatile"
+elif openrouter_api_key:
+    client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=openrouter_api_key)
+    default_model = "google/gemini-2.5-flash"
+else:
+    client = None
+    default_model = None
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def _call_api_with_retry(system_instruction: str, prompt: str) -> str:
     if not client:
-        raise Exception("OpenRouter API Key not configured")
+        raise Exception("LLM API Key not configured (neither GROQ_API_KEY nor OPENROUTER_API_KEY)")
     
     response = client.chat.completions.create(
-        model="google/gemini-2.5-flash",
+        model=default_model,
         messages=[
             {"role": "system", "content": system_instruction},
             {"role": "user", "content": prompt}
