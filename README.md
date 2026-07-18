@@ -47,13 +47,14 @@ The AI pipeline is designed for high-speed, dynamic inference to assist both pat
 
 ## 3. Agent Architecture
 
-CuraLink employs a multi-agent architecture where specialized agents handle distinct domains of the hospital ecosystem.
+CuraLink employs a multi-agent architecture where 5 specialized agents handle distinct domains of the hospital ecosystem.
 
 ### Agent Types
+- **Triage Agent**: Evaluates patient symptoms and assigns emergency severity levels to alert nurses.
 - **Appointment Agent**: Handles autonomous booking, verifying doctor availability and department match.
 - **Rescheduling Agent**: Analyzes scheduling conflicts and proposes alternative time slots.
-- **Triage Agent**: Evaluates patient symptoms and assigns emergency severity levels to alert nurses.
-- **Clinical Expert Agent**: Acts as an AI Copilot for doctors, analyzing lab reports and summarizing patient history.
+- **Clinical Health Record Explainer Agent**: Translates complex medical reports and terminology into patient-friendly, easy-to-understand summaries.
+- **Clinical Nutritionist Agent**: Provides tailored dietary advice and nutritional warnings based on specific patient health conditions.
 
 ### Decision-Making Logic
 Agents maintain zero persistent state in memory (optimizing them for Serverless execution). Instead, they fetch the necessary conversational history and patient data from the SQLite database upon invocation. Tool usage is simulated via deterministic prompt parsing, allowing the LLM to output structured JSON commands that the backend Python logic executes (e.g., triggering a database commit and dispatching a `Notification`).
