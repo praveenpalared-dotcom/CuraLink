@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from jose import jwt
 
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-insecure-hackathon-secret-change-me")
 JWT_ALGORITHM = "HS256"
