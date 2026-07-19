@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { 
   Activity, 
   Sparkles, 
@@ -816,6 +817,7 @@ export default function Login({ onLogin }) {
           Secure CuraLink Intake Session • Authorized Access Only
         </footer>
       </div>
+      <SpeedInsights />
     </div>
   );
 }
