@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --brand-bg: #F8FAFC;          /* Clean hospital gray-blue background */
+  --brand-card: #FFFFFF;        /* Card panels */
+  --brand-accent: #2563EB;      /* Primary Blue */
+  --brand-teal: #14B8A6;        /* Healthcare Teal */
+  --brand-border: #E2E8F0;      /* Thin divider grey */
+  --brand-text: #0F172A;        /* Slate text */
+  --brand-muted: #64748B;       /* Neutral Gray */
+  --brand-hover: rgba(37, 99, 235, 0.03);
+  --brand-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.05), 0 8px 10px -6px rgba(37, 99, 235, 0.03);
+}
+
+:root.dark {
+  --brand-bg: #090D1A;          /* Deep dark slate background */
+  --brand-card: #131C33;        /* Dark navy card */
+  --brand-accent: #3B82F6;      /* Vivid Blue Accent */
+  --brand-teal: #2DD4BF;        /* Bright Healthcare Teal */
+  --brand-border: #1E2E5A;      /* Dark navy borders */
+  --brand-text: #F1F5F9;        /* Bright white-slate text */
+  --brand-muted: #94A3B8;       /* Muted gray description */
+  --brand-hover: rgba(59, 130, 246, 0.05);
+  --brand-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.08), 0 8px 10px -6px rgba(59, 130, 246, 0.04);
+}
+
+@theme {
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-card: var(--brand-card);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-teal: var(--brand-teal);
+  --color-brand-border: var(--brand-border);
+  --color-brand-text: var(--brand-text);
+  --color-brand-muted: var(--brand-muted);
+  --color-brand-hover: var(--brand-hover);
+  
+  --font-sans: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+  --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  body {
+    background-color: var(--brand-bg);
+    color: var(--brand-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Light/Dark Glassmorphism Panel */
+.glass-panel {
+  background: var(--brand-card);
+  border: 1px solid var(--brand-border);
+  box-shadow: var(--brand-shadow);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel-hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-accent);
+  background-color: var(--brand-hover);
+  box-shadow: 0 12px 24px rgba(2, 132, 199, 0.06);
+}
+
+/* Premium gradient headers */
+.text-gradient-cyan-mint {
+  background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Light Theme Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--brand-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+:root.dark ::-webkit-scrollbar-thumb {
+  background: #1E293B;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-accent);
+}
+
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+:root.dark .glassmorphism {
+  background: rgba(19, 28, 51, 0.65);
+  border: 1px solid rgba(30, 46, 90, 0.4);
+}
+
+.hero-gradient-text {
+  background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
