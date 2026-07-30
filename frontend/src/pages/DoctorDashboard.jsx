@@ -209,7 +209,7 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
           <div className="grid grid-cols-3 gap-2">
             <div className="glass-panel p-2.5 rounded-xl border border-brand-border flex flex-col justify-between">
               <span className="text-[8px] text-brand-muted font-bold uppercase tracking-wider block">Today Seen</span>
-              <span className="text-lg font-black text-brand-text font-mono mt-1">{completedToday.length} / 12</span>
+              <span className="text-lg font-black text-brand-text font-mono mt-1">{completedToday.length} / {completedToday.length + activeQueue.length + upcomingSchedule.length}</span>
             </div>
             <div className="glass-panel p-2.5 rounded-xl border border-brand-border flex flex-col justify-between">
               <span className="text-[8px] text-brand-muted font-bold uppercase tracking-wider block">Waiting Lobby</span>
@@ -228,7 +228,7 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
                 Active Consultation Queue
               </h3>
-              <span className="text-[9px] text-brand-muted font-mono">{activeQueue.length} Checked-In</span>
+              <span className="text-[9px] text-brand-muted font-mono">{activeQueue.length} in Queue</span>
             </div>
 
             {loading && appointments.length === 0 ? (
