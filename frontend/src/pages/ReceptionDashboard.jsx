@@ -239,7 +239,7 @@ export default function ReceptionDashboard({ user, onLogout, onNavigate }) {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden md:block text-right">
-            <span className="text-xs font-black block text-brand-text">{user?.name || "Receptionist Michael"}</span>
+            <span className="text-xs font-black block text-brand-text">{user?.name || "Receptionist Michael Scott"}</span>
             <span className="text-[9px] text-brand-muted block font-extrabold uppercase tracking-wider">Admissions & Registrar Coordinator</span>
           </div>
           <button 

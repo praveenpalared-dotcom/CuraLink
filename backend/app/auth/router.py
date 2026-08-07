@@ -44,8 +44,8 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         known_staff = {
             "richard@gmail.com": ("Dr. Richard", "", StaffRole.doctor),
             "emily@gmail.com": ("Nurse Emily", "", StaffRole.nurse),
-            "scott@gmail.com": ("Pharmacist Michael", "Scott", StaffRole.pharmacist),
-            "michael@gmail.com": ("Receptionist Michael", "", StaffRole.receptionist),
+            "scott@gmail.com": ("Receptionist Michael", "Scott", StaffRole.receptionist),
+            "michael@gmail.com": ("Pharmacist Michael", "", StaffRole.pharmacist),
             "angela@gmail.com": ("Operations Admin", "Angela", StaffRole.admin),
             "jessica@gmail.com": ("Dr. Jessica Davis", "(Head of Hospital)", StaffRole.command_center),
         }
