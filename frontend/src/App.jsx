@@ -11,67 +11,84 @@ import Login from './pages/Login';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [sessionType, setSessionType] = useState(null); // 'patient' | 'hospital'
-  const [patientData, setPatientData] = useState(null);
-  const [currentPage, setCurrentPage] = useState('landing');
-  const [userRole, setUserRole] = useState('admin'); // 'admin' | 'doctor' | 'nurse' | 'receptionist' | 'patient' | 'command_center'
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem('curalink_isLoggedIn') === 'true';
+  });
+  const [sessionType, setSessionType] = useState(() => {
+    return localStorage.getItem('curalink_sessionType') || null;
+  });
+  const [patientData, setPatientData] = useState(() => {
+    const saved = localStorage.getItem('curalink_patientData');
+    if (!saved) return null;
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return null;
+    }
+  });
+  const [userRole, setUserRole] = useState(() => {
+    return localStorage.getItem('curalink_userRole') || 'patient';
+  });
+  const [currentPage, setCurrentPage] = useState(() => {
+    const savedRole = localStorage.getItem('curalink_userRole') || 'patient';
+    return savedRole === 'patient' ? 'patient' : savedRole;
+  });
+
+  const canAccessPage = (role, page) => {
+    if (role === 'patient') return page === 'patient';
+    if (role === 'doctor') return page === 'doctor';
+    if (role === 'nurse') return page === 'nurse';
+    if (role === 'receptionist') return page === 'receptionist';
+    if (role === 'pharmacist') return page === 'pharmacist';
+    if (role === 'admin') return page === 'admin';
+    if (role === 'command_center') return page === 'command_center';
+    return false;
+  };
 
   // Handle switching page when role changes
   const handleRoleChange = (role) => {
     setUserRole(role);
-    if (role === 'patient') {
-      setCurrentPage('patient');
-    } else if (role === 'doctor') {
-      setCurrentPage('doctor');
-    } else if (role === 'nurse') {
-      setCurrentPage('nurse');
-    } else if (role === 'receptionist') {
-      setCurrentPage('receptionist');
-    } else if (role === 'pharmacist') {
-      setCurrentPage('pharmacist');
-    } else if (role === 'admin') {
-      setCurrentPage('admin');
-    } else if (role === 'command_center') {
-      setCurrentPage('command_center');
-    } else {
-      setCurrentPage('landing');
-    }
+    localStorage.setItem('curalink_userRole', role);
+    let targetPage = role === 'patient' ? 'patient' : role;
+    setCurrentPage(targetPage);
+    localStorage.setItem('curalink_currentPage', targetPage);
   };
 
   const navigate = (page) => {
-    setCurrentPage(page);
-    if (page === 'patient') {
-      setUserRole('patient');
-    } else if (page === 'landing') {
-      // Keep existing role
+    if (canAccessPage(userRole, page)) {
+      setCurrentPage(page);
+      localStorage.setItem('curalink_currentPage', page);
+      if (page === 'patient') {
+        setUserRole('patient');
+        localStorage.setItem('curalink_userRole', 'patient');
+      }
+    } else {
+      alert(`SECURITY WARNING: Access Denied to "${page}". Your role (${userRole?.toUpperCase()}) does not have permission to view other clinical portals.`);
     }
   };
 
   const handleLogin = ({ sessionType, role, user }) => {
+    const finalRole = role || 'doctor';
     setSessionType(sessionType);
-    setUserRole(role);
+    setUserRole(finalRole);
     setIsLoggedIn(true);
+    localStorage.setItem('curalink_isLoggedIn', 'true');
+    localStorage.setItem('curalink_sessionType', sessionType || '');
+    localStorage.setItem('curalink_userRole', finalRole);
+
     if (sessionType === 'patient') {
-      setPatientData(user);
+      setPatientData(user || null);
+      if (user) {
+        localStorage.setItem('curalink_patientData', JSON.stringify(user));
+      }
       setCurrentPage('patient');
+      localStorage.setItem('curalink_currentPage', 'patient');
     } else {
       setPatientData(null);
-      if (role === 'doctor') {
-        setCurrentPage('doctor');
-      } else if (role === 'nurse') {
-        setCurrentPage('nurse');
-      } else if (role === 'receptionist') {
-        setCurrentPage('receptionist');
-      } else if (role === 'pharmacist') {
-        setCurrentPage('pharmacist');
-      } else if (role === 'admin') {
-        setCurrentPage('admin');
-      } else if (role === 'command_center') {
-        setCurrentPage('command_center');
-      } else {
-        setCurrentPage('landing');
-      }
+      localStorage.removeItem('curalink_patientData');
+      const targetPage = finalRole;
+      setCurrentPage(targetPage);
+      localStorage.setItem('curalink_currentPage', targetPage);
     }
   };
 
@@ -79,26 +96,27 @@ function App() {
     setIsLoggedIn(false);
     setSessionType(null);
     setPatientData(null);
-    setUserRole('admin');
-    setCurrentPage('landing');
+    setUserRole('patient');
+    setCurrentPage('patient');
+    localStorage.removeItem('curalink_isLoggedIn');
+    localStorage.removeItem('curalink_sessionType');
+    localStorage.removeItem('curalink_patientData');
+    localStorage.removeItem('curalink_userRole');
+    localStorage.removeItem('curalink_currentPage');
+    localStorage.removeItem('curalink_patientActiveTab');
   };
 
   if (!isLoggedIn) {
     return <Login onLogin={handleLogin} />;
   }
 
+  // Ensure current page is directly the authorized dashboard for user's role
+  const activePage = userRole === 'patient' ? 'patient' : userRole;
+
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-brand-bg text-brand-text">
-        {currentPage === 'landing' && (
-          <Landing 
-            onNavigate={navigate} 
-            onSelectRole={handleRoleChange} 
-            sessionType={sessionType}
-            onLogout={handleLogout}
-          />
-        )}
-        {currentPage === 'patient' && (
+        {activePage === 'patient' && (
           <PatientDashboard 
             onNavigate={navigate} 
             userRole={userRole} 
@@ -108,37 +126,37 @@ function App() {
             onLogout={handleLogout}
           />
         )}
-        {currentPage === 'doctor' && (
+        {activePage === 'doctor' && (
           <DoctorDashboard 
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
-        {currentPage === 'nurse' && (
+        {activePage === 'nurse' && (
           <NurseDashboard 
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
-        {currentPage === 'receptionist' && (
+        {activePage === 'receptionist' && (
           <ReceptionDashboard 
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
-        {currentPage === 'pharmacist' && (
+        {activePage === 'pharmacist' && (
           <PharmacistDashboard 
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
-        {currentPage === 'admin' && (
+        {activePage === 'admin' && (
           <AdminDashboard 
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
-        {currentPage === 'command_center' && (
+        {activePage === 'command_center' && (
           <AiCommandCenter 
             onNavigate={navigate} 
             onLogout={handleLogout}

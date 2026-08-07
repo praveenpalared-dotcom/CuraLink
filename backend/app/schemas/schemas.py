@@ -30,7 +30,7 @@ class PatientBase(BaseModel):
     location: Optional[str] = None
 
 class PatientCreate(PatientBase):
-    pass
+    password: Optional[str] = None
 
 class PatientResponse(PatientBase):
     id: int

@@ -58,7 +58,9 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
       if (res.ok) {
         const data = await res.json();
         // Sort appointments by date
-        setAppointments(data.reverse());
+        if (Array.isArray(data)) {
+          setAppointments(data.reverse());
+        }
       }
     } catch (e) {
       console.error("Failed to load doctor appointments:", e);
@@ -85,7 +87,9 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
         if (res.ok) {
           const data = await res.json();
           // Filter out the current appointment
-          setPatientHistory(data.filter(a => a.id !== appt.id));
+          if (Array.isArray(data)) {
+            setPatientHistory(data.filter(a => a.id !== appt.id));
+          }
         }
       } catch (e) {
         console.error("Failed to load history:", e);
@@ -104,11 +108,13 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
       const queueRes = await fetch('/api/v1/queue/');
       if (queueRes.ok) {
         const queueData = await queueRes.json();
-        const activeQueueItem = queueData.find(q => q.appointment_id === selectedAppt.id);
-        if (activeQueueItem) {
-          await fetch(`/api/v1/queue/${activeQueueItem.id}/complete`, {
-            method: 'POST'
-          });
+        if (Array.isArray(queueData)) {
+          const activeQueueItem = queueData.find(q => q.appointment_id === selectedAppt.id);
+          if (activeQueueItem) {
+            await fetch(`/api/v1/queue/${activeQueueItem.id}/complete`, {
+              method: 'POST'
+            });
+          }
         }
       }
       
@@ -153,7 +159,7 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
     <div className="min-h-screen bg-brand-bg flex flex-col">
       {/* Header bar */}
       <header className="bg-brand-card border-b border-brand-border px-4 py-2.5 flex justify-between items-center z-10">
-        <div onClick={() => onNavigate('landing')} className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
+        <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-brand-accent/10 border border-brand-accent/20">
             <Users className="w-5 h-5 text-brand-accent" />
           </div>
@@ -185,12 +191,6 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
             <span className="text-xs font-black block text-brand-text">Dr. Richard Patel</span>
             <span className="text-[9px] text-brand-muted font-bold block uppercase tracking-wider">Department of General Medicine</span>
           </div>
-          <button 
-            onClick={() => onNavigate('landing')}
-            className="px-2.5 py-1.5 bg-brand-bg hover:bg-brand-hover border border-brand-border text-brand-text rounded-xl text-xs font-semibold transition cursor-pointer"
-          >
-            Exit <span className="hidden sm:inline">Portal</span>
-          </button>
           <button 
             onClick={onLogout}
             className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/20 text-red-500 rounded-xl text-xs font-bold transition cursor-pointer"
@@ -423,7 +423,6 @@ export default function DoctorDashboard({ onLogout, onNavigate }) {
                           <div className="text-brand-muted text-[9px] py-1">No past records.</div>
                         )}
                       </div>
-                      
                       <button 
                         onClick={() => setIsSummaryModalOpen(true)}
                         className="w-full mt-3 py-2 bg-brand-accent hover:bg-brand-accent/90 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"

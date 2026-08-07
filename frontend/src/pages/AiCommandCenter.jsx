@@ -78,7 +78,7 @@ export default function AiCommandCenter({ onLogout, onNavigate }) {
 
       {/* Header bar */}
       <header className="border-b border-[#141F3B] bg-[#0A0F1D]/80 backdrop-blur px-4 py-3 flex justify-between items-center z-10">
-        <div onClick={() => onNavigate('landing')} className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
+        <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/30 animate-pulse">
             <Cpu className="w-5 h-5 text-red-500" />
           </div>
@@ -95,12 +95,6 @@ export default function AiCommandCenter({ onLogout, onNavigate }) {
             <span className="text-xs font-black block text-[#F1F5F9]">AI System Administrator</span>
             <span className="text-[8px] text-brand-teal font-mono tracking-widest block uppercase">Telemetry Sync Status: Live</span>
           </div>
-          <button 
-            onClick={() => onNavigate('landing')}
-            className="px-2.5 py-1.5 bg-[#121A30] hover:bg-[#1C2849] border border-[#1E2E5A] text-[#F1F5F9] rounded-xl text-xs font-semibold transition cursor-pointer"
-          >
-            Exit <span className="hidden sm:inline">Control Room</span>
-          </button>
           <button 
             onClick={onLogout}
             className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/20 text-red-500 rounded-xl text-xs font-bold transition cursor-pointer"

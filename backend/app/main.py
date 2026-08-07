@@ -31,16 +31,15 @@ try:
     )
 
     # Register routers
+    app.include_router(auth_router, prefix="/api/v1")
     app.include_router(appointments.router, prefix="/api/v1")
     app.include_router(queue.router, prefix="/api/v1")
     app.include_router(notifications.router, prefix="/api/v1")
     app.include_router(post_recovery.router, prefix="/api/v1")
     app.include_router(research.router, prefix="/api/v1")
-    app.include_router(auth_router, prefix="/api/v1")
 
     # Middleware to ensure database is seeded on the first request (safe for serverless imports)
     IS_SEEDED = False
-
     DEMO_PASSWORD_HASH = hash_password("password123")
 
     def ensure_database_seeded():
@@ -120,31 +119,34 @@ try:
                     db.add_all(patients)
                     db.commit()
 
-                # 4. Seed Staff if empty
-                if db.query(Staff).count() == 0:
-                    dept_map = {d.name: d.id for d in db.query(HospitalDepartment).all()}
-                    staff_data = [
-                        ("Emily", "Nightingale", "emily.n@mediflow.com", StaffRole.nurse, "General Medicine"),
-                        ("Michael", "Scott", "michael.s@mediflow.com", StaffRole.receptionist, "General Medicine"),
-                        ("Pam", "Beesly", "pam.b@mediflow.com", StaffRole.receptionist, "General Medicine"),
-                        ("Jim", "Halpert", "jim.h@mediflow.com", StaffRole.receptionist, "Ophthalmology"),
-                        ("Dwight", "Schrute", "dwight.s@mediflow.com", StaffRole.nurse, "Orthopedics"),
-                        ("Angela", "Martin", "angela.m@mediflow.com", StaffRole.admin, "General Medicine"),
-                        ("Oscar", "Martinez", "oscar.m@mediflow.com", StaffRole.admin, "Cardiology"),
-                        ("Kevin", "Malone", "kevin.m@mediflow.com", StaffRole.nurse, "Pediatrics"),
-                        ("Toby", "Flenderson", "toby.f@mediflow.com", StaffRole.nurse, "Dermatology")
-                    ]
-                    for f_name, l_name, email, role, dept_name in staff_data:
+                # 4. Seed / Ensure Staff Records Exist
+                dept_map = {d.name: d.id for d in db.query(HospitalDepartment).all()}
+                default_dept_id = list(dept_map.values())[0] if dept_map else 1
+                existing_emails = {s.email for s in db.query(Staff).all()}
+                
+                demo_staff_data = [
+                    ("Dr. Richard", "Patel", "richard.patel@mediflow.com", StaffRole.doctor, "General Medicine"),
+                    ("Emily", "Nightingale", "emily.n@mediflow.com", StaffRole.nurse, "General Medicine"),
+                    ("Michael", "Scott", "michael.s@mediflow.com", StaffRole.receptionist, "General Medicine"),
+                    ("Michael", "Pharmacist", "michael.rx@mediflow.com", StaffRole.pharmacist, "General Medicine"),
+                    ("Angela", "Martin", "angela.m@mediflow.com", StaffRole.admin, "General Medicine"),
+                    ("Dr. Jessica", "Davis", "jessica.davis@mediflow.com", StaffRole.command_center, "General Medicine"),
+                ]
+                for f_name, l_name, email, role, dept_name in demo_staff_data:
+                    if email not in existing_emails:
                         db.add(Staff(
                             first_name=f_name,
                             last_name=l_name,
                             email=email,
                             role=role,
-                            department_id=dept_map[dept_name],
+                            department_id=dept_map.get(dept_name, default_dept_id),
                             password_hash=DEMO_PASSWORD_HASH
                         ))
-                    # Also add doctors to staff list
-                    for doc in db.query(Doctor).all():
+                        existing_emails.add(email)
+                
+                # Also ensure doctors exist in staff list
+                for doc in db.query(Doctor).all():
+                    if doc.email not in existing_emails:
                         db.add(Staff(
                             first_name=doc.first_name,
                             last_name=doc.last_name,
@@ -153,93 +155,54 @@ try:
                             department_id=doc.department_id,
                             password_hash=DEMO_PASSWORD_HASH
                         ))
-                    db.commit()
+                        existing_emails.add(doc.email)
+                db.commit()
 
                 # 5. Seed Schedules if empty
                 if db.query(Schedule).count() == 0:
-                    staff_members = db.query(Staff).all()
-                    now = datetime.datetime.utcnow()
-                    for st in staff_members:
-                        for day_offset in [-1, 0, 1]:
-                            day = now.date() + datetime.timedelta(days=day_offset)
-                            shift_start = datetime.datetime.combine(day, datetime.time(8, 0))
-                            shift_end = datetime.datetime.combine(day, datetime.time(16, 0))
-                            db.add(Schedule(
-                                staff_id=st.id,
-                                shift_start=shift_start,
-                                shift_end=shift_end,
-                                is_on_call=(random.random() > 0.7)
-                            ))
+                    staff_list = db.query(Staff).all()
+                    now_time = datetime.datetime.utcnow()
+                    for s in staff_list:
+                        db.add(Schedule(
+                            staff_id=s.id,
+                            shift_start=now_time,
+                            shift_end=now_time + datetime.timedelta(hours=8),
+                            is_on_call=False
+                        ))
                     db.commit()
 
-                # 6. Seed Appointments and Queue (if empty)
+                # 6. Seed Appointments if empty
                 if db.query(Appointment).count() == 0:
-                    now = datetime.datetime.utcnow()
-                    patients_db = db.query(Patient).all()
-                    doctors_db = db.query(Doctor).all()
+                    patients = db.query(Patient).all()
+                    doctors = db.query(Doctor).all()
                     
-                    # Past Appointments (Completed)
+                    now = datetime.datetime.utcnow()
+                    
+                    # Create some past appointments
                     for i in range(15):
-                        p = random.choice(patients_db)
-                        d = random.choice(doctors_db)
-                        past_date = now - datetime.timedelta(days=random.randint(1, 10), hours=random.randint(1, 8))
+                        p = random.choice(patients)
+                        d = random.choice(doctors)
+                        past_days = random.randint(1, 30)
+                        past_time = now - datetime.timedelta(days=past_days, hours=random.randint(1, 8))
+                        
                         appt = Appointment(
                             patient_id=p.id,
                             doctor_id=d.id,
                             department_id=d.department_id,
-                            start_time=past_date,
-                            end_time=past_date + datetime.timedelta(minutes=30),
-                            status=AppointmentStatus.completed,
-                            chief_complaint=random.choice(["Follow-up visit", "Annual physical", "Mild headache", "Back pain", "Cough and cold"])
+                            start_time=past_time,
+                            end_time=past_time + datetime.timedelta(minutes=30),
+                            status=random.choice([AppointmentStatus.completed, AppointmentStatus.cancelled, AppointmentStatus.no_show]),
+                            chief_complaint=random.choice(["Fever and cough", "Routine eye exam", "Childhood vaccination", "Joint pain", "Chest tightness", "Skin rash"])
                         )
                         db.add(appt)
-                        db.commit()
-                        db.refresh(appt)
                         
-                        q_item = QueueStatus(
-                            appointment_id=appt.id,
-                            department_id=appt.department_id,
-                            check_in_time=past_date - datetime.timedelta(minutes=15),
-                            called_to_room_time=past_date,
-                            completed_time=past_date + datetime.timedelta(minutes=30),
-                            current_position=0
-                        )
-                        db.add(q_item)
-
-                    # Today's Active Appointments (Checked In & In Consultation)
-                    for i in range(8):
-                        p = random.choice(patients_db)
-                        d = random.choice(doctors_db)
-                        start = now - datetime.timedelta(minutes=random.randint(5, 45))
-                        status = random.choice([AppointmentStatus.checked_in, AppointmentStatus.in_consultation])
-                        appt = Appointment(
-                            patient_id=p.id,
-                            doctor_id=d.id,
-                            department_id=d.department_id,
-                            start_time=start,
-                            end_time=start + datetime.timedelta(minutes=30),
-                            status=status,
-                            chief_complaint=random.choice(["Chest pain", "High fever", "Blurry vision", "Joint pain", "Skin rash"])
-                        )
-                        db.add(appt)
-                        db.commit()
-                        db.refresh(appt)
+                    # Create some future scheduled appointments
+                    for i in range(20):
+                        p = random.choice(patients)
+                        d = random.choice(doctors)
+                        future_days = random.randint(1, 7)
+                        future = now + datetime.timedelta(days=future_days, hours=random.randint(1, 8))
                         
-                        q_item = QueueStatus(
-                            appointment_id=appt.id,
-                            department_id=appt.department_id,
-                            check_in_time=start - datetime.timedelta(minutes=20),
-                            called_to_room_time=start if status == AppointmentStatus.in_consultation else None,
-                            current_position=i + 1,
-                            estimated_wait_minutes=15 if status == AppointmentStatus.checked_in else 0
-                        )
-                        db.add(q_item)
-                        
-                    # Future Scheduled Appointments
-                    for i in range(12):
-                        p = random.choice(patients_db)
-                        d = random.choice(doctors_db)
-                        future = now + datetime.timedelta(days=random.randint(1, 10), hours=random.randint(1, 5))
                         appt = Appointment(
                             patient_id=p.id,
                             doctor_id=d.id,
@@ -267,7 +230,6 @@ try:
                         db.add(PostRecoveryTask(patient_id=1, title="Post-Op Follow Up Visit", description="Review stitches with Dr. Patel.", type=PostRecoveryTaskType.follow_up, due_date=now + datetime.timedelta(days=7), status="pending"))
                         db.add(PostRecoveryTask(patient_id=1, title="Daily Breathing Exercises", description="15 minutes of deep breathing.", type=PostRecoveryTaskType.exercise, due_date=now, status="completed", completed_at=now - datetime.timedelta(hours=5)))
                         db.commit()
-                        db.commit()
                         
                     # 7. Hackathon Seed Data
                     if db.query(ClinicalTrial).count() == 0:
@@ -278,6 +240,7 @@ try:
                         db.add(SavedSearch(patient_id=1, query="Lung Cancer Trials", category="Clinical Trials"))
                         db.commit()
 
+                    db.commit()
                 IS_SEEDED = True
             finally:
                 db.close()

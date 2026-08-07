@@ -33,7 +33,9 @@ class StaffRole(str, enum.Enum):
     doctor = "doctor"
     nurse = "nurse"
     receptionist = "receptionist"
+    pharmacist = "pharmacist"
     admin = "admin"
+    command_center = "command_center"
 
 class HospitalDepartment(Base):
     __tablename__ = "hospital_departments"

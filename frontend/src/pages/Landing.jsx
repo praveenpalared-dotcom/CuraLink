@@ -1,9 +1,8 @@
 import React from 'react';
-import { Sparkles, Calendar, Activity, Shield, Users, ArrowRight, HeartPulse, UserCog, Stethoscope, UserCheck, LayoutDashboard, Cpu } from 'lucide-react';
+import { Sparkles, Calendar, Activity, Shield, Users, ArrowRight, HeartPulse, UserCog, Stethoscope, UserCheck, LayoutDashboard, Cpu, Lock } from 'lucide-react';
 
-export default function Landing({ onNavigate, onSelectRole, sessionType, onLogout }) {
+export default function Landing({ onNavigate, onSelectRole, sessionType, userRole, onLogout }) {
   const roles = [
-
     {
       id: 'doctor',
       title: 'Doctor Portal',
@@ -42,12 +41,11 @@ export default function Landing({ onNavigate, onSelectRole, sessionType, onLogou
       description: 'Monitor predicted patient surge telemetry, wing overcrowding heatmaps, and doctor delay risks.',
       icon: Cpu,
       color: 'text-red-500 bg-red-500/10 border-red-500/20',
-      actionText: 'Enter Command Room'
+      actionText: 'Enter Command Room (Head of Hospital Only)'
     }
   ];
 
-  // Since patient is removed from roles, all roles in Landing are hospital staff roles
-  const visibleRoles = roles;
+  const visibleRoles = userRole ? roles.filter(role => role.id === userRole) : roles;
 
   return (
     <div className="min-h-screen bg-[#070A13] text-[#F1F5F9] relative overflow-hidden flex flex-col justify-between selection:bg-brand-teal selection:text-white">
@@ -66,8 +64,8 @@ export default function Landing({ onNavigate, onSelectRole, sessionType, onLogou
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="hidden sm:inline-block text-[10px] tracking-widest text-brand-teal font-mono bg-brand-teal/10 px-3.5 py-1.5 rounded-full border border-brand-teal/20 shadow-[0_2px_8px_rgba(13,148,136,0.05)]">
-            Clinical Operations Platform
+          <span className="hidden sm:inline-flex text-[10px] tracking-widest text-emerald-400 font-mono bg-emerald-950/40 px-3.5 py-1.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+            <Shield className="w-3.5 h-3.5 text-emerald-400" /> ISOLATED DOMAIN ENFORCED
           </span>
           {onLogout && (
             <button
@@ -84,7 +82,7 @@ export default function Landing({ onNavigate, onSelectRole, sessionType, onLogou
       <main className="w-full max-w-7xl mx-auto px-6 py-10 flex-1 flex flex-col justify-center items-center z-10">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-teal/10 border border-brand-teal/25 rounded-full text-brand-teal text-xs font-semibold mb-6">
           <Sparkles className="w-4 h-4 text-brand-teal animate-pulse" />
-          CuraLink Clinical Operations
+          CuraLink Isolated Clinical Access
         </div>
         
         <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white max-w-5xl leading-[1.15] font-display text-center">
@@ -97,45 +95,53 @@ export default function Landing({ onNavigate, onSelectRole, sessionType, onLogou
             — Hippocrates (460 BC – 370 BC)
           </p>
           <p className="text-slate-400 text-xs md:text-sm font-semibold leading-relaxed">
-            Welcome to the CuraLink Hospital Operations Control Room. Synchronizing clinical scheduling, live wait queues, and nurse workforce allocations automatically.
+            Role-Based Access Security Active. You are authenticated to your private clinical portal. Other department portals are completely hidden from your view.
           </p>
         </div>
 
         {/* Role Portal Selection Grid */}
-        <div className={`grid grid-cols-1 ${sessionType === 'hospital' ? 'md:grid-cols-5 max-w-6xl' : 'md:grid-cols-6 w-full max-w-7xl'} gap-4 mt-12 px-4`}>
-          {visibleRoles.map((role) => {
-            const IconComponent = role.icon;
-            return (
-              <div 
-                key={role.id}
-                onClick={() => onSelectRole(role.id)}
-                className="bg-[#0B1123] border border-[#14234C] p-5 rounded-2xl text-left hover:border-brand-teal hover:bg-[#111A35] group cursor-pointer flex flex-col justify-between h-[250px] shadow-lg transition duration-200"
-              >
-                <div>
-                  <div className={`p-3 border rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform ${role.color}`}>
-                    <IconComponent className="w-6 h-6" />
+        <div className="flex justify-center w-full max-w-4xl mt-10 px-4">
+          <div className={`grid grid-cols-1 ${visibleRoles.length > 1 ? 'md:grid-cols-5' : 'max-w-md w-full'} gap-6`}>
+            {visibleRoles.map((role) => {
+              const IconComponent = role.icon;
+              return (
+                <div 
+                  key={role.id}
+                  onClick={() => onSelectRole(role.id)}
+                  className="p-6 rounded-3xl text-left bg-[#0E1B38] border-2 border-emerald-500 cursor-pointer shadow-2xl shadow-emerald-950/50 hover:bg-[#12234A] transition-all hover:scale-[1.02] group flex flex-col justify-between min-h-[260px]"
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`p-3.5 border rounded-2xl w-fit ${role.color}`}>
+                        <IconComponent className="w-7 h-7" />
+                      </div>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded-full font-black uppercase tracking-wider">
+                        AUTHORIZED ACCESS
+                      </span>
+                    </div>
+                    
+                    <h3 className="font-extrabold text-xl text-white font-display">
+                      {role.title}
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-2.5 leading-relaxed font-medium">
+                      {role.description}
+                    </p>
                   </div>
-                  <h3 className="font-extrabold text-base text-white font-display flex items-center justify-between">
-                    {role.title}
-                  </h3>
-                  <p className="text-[11px] text-slate-400 mt-2 leading-relaxed font-semibold">
-                    {role.description}
-                  </p>
+                  
+                  <div className="text-xs font-extrabold uppercase tracking-wider mt-6 text-emerald-400 flex items-center gap-1.5 group-hover:translate-x-1 transition-transform">
+                    {role.actionText}
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
                 </div>
-                
-                <div className="text-[10px] text-brand-teal font-bold uppercase tracking-wider mt-4 flex items-center gap-1 group-hover:underline">
-                  {role.actionText}
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="w-full max-w-7xl mx-auto px-6 py-8 text-center text-xs text-slate-500 border-t border-[#141F3B]/50 z-10 font-semibold">
-        CuraLink Operational Dashboard — Hospital & Clinic Queue Engine.
+        CuraLink Security & Privacy Operations — HIPAA & RBAC Enforced Engine.
       </footer>
     </div>
   );

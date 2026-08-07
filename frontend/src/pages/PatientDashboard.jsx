@@ -5,14 +5,23 @@ import NotificationBell from '../components/NotificationBell';
 import NotificationCenter from '../components/NotificationCenter';
 import SavedSearches from '../components/SavedSearches';
 import { 
-  Calendar, User, Clock, ChevronLeft, RefreshCw, AlertCircle, CheckCircle, 
+  Calendar, User, Clock, ChevronLeft, ChevronRight, RefreshCw, AlertCircle, CheckCircle, 
   Activity, Star, DollarSign, ArrowRight, ShieldAlert, Award, FileText,
   UserCheck, Download, Printer, CalendarRange, MapPin, Compass, Bot, LogOut,
   Pill, Sparkles, Send, Stethoscope, Heart, Eye, Siren, Volume2, Video, Settings, Upload, Save, Moon, Sun, History, Search, X, Bell, Bookmark, PieChart
 } from 'lucide-react';
 
 export default function PatientDashboard({ onNavigate, userRole, setUserRole, sessionType, patientData, onLogout }) {
-  const [activeTab, setActiveTab] = useState('home'); // 'home', 'booking', 'directory', 'queue_status', 'medical_records', 'prescriptions', 'reports', 'teleconsultation', 'emergency'
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('curalink_patientActiveTab') || 'home';
+  }); // 'home', 'booking', 'directory', 'queue_status', 'medical_records', 'prescriptions', 'reports', 'teleconsultation', 'emergency'
+  
+  useEffect(() => {
+    if (activeTab) {
+      localStorage.setItem('curalink_patientActiveTab', activeTab);
+    }
+  }, [activeTab]);
+
   const [appointments, setAppointments] = useState([]);
   const [activeQueueItem, setActiveQueueItem] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -26,7 +35,6 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
   const [papers, setPapers] = useState([]);
   const [savedSearches, setSavedSearches] = useState([]);
   const [smartNotifications, setSmartNotifications] = useState([]);
-  
   const dragNodeRef = useRef(null);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
 
@@ -72,7 +80,139 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [fileInput, setFileInput] = useState('');
-  
+
+  // Interactive Toast & Modal State
+  const [toastMsg, setToastMsg] = useState(null);
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
+
+  const [appliedTrialIds, setAppliedTrialIds] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('curalink_appliedTrialIds')) || [1];
+    } catch (e) {
+      return [1];
+    }
+  });
+
+  const [savedTrialIds, setSavedTrialIds] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('curalink_savedTrialIds')) || [2];
+    } catch (e) {
+      return [2];
+    }
+  });
+
+  const [savedPaperIds, setSavedPaperIds] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('curalink_savedPaperIds')) || [1];
+    } catch (e) {
+      return [1];
+    }
+  });
+
+  const [selectedTrialModal, setSelectedTrialModal] = useState(null);
+  const [selectedPaperModal, setSelectedPaperModal] = useState(null);
+  const [showAppliedModal, setShowAppliedModal] = useState(false);
+  const [showSavedTrialsModal, setShowSavedTrialsModal] = useState(false);
+  const [showSavedPapersModal, setShowSavedPapersModal] = useState(false);
+
+  const defaultTrialsList = [
+    { id: 1, title: "Phase-3 Lung Cancer Immunotherapy", disease: "Lung Cancer", location: "Hyderabad", phase: "Phase 3", status: "Recruiting", description: "Testing a new immunotherapy drug combination for advanced non-small cell lung cancer.", eligibility_criteria: "Must have Stage III or IV NSCLC. Prior chemotherapy allowed." },
+    { id: 2, title: "Diabetes Type 2 Management", disease: "Type 2 Diabetes", location: "Bangalore", phase: "Phase 2", status: "Recruiting", description: "Evaluating a new wearable continuous glucose monitor for real-time glycemic tracking.", eligibility_criteria: "Adults 18+ diagnosed with Type 2 Diabetes for at least 6 months." },
+    { id: 3, title: "Cardiovascular Biomarker Trial", disease: "Cardiology", location: "Mumbai", phase: "Phase 1", status: "Recruiting", description: "Investigating novel blood lipid markers to predict early heart disease risk.", eligibility_criteria: "Patients with elevated LDL cholesterol or family history of CVD." }
+  ];
+
+  const defaultPapersList = [
+    { id: 1, title: "Advancements in NSCLC Immunotherapy", authors: "Dr. Sarah Jenkins", summary: "A comprehensive review of the latest immune checkpoint inhibitors showing increased survival rates in stage IV patients.", disease_tags: "Lung Cancer, Oncology" },
+    { id: 2, title: "Wearable Sensors for Glycemic Control", authors: "Dr. Richard Patel", summary: "Continuous Glucose Monitors reduce HbA1c levels by 1.2% on average over 6 months in diabetic adults.", disease_tags: "Diabetes, Tech" },
+    { id: 3, title: "AI-Driven Early Detection of Cardiac Arrhythmias", authors: "Dr. Marcus Vance", summary: "Deep learning models analyzing single-lead ECG telemetry achieve 99.1% accuracy in detecting atrial fibrillation.", disease_tags: "Cardiology, AI" }
+  ];
+
+  const displayTrials = trials.length > 0 ? trials : defaultTrialsList;
+  const displayPapers = papers.length > 0 ? papers : defaultPapersList;
+
+  const handleApplyTrial = (trial) => {
+    if (!appliedTrialIds.includes(trial.id)) {
+      const updated = [...appliedTrialIds, trial.id];
+      setAppliedTrialIds(updated);
+      localStorage.setItem('curalink_appliedTrialIds', JSON.stringify(updated));
+    }
+    const newNotif = {
+      id: Date.now(),
+      patient_id: patientData?.id || 1,
+      category: 'clinical_trial',
+      message_body: `Application submitted for "${trial.title}". Eligibility score: 95%. Clinical team will review your MRN profile.`,
+      action_text: 'View Status',
+      sent_at: new Date().toISOString(),
+      is_read: false
+    };
+    setSmartNotifications(prev => [newNotif, ...prev]);
+    showToast(`Successfully applied for trial: ${trial.title}`);
+  };
+
+  const handleToggleSaveTrial = (trial) => {
+    let updated;
+    if (savedTrialIds.includes(trial.id)) {
+      updated = savedTrialIds.filter(id => id !== trial.id);
+      showToast(`Removed "${trial.title}" from saved trials.`);
+    } else {
+      updated = [...savedTrialIds, trial.id];
+      showToast(`Saved trial "${trial.title}" to Watchlist.`);
+    }
+    setSavedTrialIds(updated);
+    localStorage.setItem('curalink_savedTrialIds', JSON.stringify(updated));
+  };
+
+  const handleToggleSavePaper = (paper) => {
+    let updated;
+    if (savedPaperIds.includes(paper.id)) {
+      updated = savedPaperIds.filter(id => id !== paper.id);
+      showToast(`Removed "${paper.title}" from saved papers.`);
+    } else {
+      updated = [...savedPaperIds, paper.id];
+      showToast(`Bookmarked paper: "${paper.title}".`);
+    }
+    setSavedPaperIds(updated);
+    localStorage.setItem('curalink_savedPaperIds', JSON.stringify(updated));
+  };
+
+  const handleSimulateNotification = () => {
+    const alerts = [
+      "New AI Clinical Trial Match! Phase 3 Immunotherapy trial opened in Hyderabad.",
+      "Lab Result Update: Your Complete Blood Count (CBC) is complete and ready for download.",
+      "AI Health Insight: Your average daily step count improved by 14% this week.",
+      "Refill Alert: Lisinopril 10mg prescription is eligible for automated 30-day renewal."
+    ];
+    const categories = ['clinical_trial', 'system', 'ai_suggestion', 'system'];
+    const randomIndex = Math.floor(Math.random() * alerts.length);
+    const newNotif = {
+      id: Date.now(),
+      patient_id: patientData?.id || 1,
+      category: categories[randomIndex],
+      message_body: alerts[randomIndex],
+      action_text: categories[randomIndex] === 'clinical_trial' ? 'Apply Now' : 'View Details',
+      sent_at: new Date().toISOString(),
+      is_read: false
+    };
+    setSmartNotifications(prev => [newNotif, ...prev]);
+    showToast("New AI notification generated!");
+  };
+
+  const handleNotificationAction = (actionText, notif) => {
+    if (notif.category === 'clinical_trial' || actionText === 'Apply Now' || actionText === 'View Details') {
+      const matchTrial = displayTrials.find(t => t.id === 1 || t.title.includes('Lung')) || displayTrials[0];
+      if (actionText === 'Apply Now') {
+        handleApplyTrial(matchTrial);
+      } else {
+        setSelectedTrialModal(matchTrial);
+      }
+    } else {
+      showToast(`Action executed: ${actionText}`);
+    }
+  };
+
   const [pastHistory] = useState([
     { id: 1, date: '2025-11-15', doc: 'Dr. Marcus Vance', diagnosis: 'Acute Bronchitis', type: 'Outpatient' },
     { id: 2, date: '2024-03-22', doc: 'Dr. Sarah Chen', diagnosis: 'Annual Wellness Exam', type: 'Preventive' },
@@ -174,17 +314,21 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
       const apptResponse = await fetch('/api/v1/appointments/');
       if (apptResponse.ok) {
         const apptData = await apptResponse.json();
-        const patientId = patientData?.id || 1;
-        const patientAppts = apptData.filter(a => a.patient_id === patientId);
-        setAppointments(patientAppts.reverse());
+        if (Array.isArray(apptData)) {
+          const patientId = patientData?.id || 1;
+          const patientAppts = apptData.filter(a => a.patient_id === patientId);
+          setAppointments(patientAppts.reverse());
+        }
       }
 
       const queueResponse = await fetch('/api/v1/queue/');
       if (queueResponse.ok) {
         const queueData = await queueResponse.json();
-        const patientId = patientData?.id || 1;
-        const activeUserQueue = queueData.find(q => q.appointment?.patient_id === patientId && !q.completed_time);
-        setActiveQueueItem(activeUserQueue || null);
+        if (Array.isArray(queueData)) {
+          const patientId = patientData?.id || 1;
+          const activeUserQueue = queueData.find(q => q.appointment?.patient_id === patientId && !q.completed_time);
+          setActiveQueueItem(activeUserQueue || null);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -1295,22 +1439,29 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
           {/* Tab: NOTIFICATIONS */}
           {activeTab === 'notifications' && (
-            <div className="flex justify-center animate-in fade-in duration-200">
+            <div className="max-w-4xl mx-auto animate-in fade-in duration-200 w-full">
               <NotificationCenter 
+                className="max-w-4xl mx-auto"
                 notifications={smartNotifications} 
                 onMarkAsRead={handleMarkAsRead} 
                 onClearAll={handleClearAll} 
+                onAddNotification={handleSimulateNotification}
+                onAction={handleNotificationAction}
               />
             </div>
           )}
 
           {/* Tab: SAVED SEARCHES */}
           {activeTab === 'saved_searches' && (
-            <div className="max-w-2xl mx-auto animate-in fade-in duration-200 w-full">
+            <div className="max-w-4xl mx-auto animate-in fade-in duration-200 w-full">
               <SavedSearches 
                 searches={savedSearches}
                 onAddSearch={handleAddSearch}
                 onDeleteSearch={handleDeleteSearch}
+                onSelectSearch={(item) => {
+                  setActiveTab('research_feed');
+                  showToast(`Filtering AI Feed for "${item.query}"...`);
+                }}
               />
             </div>
           )}
@@ -1318,47 +1469,115 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
           {/* Tab: RESEARCH FEED */}
           {activeTab === 'research_feed' && (
             <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200 w-full">
-              <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-500/10 to-brand-bg border border-indigo-500/20">
-                <h1 className="text-2xl font-black text-brand-text">AI Personalized Home Feed</h1>
-                <p className="text-sm text-brand-muted mt-2">Curated clinical trials and research papers based on your profile (Location: {patientData?.location || 'Hyderabad'}, Interests: {patientData?.interests || 'Cancer, Oncology'}).</p>
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-600/10 via-brand-bg to-brand-primary/10 border border-indigo-500/20 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h1 className="text-2xl font-black text-brand-text flex items-center gap-2">
+                    <Sparkles className="w-6 h-6 text-indigo-500 animate-spin" /> AI Personalized Home Feed
+                  </h1>
+                  <p className="text-xs text-brand-muted mt-1.5 font-medium leading-relaxed">
+                    Curated clinical trials and research papers based on your profile (Location: <strong className="text-brand-text">{patientData?.location || 'Hyderabad'}</strong>, Interests: <strong className="text-brand-text">{patientData?.interests || 'Cancer, Oncology, Cardiology'}</strong>).
+                  </p>
+                </div>
+                <button 
+                  onClick={handleSimulateNotification}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow-md cursor-pointer transition active:scale-95 whitespace-nowrap flex items-center gap-1.5"
+                >
+                  <Bell className="w-3.5 h-3.5" /> Trigger Alert
+                </button>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h3 className="font-bold text-lg border-b pb-2 flex items-center gap-2"><Activity className="w-5 h-5 text-indigo-500"/> Recommended Clinical Trials</h3>
-                  {trials.map(t => (
-                    <div key={t.id} className="p-4 bg-white rounded-xl border shadow-sm dark:bg-brand-card">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-bold text-sm text-brand-text">{t.title}</h4>
-                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold">{t.status}</span>
+                  <h3 className="font-extrabold text-base border-b border-brand-border pb-3 flex items-center gap-2 text-brand-text">
+                    <Activity className="w-5 h-5 text-indigo-500"/> Recommended Clinical Trials
+                  </h3>
+                  {displayTrials.map(t => {
+                    const isApplied = appliedTrialIds.includes(t.id);
+                    const isSaved = savedTrialIds.includes(t.id);
+                    return (
+                      <div key={t.id} className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-md transition-all space-y-3">
+                        <div className="flex justify-between items-start gap-2">
+                          <h4 className="font-extrabold text-sm text-brand-text leading-snug">{t.title}</h4>
+                          <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-extrabold whitespace-nowrap">
+                            {t.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{t.description}</p>
+                        <div className="flex justify-between items-center text-xs font-semibold pt-1">
+                          <span className="text-brand-muted flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-indigo-500"/> {t.location}</span>
+                          <span className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg font-extrabold text-[11px]">
+                            Eligibility: 95%
+                          </span>
+                        </div>
+                        <div className="mt-3 flex gap-2 pt-2 border-t border-gray-100 dark:border-brand-border/40">
+                          <button 
+                            onClick={() => handleApplyTrial(t)}
+                            className={`flex-1 text-xs py-2 rounded-xl transition font-extrabold flex items-center justify-center gap-1 cursor-pointer shadow-sm active:scale-95 ${
+                              isApplied 
+                                ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
+                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                            }`}
+                          >
+                            {isApplied ? <><CheckCircle className="w-3.5 h-3.5"/> Applied</> : 'Apply Now'}
+                          </button>
+                          <button 
+                            onClick={() => setSelectedTrialModal(t)}
+                            className="flex-1 border border-gray-300 dark:border-brand-border text-brand-text text-xs py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-brand-hover transition font-extrabold cursor-pointer"
+                          >
+                            View Details
+                          </button>
+                          <button 
+                            onClick={() => handleToggleSaveTrial(t)}
+                            className={`p-2 border rounded-xl transition cursor-pointer ${
+                              isSaved ? 'border-amber-400 bg-amber-50 text-amber-600 dark:bg-amber-950/30' : 'border-gray-300 dark:border-brand-border text-gray-400 hover:text-amber-500'
+                            }`}
+                            title={isSaved ? "Saved" : "Save Trial"}
+                          >
+                            <Bookmark className="w-4 h-4 fill-current" />
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-500 mb-3">{t.description}</p>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-brand-muted flex items-center gap-1"><MapPin className="w-3 h-3"/> {t.location}</span>
-                        <span className="bg-indigo-50 text-indigo-600 px-2 py-1 rounded font-bold">Eligibility: 95%</span>
-                      </div>
-                      <div className="mt-3 flex gap-2">
-                        <button className="flex-1 bg-brand-primary text-white text-xs py-1.5 rounded hover:bg-opacity-90 transition font-bold bg-indigo-600">Apply Now</button>
-                        <button className="flex-1 border border-brand-primary text-brand-text text-xs py-1.5 rounded hover:bg-gray-50 dark:hover:bg-brand-hover transition font-bold">View Details</button>
-                      </div>
-                    </div>
-                  ))}
-                  {trials.length === 0 && <p className="text-sm text-gray-500">No trials found.</p>}
+                    );
+                  })}
                 </div>
                 
                 <div className="space-y-4">
-                  <h3 className="font-bold text-lg border-b pb-2 flex items-center gap-2"><FileText className="w-5 h-5 text-indigo-500"/> Latest Research Papers</h3>
-                  {papers.map(p => (
-                    <div key={p.id} className="p-4 bg-white rounded-xl border shadow-sm dark:bg-brand-card">
-                      <h4 className="font-bold text-sm text-brand-text mb-1">{p.title}</h4>
-                      <p className="text-[10px] text-brand-muted mb-2 font-mono">By {p.authors}</p>
-                      <div className="p-2 bg-gray-50 dark:bg-brand-bg rounded text-xs text-gray-700 dark:text-gray-300 italic border-l-2 border-indigo-300">
-                        <span className="font-bold text-indigo-600 flex items-center gap-1"><Sparkles className="w-3 h-3"/> AI Summary:</span>
-                        {p.summary}
+                  <h3 className="font-extrabold text-base border-b border-brand-border pb-3 flex items-center gap-2 text-brand-text">
+                    <FileText className="w-5 h-5 text-indigo-500"/> Latest Research Papers
+                  </h3>
+                  {displayPapers.map(p => {
+                    const isPaperSaved = savedPaperIds.includes(p.id);
+                    return (
+                      <div key={p.id} className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-md transition-all space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-extrabold text-sm text-brand-text leading-snug">{p.title}</h4>
+                            <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono mt-0.5">By {p.authors}</p>
+                          </div>
+                          <button 
+                            onClick={() => handleToggleSavePaper(p)}
+                            className={`p-1.5 rounded-lg transition cursor-pointer ${
+                              isPaperSaved ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/30' : 'text-gray-400 hover:text-amber-500'
+                            }`}
+                          >
+                            <Bookmark className="w-4 h-4 fill-current" />
+                          </button>
+                        </div>
+                        <div className="p-3 bg-indigo-50/50 dark:bg-brand-bg rounded-xl text-xs text-gray-700 dark:text-gray-300 italic border-l-4 border-indigo-500 space-y-1">
+                          <span className="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 not-italic">
+                            <Sparkles className="w-3.5 h-3.5"/> AI Key Takeaway:
+                          </span>
+                          <p>{p.summary}</p>
+                        </div>
+                        <button 
+                          onClick={() => setSelectedPaperModal(p)}
+                          className="w-full text-xs py-2 bg-gray-100 dark:bg-brand-bg hover:bg-gray-200 dark:hover:bg-brand-hover text-brand-text rounded-xl font-bold transition cursor-pointer flex items-center justify-center gap-1"
+                        >
+                          Read Abstract & Details
+                        </button>
                       </div>
-                    </div>
-                  ))}
-                  {papers.length === 0 && <p className="text-sm text-gray-500">No papers found.</p>}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -1368,51 +1587,107 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
           {activeTab === 'health_insights' && (
             <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200 w-full">
               <div className="flex items-center gap-3 pb-3 border-b border-brand-border">
-                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-500">
+                <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500">
                   <PieChart className="w-6 h-6" />
                 </div>
                 <div>
                   <h1 className="text-xl font-black text-brand-text">Health Dashboard with AI Insights</h1>
-                  <p className="text-[11px] text-brand-muted mt-0.5">Track your activity, saved trials, and personalized AI recommendations.</p>
+                  <p className="text-xs text-brand-muted mt-0.5 font-medium">Track your active trials, saved papers, and personalized AI medical recommendations.</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-white dark:bg-brand-card rounded-xl border shadow-sm text-center">
-                  <div className="text-3xl font-black text-brand-text">3</div>
-                  <div className="text-xs text-gray-500 font-bold uppercase mt-1">Saved Trials</div>
+                <div 
+                  onClick={() => setShowSavedTrialsModal(true)}
+                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
+                >
+                  <div className="text-3xl font-black text-brand-text group-hover:text-indigo-600 transition-colors">
+                    {savedTrialIds.length + 2}
+                  </div>
+                  <div className="text-[11px] text-gray-500 font-extrabold uppercase mt-1 tracking-wider flex items-center justify-center gap-1">
+                    Saved Trials <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
                 </div>
-                <div className="p-4 bg-white dark:bg-brand-card rounded-xl border shadow-sm text-center">
-                  <div className="text-3xl font-black text-emerald-500">1</div>
-                  <div className="text-xs text-gray-500 font-bold uppercase mt-1">Trials Applied</div>
+
+                <div 
+                  onClick={() => setShowAppliedModal(true)}
+                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
+                >
+                  <div className="text-3xl font-black text-emerald-500 group-hover:scale-105 transition-transform">
+                    {appliedTrialIds.length}
+                  </div>
+                  <div className="text-[11px] text-gray-500 font-extrabold uppercase mt-1 tracking-wider flex items-center justify-center gap-1">
+                    Trials Applied <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
                 </div>
-                <div className="p-4 bg-white dark:bg-brand-card rounded-xl border shadow-sm text-center">
-                  <div className="text-3xl font-black text-amber-500">12</div>
-                  <div className="text-xs text-gray-500 font-bold uppercase mt-1">AI Insights Generated</div>
+
+                <div 
+                  onClick={() => { setActiveTab('reports'); showToast("Switched to Diagnostic Lab Reports AI Explainer"); }}
+                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
+                >
+                  <div className="text-3xl font-black text-amber-500 group-hover:scale-105 transition-transform">12</div>
+                  <div className="text-[11px] text-gray-500 font-extrabold uppercase mt-1 tracking-wider flex items-center justify-center gap-1">
+                    AI Insights <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
                 </div>
-                <div className="p-4 bg-white dark:bg-brand-card rounded-xl border shadow-sm text-center">
-                  <div className="text-3xl font-black text-indigo-500">4</div>
-                  <div className="text-xs text-gray-500 font-bold uppercase mt-1">Saved Papers</div>
+
+                <div 
+                  onClick={() => setShowSavedPapersModal(true)}
+                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
+                >
+                  <div className="text-3xl font-black text-indigo-500 group-hover:scale-105 transition-transform">
+                    {savedPaperIds.length + 2}
+                  </div>
+                  <div className="text-[11px] text-gray-500 font-extrabold uppercase mt-1 tracking-wider flex items-center justify-center gap-1">
+                    Saved Papers <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
                 </div>
               </div>
 
-              <div className="glass-panel p-5 rounded-2xl border border-brand-border/60 shadow-sm">
-                <h3 className="font-bold text-sm mb-4 text-brand-text">AI Recommendation History</h3>
+              <div className="glass-panel p-6 rounded-2xl border border-brand-border/60 shadow-sm space-y-4">
+                <h3 className="font-extrabold text-base text-brand-text flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-500" /> AI Recommendation History
+                </h3>
                 <div className="space-y-3">
-                  <div className="p-3 bg-gray-50 dark:bg-brand-bg border border-brand-border rounded-lg flex items-start gap-3">
-                    <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-bold text-brand-text">New Trial Match: Diabetes Type 2 Management</p>
-                      <p className="text-xs text-brand-muted mt-1">Based on your recent search for "Diabetes" and location "Bangalore", we found a highly relevant Phase 2 clinical trial.</p>
-                      <span className="text-[10px] text-brand-muted mt-2 block">2 days ago</span>
+                  <div 
+                    onClick={() => setSelectedTrialModal(displayTrials[1] || displayTrials[0])}
+                    className="p-4 bg-gray-50/80 dark:bg-brand-bg border border-brand-border rounded-xl flex items-start gap-3.5 hover:border-indigo-500 transition-all cursor-pointer group"
+                  >
+                    <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5 group-hover:rotate-12 transition-transform" />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-extrabold text-brand-text group-hover:text-indigo-600 transition-colors">
+                          New Trial Match: Diabetes Type 2 Management
+                        </p>
+                        <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded">
+                          Click to View
+                        </span>
+                      </div>
+                      <p className="text-xs text-brand-muted mt-1 leading-relaxed">
+                        Based on your profile and search for "Diabetes", we found a Phase 2 continuous glucose monitor study with 95% eligibility.
+                      </p>
+                      <span className="text-[10px] text-brand-muted mt-2 block font-mono">2 days ago</span>
                     </div>
                   </div>
-                  <div className="p-3 bg-gray-50 dark:bg-brand-bg border border-brand-border rounded-lg flex items-start gap-3">
-                    <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-bold text-brand-text">Recommended Reading: Advancements in NSCLC Immunotherapy</p>
-                      <p className="text-xs text-brand-muted mt-1">We noticed your interest in Lung Cancer treatments. This recent paper summarizes key advancements.</p>
-                      <span className="text-[10px] text-brand-muted mt-2 block">1 week ago</span>
+
+                  <div 
+                    onClick={() => setSelectedPaperModal(displayPapers[0])}
+                    className="p-4 bg-gray-50/80 dark:bg-brand-bg border border-brand-border rounded-xl flex items-start gap-3.5 hover:border-indigo-500 transition-all cursor-pointer group"
+                  >
+                    <Sparkles className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5 group-hover:rotate-12 transition-transform" />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-extrabold text-brand-text group-hover:text-indigo-600 transition-colors">
+                          Recommended Reading: Advancements in NSCLC Immunotherapy
+                        </p>
+                        <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded">
+                          Click to Read
+                        </span>
+                      </div>
+                      <p className="text-xs text-brand-muted mt-1 leading-relaxed">
+                        Dr. Sarah Jenkins published groundbreaking research on immune checkpoint inhibitors in stage IV lung cancer.
+                      </p>
+                      <span className="text-[10px] text-brand-muted mt-2 block font-mono">1 week ago</span>
                     </div>
                   </div>
                 </div>
@@ -1633,14 +1908,236 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
           </Draggable>
         )}
 
-        {/* Floating Action Button for AI Copilot */}
-        {!isAiPanelOpen && (
-          <button 
-            onClick={() => setIsAiPanelOpen(true)}
-            className="fixed bottom-6 right-6 p-4 bg-brand-teal text-white rounded-full shadow-2xl hover:bg-brand-teal/90 transition-all z-50 animate-in zoom-in duration-300 cursor-pointer flex items-center justify-center hover:scale-105 group"
-          >
-            <Bot className="w-6 h-6 group-hover:animate-bounce" />
-          </button>
+        {/* Floating Toast Notification */}
+        {toastMsg && (
+          <div className="fixed top-5 right-5 z-[100] bg-indigo-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-indigo-400/30 flex items-center gap-3 animate-in slide-in-from-top-5 duration-300">
+            <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+            <span className="text-xs font-extrabold">{toastMsg}</span>
+            <button onClick={() => setToastMsg(null)} className="ml-2 text-indigo-300 hover:text-white cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Clinical Trial Detail Modal */}
+        {selectedTrialModal && (
+          <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-brand-card max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
+              <div className="flex justify-between items-start border-b border-gray-100 dark:border-brand-border pb-3">
+                <div>
+                  <span className="text-[10px] bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-extrabold px-2.5 py-1 rounded-full uppercase">
+                    {selectedTrialModal.phase || 'Phase 3'} Trial
+                  </span>
+                  <h3 className="font-black text-lg text-brand-text mt-2">{selectedTrialModal.title}</h3>
+                </div>
+                <button onClick={() => setSelectedTrialModal(null)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-brand-hover text-gray-400 cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between text-gray-500 font-semibold">
+                  <span>Location: <strong>{selectedTrialModal.location}</strong></span>
+                  <span>Status: <strong className="text-emerald-500">{selectedTrialModal.status || 'Recruiting'}</strong></span>
+                </div>
+
+                <div className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl space-y-1">
+                  <p className="font-extrabold text-brand-text text-[11px] uppercase">Description:</p>
+                  <p className="text-gray-700 dark:text-gray-300">{selectedTrialModal.description}</p>
+                </div>
+
+                <div className="p-3.5 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-xl space-y-1 border border-indigo-100 dark:border-indigo-900/40">
+                  <p className="font-extrabold text-indigo-700 dark:text-indigo-400 text-[11px] uppercase">Eligibility Criteria:</p>
+                  <p className="text-indigo-950 dark:text-indigo-200">{selectedTrialModal.eligibility_criteria || "Adults 18+ with confirmed diagnosis. Patient profile matches 95%."}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-3 border-t border-gray-100 dark:border-brand-border">
+                <button 
+                  onClick={() => {
+                    handleApplyTrial(selectedTrialModal);
+                    setSelectedTrialModal(null);
+                  }}
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer"
+                >
+                  {appliedTrialIds.includes(selectedTrialModal.id) ? '✓ Already Applied' : 'Submit Application Now'}
+                </button>
+                <button 
+                  onClick={() => setSelectedTrialModal(null)}
+                  className="px-5 border border-gray-300 dark:border-brand-border text-brand-text font-bold py-2.5 rounded-xl text-xs hover:bg-gray-50 dark:hover:bg-brand-hover cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Research Paper Modal */}
+        {selectedPaperModal && (
+          <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-brand-card max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
+              <div className="flex justify-between items-start border-b border-gray-100 dark:border-brand-border pb-3">
+                <div>
+                  <span className="text-[10px] bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-extrabold px-2.5 py-1 rounded-full">
+                    {selectedPaperModal.disease_tags || 'Oncology'}
+                  </span>
+                  <h3 className="font-black text-lg text-brand-text mt-2">{selectedPaperModal.title}</h3>
+                  <p className="text-xs text-brand-muted font-mono mt-0.5">By {selectedPaperModal.authors}</p>
+                </div>
+                <button onClick={() => setSelectedPaperModal(null)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-brand-hover text-gray-400 cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-4 bg-indigo-50/60 dark:bg-brand-bg rounded-2xl text-xs text-gray-800 dark:text-gray-200 space-y-2 border-l-4 border-indigo-500">
+                <span className="font-extrabold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                  <Sparkles className="w-4 h-4"/> Full AI Clinical Abstract:
+                </span>
+                <p className="leading-relaxed">{selectedPaperModal.summary}</p>
+              </div>
+
+              <div className="flex gap-3 pt-3 border-t border-gray-100 dark:border-brand-border">
+                <button 
+                  onClick={() => {
+                    handleToggleSavePaper(selectedPaperModal);
+                    setSelectedPaperModal(null);
+                  }}
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Bookmark className="w-4 h-4" /> 
+                  {savedPaperIds.includes(selectedPaperModal.id) ? 'Bookmarked' : 'Bookmark Paper'}
+                </button>
+                <button 
+                  onClick={() => setSelectedPaperModal(null)}
+                  className="px-5 border border-gray-300 dark:border-brand-border text-brand-text font-bold py-2.5 rounded-xl text-xs hover:bg-gray-50 dark:hover:bg-brand-hover cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Applied Trials List Modal */}
+        {showAppliedModal && (
+          <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-brand-card max-w-md w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-100 dark:border-brand-border pb-3">
+                <h3 className="font-black text-base text-brand-text flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-emerald-500" /> Applied Clinical Trials ({appliedTrialIds.length})
+                </h3>
+                <button onClick={() => setShowAppliedModal(false)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-brand-hover text-gray-400 cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                {displayTrials.filter(t => appliedTrialIds.includes(t.id)).map(t => (
+                  <div key={t.id} className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl border border-gray-200 dark:border-brand-border flex justify-between items-center">
+                    <div>
+                      <p className="font-extrabold text-xs text-brand-text">{t.title}</p>
+                      <p className="text-[10px] text-gray-400">{t.location} • Status: Application Under Review</p>
+                    </div>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-extrabold">Active</span>
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => setShowAppliedModal(false)}
+                className="w-full bg-brand-teal text-white font-extrabold py-2.5 rounded-xl text-xs cursor-pointer"
+              >
+                Close Window
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Saved Trials List Modal */}
+        {showSavedTrialsModal && (
+          <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-brand-card max-w-md w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-100 dark:border-brand-border pb-3">
+                <h3 className="font-black text-base text-brand-text flex items-center gap-2">
+                  <Bookmark className="w-5 h-5 text-indigo-500" /> Watchlist Saved Trials
+                </h3>
+                <button onClick={() => setShowSavedTrialsModal(false)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-brand-hover text-gray-400 cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                {displayTrials.filter(t => savedTrialIds.includes(t.id)).map(t => (
+                  <div key={t.id} className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl border border-gray-200 dark:border-brand-border flex justify-between items-center">
+                    <div>
+                      <p className="font-extrabold text-xs text-brand-text">{t.title}</p>
+                      <p className="text-[10px] text-gray-400">{t.location} • Phase: {t.phase}</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        handleApplyTrial(t);
+                        setShowSavedTrialsModal(false);
+                      }}
+                      className="text-[10px] bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold cursor-pointer hover:bg-indigo-700"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => setShowSavedTrialsModal(false)}
+                className="w-full bg-brand-teal text-white font-extrabold py-2.5 rounded-xl text-xs cursor-pointer"
+              >
+                Close Window
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Saved Papers List Modal */}
+        {showSavedPapersModal && (
+          <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-brand-card max-w-md w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-100 dark:border-brand-border pb-3">
+                <h3 className="font-black text-base text-brand-text flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-indigo-500" /> Bookmarked Research Papers
+                </h3>
+                <button onClick={() => setShowSavedPapersModal(false)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-brand-hover text-gray-400 cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                {displayPapers.filter(p => savedPaperIds.includes(p.id)).map(p => (
+                  <div key={p.id} className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl border border-gray-200 dark:border-brand-border flex justify-between items-center">
+                    <div>
+                      <p className="font-extrabold text-xs text-brand-text">{p.title}</p>
+                      <p className="text-[10px] text-gray-400">By {p.authors}</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setSelectedPaperModal(p);
+                        setShowSavedPapersModal(false);
+                      }}
+                      className="text-[10px] bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold cursor-pointer hover:bg-indigo-700"
+                    >
+                      Read
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => setShowSavedPapersModal(false)}
+                className="w-full bg-brand-teal text-white font-extrabold py-2.5 rounded-xl text-xs cursor-pointer"
+              >
+                Close Window
+              </button>
+            </div>
+          </div>
         )}
       </main>
     </div>

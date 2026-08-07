@@ -1,74 +1,119 @@
 import React, { useState } from 'react';
-import { Bell, Check, Search } from 'lucide-react';
+import { Bell, Check, Search, Plus, Sparkles } from 'lucide-react';
 
-const NotificationCenter = ({ notifications, onMarkAsRead, onClearAll }) => {
+const NotificationCenter = ({ notifications = [], onMarkAsRead, onClearAll, onAction, onAddNotification, className = "max-w-md" }) => {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
 
   const filteredNotifications = notifications.filter(n => {
     if (filter !== 'all' && n.category !== filter) return false;
-    if (search && !n.message_body.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !n.message_body?.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden flex flex-col h-[600px] w-full max-w-md">
-      <div className="p-4 border-b border-gray-200 bg-brand-primary text-white flex justify-between items-center">
-        <h3 className="font-bold flex items-center"><Bell className="mr-2 h-5 w-5" /> Smart Notifications</h3>
-        <button onClick={onClearAll} className="text-xs bg-white text-brand-primary px-2 py-1 rounded hover:bg-gray-100">Clear All</button>
+    <div className={`bg-white dark:bg-brand-card rounded-2xl shadow-xl border border-gray-200 dark:border-brand-border overflow-hidden flex flex-col min-h-[550px] w-full ${className}`}>
+      <div className="p-4 border-b border-gray-200 dark:border-brand-border bg-gradient-to-r from-indigo-600 to-brand-primary text-white flex justify-between items-center">
+        <h3 className="font-extrabold text-base flex items-center gap-2">
+          <Bell className="h-5 w-5 text-indigo-200 animate-bounce" /> Smart AI Notifications
+        </h3>
+        <div className="flex gap-2">
+          {onAddNotification && (
+            <button 
+              onClick={onAddNotification}
+              className="text-xs bg-indigo-500/30 hover:bg-indigo-500/50 text-white font-bold px-2.5 py-1 rounded-lg border border-white/20 flex items-center gap-1 transition cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> + Simulate Alert
+            </button>
+          )}
+          <button 
+            onClick={onClearAll} 
+            className="text-xs bg-white/20 hover:bg-white/30 text-white font-bold px-2.5 py-1 rounded-lg transition cursor-pointer"
+          >
+            Clear All
+          </button>
+        </div>
       </div>
       
-      <div className="p-3 border-b border-gray-100 bg-gray-50 flex gap-2">
+      <div className="p-3 border-b border-gray-100 dark:border-brand-border bg-gray-50 dark:bg-brand-bg flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2 top-2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
           <input 
             type="text" 
-            placeholder="Search..." 
-            className="w-full pl-8 pr-2 py-1 text-sm border rounded"
+            placeholder="Search notification messages..." 
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-xl text-brand-text focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <select 
-          className="text-sm border rounded px-2"
+          className="text-xs bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-xl px-3 py-1.5 text-brand-text font-semibold focus:outline-none"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
-          <option value="all">All</option>
-          <option value="clinical_trial">Trials</option>
-          <option value="research_update">Research</option>
+          <option value="all">All Categories</option>
+          <option value="clinical_trial">Clinical Trials</option>
+          <option value="research_update">Research Papers</option>
           <option value="ai_suggestion">AI Suggestions</option>
+          <option value="system">System Alerts</option>
         </select>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {filteredNotifications.length === 0 ? (
-          <div className="text-center text-gray-500 py-10">No new notifications.</div>
+          <div className="text-center text-gray-500 dark:text-gray-400 py-16 space-y-3">
+            <Bell className="w-10 h-10 mx-auto text-gray-300 dark:text-gray-600" />
+            <p className="font-bold text-sm">No notifications found.</p>
+            <p className="text-xs text-gray-400">Select another filter or click "+ Simulate Alert" to generate a test notification.</p>
+          </div>
         ) : (
           filteredNotifications.map((notif, idx) => (
-            <div key={idx} className={`p-3 rounded border ${notif.is_read ? 'bg-gray-50 border-gray-100' : 'bg-blue-50 border-blue-100'}`}>
-              <div className="flex justify-between items-start mb-1">
-                <span className="text-xs font-bold text-brand-primary uppercase">{notif.category?.replace('_', ' ') || 'SYSTEM'}</span>
-                <span className="text-xs text-gray-400">{new Date(notif.sent_at).toLocaleDateString()}</span>
+            <div 
+              key={notif.id || idx} 
+              className={`p-4 rounded-xl border transition-all hover:shadow-md ${
+                notif.is_read 
+                  ? 'bg-gray-50/50 dark:bg-brand-bg/50 border-gray-100 dark:border-brand-border opacity-80' 
+                  : 'bg-indigo-50/40 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-900/50'
+              }`}
+            >
+              <div className="flex justify-between items-start mb-1.5">
+                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider bg-indigo-100 dark:bg-indigo-900/40 px-2 py-0.5 rounded">
+                  {notif.category?.replace('_', ' ') || 'SYSTEM'}
+                </span>
+                <span className="text-[10px] text-gray-400 font-mono">
+                  {notif.sent_at ? new Date(notif.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                </span>
               </div>
-              <p className="text-sm text-gray-800 mb-2">{notif.message_body}</p>
+              <p className="text-xs text-gray-800 dark:text-gray-200 font-medium mb-3 leading-relaxed">
+                {notif.message_body}
+              </p>
               
-              <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-brand-border/40">
                 <div className="flex gap-2">
                   {notif.action_text && (
-                    <button className="bg-brand-secondary text-white text-xs px-3 py-1 rounded hover:bg-opacity-90">
+                    <button 
+                      onClick={() => onAction && onAction(notif.action_text, notif)}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shadow-sm active:scale-95"
+                    >
                       {notif.action_text}
                     </button>
                   )}
-                  {notif.category === 'clinical_trial' && (
-                    <button className="border border-brand-primary text-brand-primary text-xs px-3 py-1 rounded hover:bg-gray-50">
+                  {notif.category === 'clinical_trial' && !notif.action_text && (
+                    <button 
+                      onClick={() => onAction && onAction('View Details', notif)}
+                      className="border border-indigo-500 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition cursor-pointer"
+                    >
                       View Details
                     </button>
                   )}
                 </div>
-                {!notif.is_read && (
-                  <button onClick={() => onMarkAsRead(notif.id)} className="text-gray-400 hover:text-green-500" title="Mark as Read">
-                    <Check className="h-4 w-4" />
+                {!notif.is_read && onMarkAsRead && (
+                  <button 
+                    onClick={() => onMarkAsRead(notif.id)} 
+                    className="text-gray-400 hover:text-emerald-500 text-xs font-bold flex items-center gap-1 cursor-pointer bg-white dark:bg-brand-card px-2 py-1 rounded border border-gray-200 dark:border-brand-border" 
+                    title="Mark as Read"
+                  >
+                    <Check className="h-3.5 w-3.5 text-emerald-500" /> Mark Read
                   </button>
                 )}
               </div>

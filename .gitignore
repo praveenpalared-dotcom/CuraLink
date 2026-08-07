@@ -27,3 +27,4 @@ frontend/.oxlintrc.json
 # Log files
 *.log
 .vercel
+CuraLink-main/

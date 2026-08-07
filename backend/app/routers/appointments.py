@@ -44,6 +44,10 @@ def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
         import random
         mrn = 'MRN-' + str(random.randint(100000, 999999))
         
+    from backend.app.auth.security import hash_password
+    pwd = patient.password if patient.password else "password123"
+    pwd_hash = hash_password(pwd)
+
     db_patient = Patient(
         first_name=patient.first_name,
         last_name=patient.last_name,
@@ -51,7 +55,8 @@ def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
         phone_number=patient.phone_number,
         date_of_birth=patient.date_of_birth,
         gender=patient.gender,
-        medical_record_number=mrn
+        medical_record_number=mrn,
+        password_hash=pwd_hash
     )
     db.add(db_patient)
     db.commit()

@@ -128,7 +128,7 @@ function PharmacistDashboard({ onNavigate, onLogout }) {
     <div className="min-h-screen bg-brand-bg flex flex-col">
       {/* Header */}
       <header className="bg-brand-card border-b border-brand-border px-4 py-2.5 flex justify-between items-center z-10 sticky top-0">
-        <div onClick={() => onNavigate('landing')} className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition">
+        <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-brand-teal/10 border border-brand-teal/20">
             <Pill className="w-5 h-5 text-brand-teal" />
           </div>

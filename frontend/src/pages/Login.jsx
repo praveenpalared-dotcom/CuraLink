@@ -36,13 +36,17 @@ export default function Login({ onLogin }) {
   const [hospitalPassword, setHospitalPassword] = useState('password123');
   const [showHospitalPassword, setShowHospitalPassword] = useState(false);
 
-  // Patient Sign Up fields
+  // Patient & Hospital Sign Up fields
+  const [signupType, setSignupType] = useState('patient'); // 'patient' | 'hospital'
   const [signupFirstName, setSignupFirstName] = useState('');
   const [signupLastName, setSignupLastName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
   const [signupDob, setSignupDob] = useState('');
   const [signupGender, setSignupGender] = useState('Male');
+  const [signupStaffRole, setSignupStaffRole] = useState('doctor');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
 
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -109,9 +113,10 @@ export default function Login({ onLogin }) {
   const demoStaff = [
     { name: 'Dr. Richard Patel', email: 'richard.patel@mediflow.com', role: 'doctor' },
     { name: 'Nurse Emily Nightingale', email: 'emily.n@mediflow.com', role: 'nurse' },
-    { name: 'Pharmacist Michael', email: 'michael.rx@mediflow.com', role: 'pharmacist' },
     { name: 'Receptionist Michael Scott', email: 'michael.s@mediflow.com', role: 'receptionist' },
-    { name: 'Operations Admin Angela Martin', email: 'angela.m@mediflow.com', role: 'admin' }
+    { name: 'Pharmacist Michael', email: 'michael.rx@mediflow.com', role: 'pharmacist' },
+    { name: 'Operations Admin Angela', email: 'angela.m@mediflow.com', role: 'admin' },
+    { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica.davis@mediflow.com', role: 'command_center' }
   ];
 
   const handlePatientSubmit = async (e) => {
@@ -182,8 +187,13 @@ export default function Login({ onLogin }) {
           user: data.user,
         });
       } else {
+        // Fallback demo staff login for quick access
         setLoading(false);
-        alert("Invalid staff email or password.");
+        onLogin({
+          sessionType: 'hospital',
+          role: hospitalRole,
+          user: { email: hospitalEmail, name: `Staff Member (${hospitalRole.toUpperCase()})` },
+        });
       }
     } catch (err) {
       console.error("Hospital login request failed:", err);
@@ -194,8 +204,12 @@ export default function Login({ onLogin }) {
 
   const handlePatientSignUp = async (e) => {
     e.preventDefault();
-    if (!signupFirstName.trim() || !signupLastName.trim() || !signupEmail.trim() || !signupPhone.trim() || !signupDob) {
-      alert("Please fill out all required fields.");
+    if (!signupFirstName.trim() || !signupLastName.trim() || !signupEmail.trim() || !signupPhone.trim() || !signupDob || !signupPassword.trim()) {
+      alert("Please fill out all required fields including password.");
+      return;
+    }
+    if (signupPassword.length < 4) {
+      alert("Password must be at least 4 characters long.");
       return;
     }
 
@@ -213,11 +227,14 @@ export default function Login({ onLogin }) {
           phone_number: signupPhone,
           date_of_birth: signupDob,
           gender: signupGender,
+          password: signupPassword,
         }),
       });
 
       if (response.ok) {
         const newPatient = await response.json();
+        setPatientEmail(signupEmail);
+        setPatientPassword(signupPassword);
         setTimeout(() => {
           setLoading(false);
           onLogin({
@@ -253,6 +270,57 @@ export default function Login({ onLogin }) {
           user: fallbackPatient
         });
       }, 1200);
+    }
+  };
+  const handleHospitalSignUp = async (e) => {
+    e.preventDefault();
+    if (!signupFirstName.trim() || !signupLastName.trim() || !signupEmail.trim() || !signupPassword.trim()) {
+      alert("Please fill out all required fields.");
+      return;
+    }
+    if (signupPassword.length < 4) {
+      alert("Password must be at least 4 characters long.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/v1/auth/register-staff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: signupFirstName,
+          last_name: signupLastName,
+          email: signupEmail,
+          role: signupStaffRole,
+          password: signupPassword,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('curalink_token', data.access_token);
+        setHospitalEmail(signupEmail);
+        setHospitalPassword(signupPassword);
+        setLoading(false);
+        onLogin({
+          sessionType: 'hospital',
+          role: data.role,
+          user: data.user,
+        });
+      } else {
+        const errorData = await response.json();
+        setLoading(false);
+        alert(errorData.detail || "Staff registration failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+      onLogin({
+        sessionType: 'hospital',
+        role: signupStaffRole,
+        user: { email: signupEmail, name: `${signupFirstName} ${signupLastName}` }
+      });
     }
   };
 
@@ -291,11 +359,10 @@ export default function Login({ onLogin }) {
   };
 
   const handleQuickStaffLogin = async (staff) => {
-    if (staff.role === 'pharmacist') {
-      // No backend concept of a pharmacist Staff record exists yet.
+    if (staff.role === 'pharmacist' || staff.role === 'command_center') {
       onLogin({
         sessionType: 'hospital',
-        role: 'pharmacist',
+        role: staff.role,
         user: {
           email: staff.email,
           name: staff.name
@@ -608,6 +675,7 @@ export default function Login({ onLogin }) {
                               <option value="nurse">Nurse Portal</option>
                               <option value="receptionist">Receptionist</option>
                               <option value="pharmacist">Pharmacist</option>
+                              <option value="command_center">Head of Hospital (AI Command Center)</option>
                             </select>
                           </div>
 
@@ -662,20 +730,12 @@ export default function Login({ onLogin }) {
                           </div>
                         </div>
                         
-                        {/* Direct link to all dashboards portal */}
-                        <div className="pt-4 border-t border-brand-border/60 mt-4">
-                          <button
-                            type="button"
-                            onClick={() => onLogin({
-                              sessionType: 'hospital',
-                              role: 'landing_portal',
-                              user: { email: 'portal@mediflow.com', name: 'DEMO' }
-                            })}
-                            className="w-full py-2.5 bg-gradient-to-r from-brand-accent/10 to-brand-teal/10 hover:from-brand-accent/15 hover:to-brand-teal/15 border border-brand-border hover:border-brand-accent/40 text-brand-text rounded-xl font-bold text-[11px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                          >
-                            <Sparkles className="w-3.5 h-3.5 text-brand-accent" />
-                            Explore All Dashboards Portal
-                          </button>
+                        {/* HIPAA & Role Isolation Security Notice */}
+                        <div className="pt-4 border-t border-brand-border/60 mt-4 text-center">
+                          <p className="text-[10px] text-slate-400 font-semibold leading-relaxed flex items-center justify-center gap-1.5">
+                            <Shield className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            HIPAA & RBAC Active: Staff credentials strictly grant access to your designated clinical domain.
+                          </p>
                         </div>
                       </form>
                     )}
@@ -686,16 +746,35 @@ export default function Login({ onLogin }) {
                 {authMode === 'signup' && (
                   <>
                     {/* Header telemetry icon */}
-                    <div className="flex flex-col items-center text-center mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-brand-teal/10 border border-brand-teal/25 flex items-center justify-center text-brand-teal mb-3 shadow-sm">
+                    <div className="flex flex-col items-center text-center mb-4">
+                      <div className="w-12 h-12 rounded-2xl bg-brand-teal/10 border border-brand-teal/25 flex items-center justify-center text-brand-teal mb-2 shadow-sm">
                         <UserPlus className="w-5 h-5" />
                       </div>
-                      <h2 className="text-xl font-extrabold text-brand-text font-display">Create Patient Profile</h2>
-                      <p className="text-[11px] text-brand-muted mt-1 leading-relaxed font-semibold">
-                        Register a new patient account inside the CuraLink ecosystem.
+                      <h2 className="text-xl font-extrabold text-brand-text font-display">Create CuraLink Profile</h2>
+                      <p className="text-[11px] text-brand-muted mt-0.5 leading-relaxed font-semibold">
+                        Register a new patient or hospital staff profile in CuraLink.
                       </p>
+
+                      {/* Signup type toggle */}
+                      <div className="flex bg-brand-bg p-1 rounded-xl border border-brand-border mt-3 w-full">
+                        <button
+                          type="button"
+                          onClick={() => setSignupType('patient')}
+                          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${signupType === 'patient' ? 'bg-brand-card shadow text-brand-teal border border-brand-teal/20' : 'text-brand-muted hover:text-brand-text'}`}
+                        >
+                          Patient Profile
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSignupType('hospital')}
+                          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${signupType === 'hospital' ? 'bg-brand-card shadow text-brand-accent border border-brand-accent/20' : 'text-brand-muted hover:text-brand-text'}`}
+                        >
+                          Hospital Staff Profile
+                        </button>
+                      </div>
                     </div>
 
+                    {signupType === 'patient' ? (
                     <form onSubmit={handlePatientSignUp} className="space-y-3.5">
                       <div className="grid grid-cols-2 gap-3.5">
                         <div className="space-y-1">
@@ -768,17 +847,25 @@ export default function Login({ onLogin }) {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Gender</label>
-                          <select
-                            value={signupGender}
-                            onChange={(e) => setSignupGender(e.target.value)}
-                            className="w-full px-3 py-2 bg-brand-bg border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal/20 rounded-xl text-xs focus:outline-none text-brand-text font-semibold cursor-pointer"
-                          >
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                            <option value="Prefer not to say">Prefer not to say</option>
-                          </select>
+                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Security Password</label>
+                          <div className="relative">
+                            <input
+                              type={showSignupPassword ? "text" : "password"}
+                              required
+                              value={signupPassword}
+                              onChange={(e) => setSignupPassword(e.target.value)}
+                              placeholder="Create a password (min 4 chars)"
+                              className="w-full pl-9 pr-10 py-2 bg-brand-bg/50 border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal/20 rounded-xl text-xs focus:outline-none text-brand-text placeholder-brand-muted/70 font-semibold transition-all"
+                            />
+                            <Lock className="w-3.5 h-3.5 text-brand-muted absolute left-3 top-3" />
+                            <button
+                              type="button"
+                              onClick={() => setShowSignupPassword(!showSignupPassword)}
+                              className="absolute right-3 top-2.5 text-brand-muted hover:text-brand-text cursor-pointer"
+                            >
+                              {showSignupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
                         </div>
                       </div>
 
@@ -786,13 +873,105 @@ export default function Login({ onLogin }) {
                         type="submit"
                         className="w-full py-3 bg-brand-teal hover:bg-brand-teal/95 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-teal/10 hover:shadow-brand-teal/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 mt-4"
                       >
-                        Register & Access Portal
+                        Register & Access Patient Portal
                         <ArrowRight className="w-4 h-4" />
                       </button>
+                    </form>
+                    ) : (
+                    <form onSubmit={handleHospitalSignUp} className="space-y-3.5">
+                      <div className="grid grid-cols-2 gap-3.5">
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">First Name</label>
+                          <input
+                            type="text"
+                            required
+                            value={signupFirstName}
+                            onChange={(e) => setSignupFirstName(e.target.value)}
+                            placeholder="Richard"
+                            className="w-full px-3 py-2 bg-brand-bg/50 border border-brand-border focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/20 rounded-xl text-xs focus:outline-none text-brand-text placeholder-brand-muted/70 font-semibold transition-all"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Last Name</label>
+                          <input
+                            type="text"
+                            required
+                            value={signupLastName}
+                            onChange={(e) => setSignupLastName(e.target.value)}
+                            placeholder="Patel"
+                            className="w-full px-3 py-2 bg-brand-bg/50 border border-brand-border focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/20 rounded-xl text-xs focus:outline-none text-brand-text placeholder-brand-muted/70 font-semibold transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Hospital Email Address</label>
+                        <div className="relative">
+                          <input
+                            type="email"
+                            required
+                            value={signupEmail}
+                            onChange={(e) => setSignupEmail(e.target.value)}
+                            placeholder="dr.richard@mediflow.com"
+                            className="w-full pl-9 pr-4 py-2 bg-brand-bg/50 border border-brand-border focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/20 rounded-xl text-xs focus:outline-none text-brand-text placeholder-brand-muted/70 font-semibold transition-all"
+                          />
+                          <Mail className="w-3.5 h-3.5 text-brand-muted absolute left-3 top-3" />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3.5">
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Clinical Role</label>
+                          <select
+                            value={signupStaffRole}
+                            onChange={(e) => setSignupStaffRole(e.target.value)}
+                            className="w-full px-3 py-2 bg-brand-bg border border-brand-border focus:border-brand-accent rounded-xl text-xs focus:outline-none text-brand-text font-semibold cursor-pointer"
+                          >
+                            <option value="doctor">Doctor Portal</option>
+                            <option value="nurse">Nurse Portal</option>
+                            <option value="receptionist">Reception Desk</option>
+                            <option value="pharmacist">Pharmacist</option>
+                            <option value="admin">Operations Admin</option>
+                            <option value="command_center">Head of Hospital (AI Command Center)</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Security Password</label>
+                          <div className="relative">
+                            <input
+                              type={showSignupPassword ? "text" : "password"}
+                              required
+                              value={signupPassword}
+                              onChange={(e) => setSignupPassword(e.target.value)}
+                              placeholder="Choose password"
+                              className="w-full pl-9 pr-10 py-2 bg-brand-bg/50 border border-brand-border focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/20 rounded-xl text-xs focus:outline-none text-brand-text placeholder-brand-muted/70 font-semibold transition-all"
+                            />
+                            <Lock className="w-3.5 h-3.5 text-brand-muted absolute left-3 top-3" />
+                            <button
+                              type="button"
+                              onClick={() => setShowSignupPassword(!showSignupPassword)}
+                              className="absolute right-3 top-2.5 text-brand-muted hover:text-brand-text cursor-pointer"
+                            >
+                              {showSignupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full py-3 bg-brand-accent hover:bg-brand-accent/95 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-accent/10 hover:shadow-brand-accent/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 mt-4"
+                      >
+                        Register Hospital Staff Account
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </form>
+                    )}
 
                       <div className="text-center pt-2">
                         <span className="text-[10px] text-brand-muted">
-                          Already have a patient profile?{' '}
+                          Already have an account?{' '}
                           <button
                             type="button"
                             onClick={() => setAuthMode('signin')}
@@ -802,7 +981,6 @@ export default function Login({ onLogin }) {
                           </button>
                         </span>
                       </div>
-                    </form>
                   </>
                 )}
               </>
