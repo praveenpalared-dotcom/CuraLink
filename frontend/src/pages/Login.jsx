@@ -113,8 +113,8 @@ export default function Login({ onLogin }) {
   const demoStaff = [
     { name: 'Dr. Richard', email: 'richard@gmail.com', role: 'doctor' },
     { name: 'Nurse Emily', email: 'emily@gmail.com', role: 'nurse' },
-    { name: 'Receptionist Michael', email: 'michael@gmail.com', role: 'receptionist' },
-    { name: 'Pharmacist Michael Scott', email: 'scott@gmail.com', role: 'pharmacist' },
+    { name: 'Pharmacist Michael', email: 'michael@gmail.com', role: 'pharmacist' },
+    { name: 'Receptionist Michael Scott', email: 'scott@gmail.com', role: 'receptionist' },
     { name: 'Operations Admin Angela', email: 'angela@gmail.com', role: 'admin' },
     { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica@gmail.com', role: 'command_center' }
   ];
@@ -122,8 +122,8 @@ export default function Login({ onLogin }) {
   const staffAccounts = {
     'richard@gmail.com': { name: 'Dr. Richard', email: 'richard@gmail.com', role: 'doctor', password: '123' },
     'emily@gmail.com': { name: 'Nurse Emily', email: 'emily@gmail.com', role: 'nurse', password: '123' },
-    'scott@gmail.com': { name: 'Pharmacist Michael Scott', email: 'scott@gmail.com', role: 'pharmacist', password: '123' },
-    'michael@gmail.com': { name: 'Receptionist Michael', email: 'michael@gmail.com', role: 'receptionist', password: '123' },
+    'scott@gmail.com': { name: 'Receptionist Michael Scott', email: 'scott@gmail.com', role: 'receptionist', password: '123' },
+    'michael@gmail.com': { name: 'Pharmacist Michael', email: 'michael@gmail.com', role: 'pharmacist', password: '123' },
     'angela@gmail.com': { name: 'Operations Admin Angela', email: 'angela@gmail.com', role: 'admin', password: '123' },
     'jessica@gmail.com': { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica@gmail.com', role: 'command_center', password: '123' }
   };
@@ -189,6 +189,11 @@ export default function Login({ onLogin }) {
 
       if (response.ok) {
         const data = await response.json();
+        if (data.role && data.role !== hospitalRole) {
+          setLoading(false);
+          alert(`Invalid credentials for the selected role. This account is registered as a ${data.role.toUpperCase()}.`);
+          return;
+        }
         localStorage.setItem('curalink_token', data.access_token);
         setLoading(false);
         onLogin({
@@ -205,6 +210,11 @@ export default function Login({ onLogin }) {
     // Evaluate against valid staff accounts map
     const account = staffAccounts[cleanEmail];
     if (account && account.password === hospitalPassword) {
+      if (account.role !== hospitalRole) {
+        setLoading(false);
+        alert(`Invalid credentials for the selected role. This account is registered as a ${account.role.toUpperCase()}.`);
+        return;
+      }
       setLoading(false);
       onLogin({
         sessionType: 'hospital',
