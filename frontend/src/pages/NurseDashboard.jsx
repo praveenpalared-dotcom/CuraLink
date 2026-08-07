@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
-export default function NurseDashboard({ onLogout, onNavigate }) {
+export default function NurseDashboard({ user, onLogout, onNavigate }) {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState(null);
@@ -136,7 +136,7 @@ export default function NurseDashboard({ onLogout, onNavigate }) {
         <div className="flex items-center gap-2 sm:gap-3">
           <NotificationBell userType="staff" userId={2} />
           <div className="hidden md:block text-right">
-            <span className="text-xs font-black block text-brand-text">Jessica Taylor, RN</span>
+            <span className="text-xs font-black block text-brand-text">{user?.name || "Nurse Emily"}</span>
             <span className="text-[9px] text-brand-muted font-bold block uppercase tracking-wider">Lobby Intake & Triage coordinator</span>
           </div>
           <button 

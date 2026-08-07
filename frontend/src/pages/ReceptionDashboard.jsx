@@ -4,7 +4,7 @@ import {
   UserPlus, UserCheck, Play, ArrowRight, Sparkles, Phone, FileText, CheckCircle, Moon, Sun, Settings
 } from 'lucide-react';
 
-export default function ReceptionDashboard({ onLogout, onNavigate }) {
+export default function ReceptionDashboard({ user, onLogout, onNavigate }) {
   const [appointments, setAppointments] = useState([]);
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -239,7 +239,7 @@ export default function ReceptionDashboard({ onLogout, onNavigate }) {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden md:block text-right">
-            <span className="text-xs font-black block text-brand-text">Receptionist Sarah</span>
+            <span className="text-xs font-black block text-brand-text">{user?.name || "Receptionist Michael"}</span>
             <span className="text-[9px] text-brand-muted block font-extrabold uppercase tracking-wider">Admissions & Registrar Coordinator</span>
           </div>
           <button 

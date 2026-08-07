@@ -4,7 +4,7 @@ import {
   DollarSign, Activity, ActivitySquare, LayoutDashboard, Smile, ThumbsUp, Trash2
 } from 'lucide-react';
 
-export default function AdminDashboard({ onLogout, onNavigate }) {
+export default function AdminDashboard({ user, onLogout, onNavigate }) {
   const [appointments, setAppointments] = useState([]);
   const [queue, setQueue] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -116,7 +116,7 @@ export default function AdminDashboard({ onLogout, onNavigate }) {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden md:block text-right">
-            <span className="text-xs font-black block text-brand-text">Admin Supervisor</span>
+            <span className="text-xs font-black block text-brand-text">{user?.name || "Operations Admin Angela"}</span>
             <span className="text-[9px] text-brand-muted block font-extrabold uppercase tracking-wider">High-Bandwidth Clinical Command</span>
           </div>
           <button 

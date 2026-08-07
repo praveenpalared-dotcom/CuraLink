@@ -26,6 +26,15 @@ function App() {
       return null;
     }
   });
+  const [staffData, setStaffData] = useState(() => {
+    const saved = localStorage.getItem('curalink_staffData');
+    if (!saved) return null;
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return null;
+    }
+  });
   const [userRole, setUserRole] = useState(() => {
     return localStorage.getItem('curalink_userRole') || 'patient';
   });
@@ -85,6 +94,10 @@ function App() {
       localStorage.setItem('curalink_currentPage', 'patient');
     } else {
       setPatientData(null);
+      setStaffData(user || null);
+      if (user) {
+        localStorage.setItem('curalink_staffData', JSON.stringify(user));
+      }
       localStorage.removeItem('curalink_patientData');
       const targetPage = finalRole;
       setCurrentPage(targetPage);
@@ -96,11 +109,13 @@ function App() {
     setIsLoggedIn(false);
     setSessionType(null);
     setPatientData(null);
+    setStaffData(null);
     setUserRole('patient');
     setCurrentPage('patient');
     localStorage.removeItem('curalink_isLoggedIn');
     localStorage.removeItem('curalink_sessionType');
     localStorage.removeItem('curalink_patientData');
+    localStorage.removeItem('curalink_staffData');
     localStorage.removeItem('curalink_userRole');
     localStorage.removeItem('curalink_currentPage');
     localStorage.removeItem('curalink_patientActiveTab');
@@ -128,36 +143,42 @@ function App() {
         )}
         {activePage === 'doctor' && (
           <DoctorDashboard 
+            user={staffData}
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
         {activePage === 'nurse' && (
           <NurseDashboard 
+            user={staffData}
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
         {activePage === 'receptionist' && (
           <ReceptionDashboard 
+            user={staffData}
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
         {activePage === 'pharmacist' && (
           <PharmacistDashboard 
+            user={staffData}
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
         {activePage === 'admin' && (
           <AdminDashboard 
+            user={staffData}
             onNavigate={navigate} 
             onLogout={handleLogout}
           />
         )}
         {activePage === 'command_center' && (
           <AiCommandCenter 
+            user={staffData}
             onNavigate={navigate} 
             onLogout={handleLogout}
           />

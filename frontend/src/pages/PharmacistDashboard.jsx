@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pill, Search, Clock, CheckCircle2, ArrowRight, Truck, MapPin, Package, LogOut, Info } from 'lucide-react';
 
-function PharmacistDashboard({ onNavigate, onLogout }) {
+function PharmacistDashboard({ user, onNavigate, onLogout }) {
   // Mock Data for Deliveries
   const [deliveries, setDeliveries] = useState([
     {
@@ -140,7 +140,7 @@ function PharmacistDashboard({ onNavigate, onLogout }) {
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 bg-brand-bg px-3 py-1.5 rounded-xl border border-brand-border text-xs">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span className="font-bold text-brand-text">Active Shift</span>
+            <span className="font-bold text-brand-text">{user?.name || "Pharmacist Michael Scott"}</span>
           </div>
           <button onClick={onLogout} className="p-2 text-brand-muted hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all border border-transparent hover:border-red-400/20 cursor-pointer">
             <LogOut className="w-4 h-4" />

@@ -111,13 +111,22 @@ export default function Login({ onLogin }) {
   ];
 
   const demoStaff = [
-    { name: 'Dr. Richard Patel', email: 'richard.patel@mediflow.com', role: 'doctor' },
-    { name: 'Nurse Emily Nightingale', email: 'emily.n@mediflow.com', role: 'nurse' },
-    { name: 'Receptionist Michael Scott', email: 'michael.s@mediflow.com', role: 'receptionist' },
-    { name: 'Pharmacist Michael', email: 'michael.rx@mediflow.com', role: 'pharmacist' },
-    { name: 'Operations Admin Angela', email: 'angela.m@mediflow.com', role: 'admin' },
-    { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica.davis@mediflow.com', role: 'command_center' }
+    { name: 'Dr. Richard', email: 'richard@gmail.com', role: 'doctor' },
+    { name: 'Nurse Emily', email: 'emily@gmail.com', role: 'nurse' },
+    { name: 'Receptionist Michael', email: 'michael@gmail.com', role: 'receptionist' },
+    { name: 'Pharmacist Michael Scott', email: 'scott@gmail.com', role: 'pharmacist' },
+    { name: 'Operations Admin Angela', email: 'angela@gmail.com', role: 'admin' },
+    { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica@gmail.com', role: 'command_center' }
   ];
+
+  const staffAccounts = {
+    'richard@gmail.com': { name: 'Dr. Richard', email: 'richard@gmail.com', role: 'doctor', password: '123' },
+    'emily@gmail.com': { name: 'Nurse Emily', email: 'emily@gmail.com', role: 'nurse', password: '123' },
+    'scott@gmail.com': { name: 'Pharmacist Michael Scott', email: 'scott@gmail.com', role: 'pharmacist', password: '123' },
+    'michael@gmail.com': { name: 'Receptionist Michael', email: 'michael@gmail.com', role: 'receptionist', password: '123' },
+    'angela@gmail.com': { name: 'Operations Admin Angela', email: 'angela@gmail.com', role: 'admin', password: '123' },
+    'jessica@gmail.com': { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica@gmail.com', role: 'command_center', password: '123' }
+  };
 
   const handlePatientSubmit = async (e) => {
     e.preventDefault();
@@ -160,7 +169,8 @@ export default function Login({ onLogin }) {
 
   const handleHospitalSubmit = async (e) => {
     e.preventDefault();
-    if (!hospitalEmail.trim()) {
+    const cleanEmail = hospitalEmail.trim().toLowerCase();
+    if (!cleanEmail) {
       alert("Please enter your staff ID or email address.");
       return;
     }
@@ -171,7 +181,7 @@ export default function Login({ onLogin }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: hospitalEmail,
+          email: cleanEmail,
           password: hospitalPassword,
           session_type: 'hospital',
         }),
@@ -186,19 +196,24 @@ export default function Login({ onLogin }) {
           role: data.role,
           user: data.user,
         });
-      } else {
-        // Fallback demo staff login for quick access
-        setLoading(false);
-        onLogin({
-          sessionType: 'hospital',
-          role: hospitalRole,
-          user: { email: hospitalEmail, name: `Staff Member (${hospitalRole.toUpperCase()})` },
-        });
+        return;
       }
     } catch (err) {
       console.error("Hospital login request failed:", err);
+    }
+
+    // Evaluate against valid staff accounts map
+    const account = staffAccounts[cleanEmail];
+    if (account && account.password === hospitalPassword) {
       setLoading(false);
-      alert("Unable to reach the authentication service. Please try again.");
+      onLogin({
+        sessionType: 'hospital',
+        role: account.role,
+        user: { email: account.email, name: account.name },
+      });
+    } else {
+      setLoading(false);
+      alert("Invalid staff email, role, or password. Access is restricted to authorized hospital staff accounts.");
     }
   };
 

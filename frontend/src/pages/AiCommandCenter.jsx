@@ -4,7 +4,7 @@ import {
   CheckCircle, ArrowRight, Play, Server, Layers, HelpCircle
 } from 'lucide-react';
 
-export default function AiCommandCenter({ onLogout, onNavigate }) {
+export default function AiCommandCenter({ user, onLogout, onNavigate }) {
   // Recommendation state
   const [allocationDone, setAllocationDone] = useState(false);
   const [allocationDone2, setAllocationDone2] = useState(false);
@@ -92,7 +92,7 @@ export default function AiCommandCenter({ onLogout, onNavigate }) {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden md:block text-right">
-            <span className="text-xs font-black block text-[#F1F5F9]">AI System Administrator</span>
+            <span className="text-xs font-black block text-[#F1F5F9]">{user?.name || "Dr. Jessica Davis (Head of Hospital)"}</span>
             <span className="text-[8px] text-brand-teal font-mono tracking-widest block uppercase">Telemetry Sync Status: Live</span>
           </div>
           <button 
