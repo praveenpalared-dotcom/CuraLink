@@ -746,35 +746,16 @@ export default function Login({ onLogin }) {
                 {authMode === 'signup' && (
                   <>
                     {/* Header telemetry icon */}
-                    <div className="flex flex-col items-center text-center mb-4">
+                    <div className="flex flex-col items-center text-center mb-6">
                       <div className="w-12 h-12 rounded-2xl bg-brand-teal/10 border border-brand-teal/25 flex items-center justify-center text-brand-teal mb-2 shadow-sm">
                         <UserPlus className="w-5 h-5" />
                       </div>
                       <h2 className="text-xl font-extrabold text-brand-text font-display">Create CuraLink Profile</h2>
                       <p className="text-[11px] text-brand-muted mt-0.5 leading-relaxed font-semibold">
-                        Register a new patient or hospital staff profile in CuraLink.
+                        Register a new patient profile in CuraLink.
                       </p>
-
-                      {/* Signup type toggle */}
-                      <div className="flex bg-brand-bg p-1 rounded-xl border border-brand-border mt-3 w-full">
-                        <button
-                          type="button"
-                          onClick={() => setSignupType('patient')}
-                          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${signupType === 'patient' ? 'bg-brand-card shadow text-brand-teal border border-brand-teal/20' : 'text-brand-muted hover:text-brand-text'}`}
-                        >
-                          Patient Profile
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSignupType('hospital')}
-                          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${signupType === 'hospital' ? 'bg-brand-card shadow text-brand-accent border border-brand-accent/20' : 'text-brand-muted hover:text-brand-text'}`}
-                        >
-                          Hospital Staff Profile
-                        </button>
-                      </div>
                     </div>
 
-                    {signupType === 'patient' ? (
                     <form onSubmit={handlePatientSignUp} className="space-y-3.5">
                       <div className="grid grid-cols-2 gap-3.5">
                         <div className="space-y-1">
@@ -877,110 +858,19 @@ export default function Login({ onLogin }) {
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     </form>
-                    ) : (
-                    <form onSubmit={handleHospitalSignUp} className="space-y-3.5">
-                      <div className="grid grid-cols-2 gap-3.5">
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">First Name</label>
-                          <input
-                            type="text"
-                            required
-                            value={signupFirstName}
-                            onChange={(e) => setSignupFirstName(e.target.value)}
-                            placeholder="Richard"
-                            className="w-full px-3 py-2 bg-brand-bg/50 border border-brand-border focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/20 rounded-xl text-xs focus:outline-none text-brand-text placeholder-brand-muted/70 font-semibold transition-all"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Last Name</label>
-                          <input
-                            type="text"
-                            required
-                            value={signupLastName}
-                            onChange={(e) => setSignupLastName(e.target.value)}
-                            placeholder="Patel"
-                            className="w-full px-3 py-2 bg-brand-bg/50 border border-brand-border focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/20 rounded-xl text-xs focus:outline-none text-brand-text placeholder-brand-muted/70 font-semibold transition-all"
-                          />
-                        </div>
-                      </div>
 
-                      <div className="space-y-1">
-                        <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Hospital Email Address</label>
-                        <div className="relative">
-                          <input
-                            type="email"
-                            required
-                            value={signupEmail}
-                            onChange={(e) => setSignupEmail(e.target.value)}
-                            placeholder="dr.richard@mediflow.com"
-                            className="w-full pl-9 pr-4 py-2 bg-brand-bg/50 border border-brand-border focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/20 rounded-xl text-xs focus:outline-none text-brand-text placeholder-brand-muted/70 font-semibold transition-all"
-                          />
-                          <Mail className="w-3.5 h-3.5 text-brand-muted absolute left-3 top-3" />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3.5">
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Clinical Role</label>
-                          <select
-                            value={signupStaffRole}
-                            onChange={(e) => setSignupStaffRole(e.target.value)}
-                            className="w-full px-3 py-2 bg-brand-bg border border-brand-border focus:border-brand-accent rounded-xl text-xs focus:outline-none text-brand-text font-semibold cursor-pointer"
-                          >
-                            <option value="doctor">Doctor Portal</option>
-                            <option value="nurse">Nurse Portal</option>
-                            <option value="receptionist">Reception Desk</option>
-                            <option value="pharmacist">Pharmacist</option>
-                            <option value="admin">Operations Admin</option>
-                            <option value="command_center">Head of Hospital (AI Command Center)</option>
-                          </select>
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-brand-muted font-bold uppercase tracking-wider block">Security Password</label>
-                          <div className="relative">
-                            <input
-                              type={showSignupPassword ? "text" : "password"}
-                              required
-                              value={signupPassword}
-                              onChange={(e) => setSignupPassword(e.target.value)}
-                              placeholder="Choose password"
-                              className="w-full pl-9 pr-10 py-2 bg-brand-bg/50 border border-brand-border focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/20 rounded-xl text-xs focus:outline-none text-brand-text placeholder-brand-muted/70 font-semibold transition-all"
-                            />
-                            <Lock className="w-3.5 h-3.5 text-brand-muted absolute left-3 top-3" />
-                            <button
-                              type="button"
-                              onClick={() => setShowSignupPassword(!showSignupPassword)}
-                              className="absolute right-3 top-2.5 text-brand-muted hover:text-brand-text cursor-pointer"
-                            >
-                              {showSignupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <button
-                        type="submit"
-                        className="w-full py-3 bg-brand-accent hover:bg-brand-accent/95 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-accent/10 hover:shadow-brand-accent/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 mt-4"
-                      >
-                        Register Hospital Staff Account
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </form>
-                    )}
-
-                      <div className="text-center pt-2">
-                        <span className="text-[10px] text-brand-muted">
-                          Already have an account?{' '}
-                          <button
-                            type="button"
-                            onClick={() => setAuthMode('signin')}
-                            className="text-brand-teal font-extrabold hover:underline cursor-pointer"
-                          >
-                            Sign In
-                          </button>
-                        </span>
-                      </div>
+                    <div className="text-center pt-2">
+                      <span className="text-[10px] text-brand-muted">
+                        Already have an account?{' '}
+                        <button
+                          type="button"
+                          onClick={() => setAuthMode('signin')}
+                          className="text-brand-teal font-extrabold hover:underline cursor-pointer"
+                        >
+                          Sign In
+                        </button>
+                      </span>
+                    </div>
                   </>
                 )}
               </>
