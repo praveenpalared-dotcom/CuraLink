@@ -175,7 +175,7 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
           <div className="hidden sm:flex bg-brand-bg rounded-xl border border-brand-border p-1 mr-4">
             <button 
               onClick={() => setActiveView('clinical')}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition flex items-center gap-1.5 ${activeView === 'clinical' ? 'bg-brand-card shadow text-brand-text border border-brand-border/50' : 'text-brand-muted hover:text-brand-text'}`}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition flex items-center gap-1.5 ${activeView === 'clinical' ? 'bg-brand-card shadow text-brand-text border border-brand-border' : 'text-brand-muted hover:text-brand-text'}`}
             >
               <Stethoscope className="w-3.5 h-3.5" /> Clinical Hub
             </button>
@@ -282,7 +282,7 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
                   <div 
                     key={appt.id}
                     onClick={() => handleSelectPatient(appt)}
-                    className={`p-2 rounded-xl border border-brand-border/40 hover:bg-brand-hover/50 cursor-pointer flex justify-between items-center text-[11px] ${
+                    className={`p-2 rounded-xl border border-brand-border hover:bg-brand-hover/50 cursor-pointer flex justify-between items-center text-[11px] ${
                       selectedAppt?.id === appt.id ? 'bg-brand-accent/5 border-brand-accent/60' : 'bg-brand-card/60'
                     }`}
                   >
@@ -383,31 +383,31 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
                       EHR Patient History File
                     </h3>
                     <div className="text-[10px] space-y-1 font-semibold leading-relaxed">
-                      <div className="flex justify-between border-b border-brand-border/30 pb-0.5">
+                      <div className="flex justify-between border-b border-brand-border pb-0.5">
                         <span className="text-brand-muted">Allergies:</span>
                         <span className="text-red-500 font-bold">Penicillin (Severe)</span>
                       </div>
-                      <div className="flex justify-between border-b border-brand-border/30 pb-0.5">
+                      <div className="flex justify-between border-b border-brand-border pb-0.5">
                         <span className="text-brand-muted">Chronic Illnesses:</span>
                         <span className="text-brand-text">Hypertension (Diagnosed 2023)</span>
                       </div>
-                      <div className="flex justify-between border-b border-brand-border/30 pb-0.5">
+                      <div className="flex justify-between border-b border-brand-border pb-0.5">
                         <span className="text-brand-muted">Recent Surgery:</span>
                         <span className="text-brand-text">None</span>
                       </div>
-                      <div className="flex justify-between border-b border-brand-border/30 pb-1">
+                      <div className="flex justify-between border-b border-brand-border pb-1">
                         <span className="text-brand-muted">Blood Group:</span>
                         <span className="text-brand-text">O positive</span>
                       </div>
                       
-                      <div className="mt-2 pt-2 border-t border-brand-border/50">
+                      <div className="mt-2 pt-2 border-t border-brand-border">
                         <h4 className="font-extrabold text-[9px] text-brand-muted uppercase tracking-wider mb-1 font-display">Past Consultations</h4>
                         {historyLoading ? (
                           <div className="text-brand-muted text-[9px] py-1">Loading records...</div>
                         ) : patientHistory.length > 0 ? (
                           <div className="space-y-1 max-h-[100px] overflow-y-auto">
                             {patientHistory.map(hist => (
-                              <div key={hist.id} className="p-1.5 bg-brand-bg/50 rounded border border-brand-border/40 text-[9px]">
+                              <div key={hist.id} className="p-1.5 bg-brand-bg/50 rounded border border-brand-border text-[9px]">
                                 <div className="flex justify-between font-bold text-brand-text">
                                   <span>{new Date(hist.start_time).toLocaleDateString()}</span>
                                   <span className="text-brand-accent">{hist.status}</span>
@@ -495,7 +495,7 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
                     {/* Prescription list */}
                     <div className="space-y-1 max-h-[120px] overflow-y-auto">
                       {prescriptions.map((rx) => (
-                        <div key={rx.id} className="p-1.5 bg-brand-bg rounded-lg flex justify-between items-center text-[10px] border border-brand-border/30">
+                        <div key={rx.id} className="p-1.5 bg-brand-bg rounded-lg flex justify-between items-center text-[10px] border border-brand-border">
                           <div>
                             <span className="font-bold text-brand-text">{rx.drug}</span>
                             <span className="text-[9px] text-brand-muted block">{rx.dosage} • {rx.frequency}</span>
@@ -506,7 +506,7 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
                     </div>
 
                     {/* Quick Add Prescription */}
-                    <form onSubmit={handleAddPrescription} className="pt-2 border-t border-brand-border/40 space-y-2">
+                    <form onSubmit={handleAddPrescription} className="pt-2 border-t border-brand-border space-y-2">
                       <div className="grid grid-cols-2 gap-1.5">
                         <input 
                           type="text"
@@ -559,7 +559,7 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
                     {attachments.length > 0 ? (
                       <div className="space-y-1.5 max-h-[80px] overflow-y-auto">
                         {attachments.map((file) => (
-                          <div key={file.id} className="p-1.5 bg-brand-bg rounded-lg flex justify-between items-center text-[10px] border border-brand-border/40">
+                          <div key={file.id} className="p-1.5 bg-brand-bg rounded-lg flex justify-between items-center text-[10px] border border-brand-border">
                             <span className="font-bold text-brand-text flex items-center gap-1.5">
                               <FileText className="w-3 h-3 text-brand-muted" /> {file.name}
                             </span>
@@ -573,13 +573,13 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-[9px] text-brand-muted italic py-1 text-center bg-brand-bg/30 rounded-lg border border-dashed border-brand-border/50">
+                      <div className="text-[9px] text-brand-muted italic py-1 text-center bg-brand-bg/30 rounded-lg border border-dashed border-brand-border">
                         No files attached.
                       </div>
                     )}
 
                     {/* Quick Add Attachment */}
-                    <div className="flex gap-1.5 pt-1.5 border-t border-brand-border/40">
+                    <div className="flex gap-1.5 pt-1.5 border-t border-brand-border">
                       <input 
                         type="text"
                         placeholder="File name (e.g. Lab Results PDF)"
@@ -666,7 +666,7 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
                     </div>
                     <span className="bg-amber-100 text-amber-700 px-2.5 py-1 rounded text-[10px] font-black uppercase">Pending</span>
                   </div>
-                  <div className="p-3 bg-brand-bg border border-brand-border/50 rounded-lg text-sm text-brand-text mb-4">
+                  <div className="p-3 bg-brand-bg border border-brand-border rounded-lg text-sm text-brand-text mb-4">
                     "{c.message}"
                   </div>
                   <div className="flex gap-2 justify-end">
@@ -748,7 +748,7 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
       {/* Comprehensive Clinical Summary Modal */}
       {isSummaryModalOpen && selectedAppt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-brand-bg w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-brand-border/50 animate-in zoom-in-95 duration-200">
+          <div className="bg-brand-bg w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-brand-border animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex justify-between items-center p-5 border-b border-brand-border bg-brand-card/50">
               <div>
@@ -838,10 +838,10 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <section>
                   <h3 className="text-sm font-black text-brand-text uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <Pill className="w-4 h-4 text-indigo-500" /> Active & Past Prescriptions
+                    <Pill className="w-4 h-4 text-brand-accent" /> Active & Past Prescriptions
                   </h3>
                   <div className="space-y-2">
-                    <div className="p-2.5 bg-indigo-500/5 border border-indigo-500/20 rounded-lg flex justify-between items-center">
+                    <div className="p-2.5 bg-brand-accent/100/5 border border-brand-accent/20 rounded-lg flex justify-between items-center">
                       <div>
                         <div className="text-xs font-bold text-brand-text">Lisinopril 10mg</div>
                         <div className="text-[9px] text-brand-muted">1 tablet • Once daily</div>
@@ -887,3 +887,6 @@ export default function DoctorDashboard({ user, onLogout, onNavigate }) {
     </div>
   );
 }
+
+
+

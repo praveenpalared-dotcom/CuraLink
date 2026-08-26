@@ -219,7 +219,7 @@ export default function NurseDashboard({ user, onLogout, onNavigate }) {
             ) : (
               <div className="space-y-1.5">
                 {checkedInQueue.map((appt) => (
-                  <div key={appt.id} className="p-2 bg-brand-card/70 border border-brand-border/40 rounded-xl flex justify-between items-center text-[11px]">
+                  <div key={appt.id} className="p-2 bg-brand-card/70 border border-brand-border rounded-xl flex justify-between items-center text-[11px]">
                     <div>
                       <div className="font-bold text-brand-text">{appt.patient?.first_name} {appt.patient?.last_name}</div>
                       <div className="text-[9px] text-brand-muted font-mono">MRN: {appt.patient?.medical_record_number}</div>
@@ -324,7 +324,7 @@ export default function NurseDashboard({ user, onLogout, onNavigate }) {
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-brand-border/40 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="pt-2 border-t border-brand-border grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-brand-muted uppercase block">Chief Symptoms Complaint</label>
                     <input 
@@ -357,7 +357,7 @@ export default function NurseDashboard({ user, onLogout, onNavigate }) {
                     <Sparkles className="w-3.5 h-3.5 text-brand-accent" />
                     AI Vital Priority Classifier
                   </span>
-                  <div className="py-2.5 text-center rounded-xl border border-brand-border/50 bg-brand-card">
+                  <div className="py-2.5 text-center rounded-xl border border-brand-border bg-brand-card">
                     <span className="text-[9px] text-brand-muted block font-extrabold uppercase tracking-wide">Evaluated Priority Code</span>
                     <strong className={`text-sm font-black font-mono block mt-1 px-3 py-1 rounded-full w-fit mx-auto ${priority.color}`}>
                       {priority.label}
@@ -443,3 +443,6 @@ export default function NurseDashboard({ user, onLogout, onNavigate }) {
     </div>
   );
 }
+
+
+

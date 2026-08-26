@@ -577,13 +577,13 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
   const quickActions = [
     { id: 'booking', label: 'Book Appointment', desc: 'Schedule a physical or virtual slot', icon: Calendar, color: 'text-blue-500 bg-blue-500/10' },
     { id: 'directory', label: 'Find Doctor', desc: 'Search specialist directory & reviews', icon: Stethoscope, color: 'text-brand-teal bg-brand-teal/10' },
-    { id: 'research_feed', label: 'AI Home Feed', desc: 'Personalized Trials & Papers', icon: Compass, color: 'text-indigo-500 bg-indigo-500/10' },
+    { id: 'research_feed', label: 'AI Home Feed', desc: 'Personalized Trials & Papers', icon: Compass, color: 'text-brand-accent bg-brand-accent/100/10' },
     { id: 'notifications', label: 'Smart Notifications', desc: 'Actionable Alerts', icon: Bell, color: 'text-amber-500 bg-amber-500/10' },
     { id: 'saved_searches', label: 'Watchlist', desc: 'Saved searches & alerts', icon: Bookmark, color: 'text-blue-500 bg-blue-500/10' },
     { id: 'health_insights', label: 'Health Dashboard', desc: 'Activity & AI Insights', icon: PieChart, color: 'text-emerald-500 bg-emerald-500/10' },
     { id: 'queue_status', label: 'Check Queue Status', desc: 'Live token telemetry & wait times', icon: Clock, color: 'text-amber-500 bg-amber-500/10' },
     { id: 'medical_records', label: 'View Medical Records', desc: 'EHR records & clinical explainer', icon: FileText, color: 'text-purple-500 bg-purple-500/10' },
-    { id: 'prescriptions', label: 'View Prescriptions', desc: 'Manage active medications & refills', icon: Pill, color: 'text-indigo-500 bg-indigo-500/10' },
+    { id: 'prescriptions', label: 'View Prescriptions', desc: 'Manage active medications & refills', icon: Pill, color: 'text-brand-accent bg-brand-accent/100/10' },
     { id: 'post_recovery', label: 'Post-Recovery Tracking', desc: 'Medicine intake & follow-ups', icon: Heart, color: 'text-pink-500 bg-pink-500/10' },
     { id: 'reports', label: 'Download Reports', desc: 'Access diagnostic lab diagnostics', icon: Download, color: 'text-emerald-500 bg-emerald-500/10' },
     { id: 'teleconsultation', label: 'Teleconsultation', desc: 'Join mock virtual video consult room', icon: Video, color: 'text-cyan-500 bg-cyan-500/10' },
@@ -777,7 +777,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                     </h3>
                     <div className="space-y-2">
                       {prescriptions.filter(p => p.active).slice(0, 2).map(p => (
-                        <div key={p.id} className="p-2.5 bg-brand-bg rounded-xl border border-brand-border/50">
+                        <div key={p.id} className="p-2.5 bg-brand-bg rounded-xl border border-brand-border">
                           <div className="flex justify-between items-start">
                             <span className="text-[11px] font-black text-brand-text">{p.drug}</span>
                             <span className="text-[8px] bg-brand-teal/10 text-brand-teal font-extrabold px-1.5 py-0.5 rounded border border-brand-teal/20">{p.frequency}</span>
@@ -810,7 +810,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                         disabled={loadingDiet}
                         className="w-full py-1.5 bg-brand-text text-brand-bg hover:bg-brand-muted font-bold rounded-xl text-[10px] cursor-pointer transition active:scale-[0.98] disabled:opacity-50"
                       >
-                        {loadingDiet ? 'Generating...' : 'Get Diet Suggestions'}
+                        {loadingDiet ? 'AI Agent is generating...' : 'Get Diet Suggestions ✨'}
                       </button>
                     </div>
                   </div>
@@ -890,7 +890,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                       disabled={loadingTriage}
                       className="px-5 py-2 bg-brand-accent text-white hover:bg-brand-accent/90 rounded-xl font-extrabold cursor-pointer disabled:opacity-50 flex items-center gap-1"
                     >
-                      {loadingTriage ? 'Analyzing...' : 'Analyze Symptoms ✨'}
+                      {loadingTriage ? 'AI Agent is analyzing...' : 'Analyze Symptoms ✨'}
                     </button>
                   </div>
 
@@ -908,7 +908,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                       </div>
                       <p className="text-[10px] text-slate-300 font-semibold leading-relaxed">{triageOutput.pre_visit_instructions}</p>
                       
-                      <div className="flex justify-end pt-1 border-t border-brand-border/30">
+                      <div className="flex justify-end pt-1 border-t border-brand-border">
                         <button 
                           onClick={() => setBookingStep(3)}
                           className="px-3.5 py-1.5 bg-brand-teal text-white text-[10px] font-black rounded-lg hover:bg-brand-teal/90 flex items-center gap-1 cursor-pointer"
@@ -984,7 +984,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
               {/* STEP 4: Date & Time slot Confirm */}
               {bookingStep === 4 && (
                 <div className="space-y-3.5">
-                  <div className="flex justify-between items-center border-b border-brand-border/30 pb-1">
+                  <div className="flex justify-between items-center border-b border-brand-border pb-1">
                     <div>
                       <strong className="text-xs text-brand-text block">Dr. {selectedDoctor?.first_name} {selectedDoctor?.last_name}</strong>
                       <span className="text-[9px] text-brand-muted block">{selectedDept?.name} Specialty</span>
@@ -1235,7 +1235,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                     disabled={loadingExplain || !medicalText.trim()}
                     className="w-full py-1.5 bg-brand-accent hover:bg-brand-accent/90 text-white font-bold rounded-xl cursor-pointer disabled:opacity-50"
                   >
-                    {loadingExplain ? 'Explaining...' : 'Explain in Plain English'}
+                    {loadingExplain ? 'AI Agent is explaining...' : 'Explain in Plain English ✨'}
                   </button>
 
                   {explanation && (
@@ -1271,7 +1271,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                   {postRecoveryTasks.filter(t => t.status === 'pending').map((task) => (
                     <div key={task.id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-brand-bg rounded-xl border border-brand-border shadow-sm">
                       <div className="flex gap-4">
-                        <div className={`p-3 rounded-xl flex items-center justify-center ${task.type === 'medicine' ? 'bg-indigo-500/10 text-indigo-500' : task.type === 'follow_up' ? 'bg-brand-teal/10 text-brand-teal' : 'bg-pink-500/10 text-pink-500'}`}>
+                        <div className={`p-3 rounded-xl flex items-center justify-center ${task.type === 'medicine' ? 'bg-brand-accent/100/10 text-brand-accent' : task.type === 'follow_up' ? 'bg-brand-teal/10 text-brand-teal' : 'bg-pink-500/10 text-pink-500'}`}>
                           {task.type === 'medicine' ? <Pill className="w-5 h-5" /> : task.type === 'follow_up' ? <Calendar className="w-5 h-5" /> : <Activity className="w-5 h-5" />}
                         </div>
                         <div>
@@ -1469,33 +1469,32 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
           {/* Tab: RESEARCH FEED */}
           {activeTab === 'research_feed' && (
             <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200 w-full">
-              <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-600/10 via-brand-bg to-brand-primary/10 border border-indigo-500/20 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-600/10 via-brand-bg to-brand-primary/10 border border-brand-accent/20 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <h1 className="text-2xl font-black text-brand-text flex items-center gap-2">
-                    <Sparkles className="w-6 h-6 text-indigo-500 animate-spin" /> AI Personalized Home Feed
+                    <Sparkles className="w-6 h-6 text-brand-accent animate-spin" /> AI Personalized Home Feed
                   </h1>
                   <p className="text-xs text-brand-muted mt-1.5 font-medium leading-relaxed">
                     Curated clinical trials and research papers based on your profile (Location: <strong className="text-brand-text">{patientData?.location || 'Hyderabad'}</strong>, Interests: <strong className="text-brand-text">{patientData?.interests || 'Cancer, Oncology, Cardiology'}</strong>).
                   </p>
                 </div>
-                <button 
+                <button aria-label="Notifications" 
                   onClick={handleSimulateNotification}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow-md cursor-pointer transition active:scale-95 whitespace-nowrap flex items-center gap-1.5"
-                >
-                  <Bell className="w-3.5 h-3.5" /> Trigger Alert
+                  className="bg-brand-accent hover:opacity-90 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow-md cursor-pointer transition active:scale-95 whitespace-nowrap flex items-center gap-1.5"
+                >`n<Bell className="w-3.5 h-3.5" /> Trigger Alert
                 </button>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h3 className="font-extrabold text-base border-b border-brand-border pb-3 flex items-center gap-2 text-brand-text">
-                    <Activity className="w-5 h-5 text-indigo-500"/> Recommended Clinical Trials
+                    <Activity className="w-5 h-5 text-brand-accent"/> Recommended Clinical Trials
                   </h3>
                   {displayTrials.map(t => {
                     const isApplied = appliedTrialIds.includes(t.id);
                     const isSaved = savedTrialIds.includes(t.id);
                     return (
-                      <div key={t.id} className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-md transition-all space-y-3">
+                      <div key={t.id} className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-brand-border border-brand-border shadow-sm hover:shadow-md transition-all space-y-3">
                         <div className="flex justify-between items-start gap-2">
                           <h4 className="font-extrabold text-sm text-brand-text leading-snug">{t.title}</h4>
                           <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-extrabold whitespace-nowrap">
@@ -1504,32 +1503,32 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                         </div>
                         <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{t.description}</p>
                         <div className="flex justify-between items-center text-xs font-semibold pt-1">
-                          <span className="text-brand-muted flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-indigo-500"/> {t.location}</span>
-                          <span className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg font-extrabold text-[11px]">
+                          <span className="text-brand-muted flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-brand-accent"/> {t.location}</span>
+                          <span className="bg-brand-accent/10 dark:bg-brand-accent/20 text-brand-accent dark:text-brand-accent px-2.5 py-1 rounded-lg font-extrabold text-[11px]">
                             Eligibility: 95%
                           </span>
                         </div>
-                        <div className="mt-3 flex gap-2 pt-2 border-t border-gray-100 dark:border-brand-border/40">
+                        <div className="mt-3 flex gap-2 pt-2 border-t border-gray-100 border-brand-border">
                           <button 
                             onClick={() => handleApplyTrial(t)}
                             className={`flex-1 text-xs py-2 rounded-xl transition font-extrabold flex items-center justify-center gap-1 cursor-pointer shadow-sm active:scale-95 ${
                               isApplied 
                                 ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
-                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                : 'bg-brand-accent text-white hover:opacity-90'
                             }`}
                           >
                             {isApplied ? <><CheckCircle className="w-3.5 h-3.5"/> Applied</> : 'Apply Now'}
                           </button>
                           <button 
                             onClick={() => setSelectedTrialModal(t)}
-                            className="flex-1 border border-gray-300 dark:border-brand-border text-brand-text text-xs py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-brand-hover transition font-extrabold cursor-pointer"
+                            className="flex-1 border border-brand-border border-brand-border text-brand-text text-xs py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-brand-hover transition font-extrabold cursor-pointer"
                           >
                             View Details
                           </button>
                           <button 
                             onClick={() => handleToggleSaveTrial(t)}
                             className={`p-2 border rounded-xl transition cursor-pointer ${
-                              isSaved ? 'border-amber-400 bg-amber-50 text-amber-600 dark:bg-amber-950/30' : 'border-gray-300 dark:border-brand-border text-gray-400 hover:text-amber-500'
+                              isSaved ? 'border-amber-400 bg-amber-50 text-amber-600 dark:bg-amber-950/30' : 'border-brand-border border-brand-border text-gray-400 hover:text-amber-500'
                             }`}
                             title={isSaved ? "Saved" : "Save Trial"}
                           >
@@ -1543,16 +1542,16 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                 
                 <div className="space-y-4">
                   <h3 className="font-extrabold text-base border-b border-brand-border pb-3 flex items-center gap-2 text-brand-text">
-                    <FileText className="w-5 h-5 text-indigo-500"/> Latest Research Papers
+                    <FileText className="w-5 h-5 text-brand-accent"/> Latest Research Papers
                   </h3>
                   {displayPapers.map(p => {
                     const isPaperSaved = savedPaperIds.includes(p.id);
                     return (
-                      <div key={p.id} className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-md transition-all space-y-3">
+                      <div key={p.id} className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-brand-border border-brand-border shadow-sm hover:shadow-md transition-all space-y-3">
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-extrabold text-sm text-brand-text leading-snug">{p.title}</h4>
-                            <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono mt-0.5">By {p.authors}</p>
+                            <p className="text-[10px] text-brand-accent dark:text-brand-accent font-mono mt-0.5">By {p.authors}</p>
                           </div>
                           <button 
                             onClick={() => handleToggleSavePaper(p)}
@@ -1563,8 +1562,8 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                             <Bookmark className="w-4 h-4 fill-current" />
                           </button>
                         </div>
-                        <div className="p-3 bg-indigo-50/50 dark:bg-brand-bg rounded-xl text-xs text-gray-700 dark:text-gray-300 italic border-l-4 border-indigo-500 space-y-1">
-                          <span className="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 not-italic">
+                        <div className="p-3 bg-brand-accent/5 dark:bg-brand-bg rounded-xl text-xs text-gray-700 dark:text-gray-300 italic border-l-4 border-brand-accent space-y-1">
+                          <span className="font-bold text-brand-accent dark:text-brand-accent flex items-center gap-1 not-italic">
                             <Sparkles className="w-3.5 h-3.5"/> AI Key Takeaway:
                           </span>
                           <p>{p.summary}</p>
@@ -1599,9 +1598,9 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div 
                   onClick={() => setShowSavedTrialsModal(true)}
-                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
+                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-brand-border border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
                 >
-                  <div className="text-3xl font-black text-brand-text group-hover:text-indigo-600 transition-colors">
+                  <div className="text-3xl font-black text-brand-text group-hover:text-brand-accent transition-colors">
                     {savedTrialIds.length + 2}
                   </div>
                   <div className="text-[11px] text-gray-500 font-extrabold uppercase mt-1 tracking-wider flex items-center justify-center gap-1">
@@ -1611,7 +1610,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
                 <div 
                   onClick={() => setShowAppliedModal(true)}
-                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
+                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-brand-border border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
                 >
                   <div className="text-3xl font-black text-emerald-500 group-hover:scale-105 transition-transform">
                     {appliedTrialIds.length}
@@ -1623,7 +1622,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
                 <div 
                   onClick={() => { setActiveTab('reports'); showToast("Switched to Diagnostic Lab Reports AI Explainer"); }}
-                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
+                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-brand-border border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
                 >
                   <div className="text-3xl font-black text-amber-500 group-hover:scale-105 transition-transform">12</div>
                   <div className="text-[11px] text-gray-500 font-extrabold uppercase mt-1 tracking-wider flex items-center justify-center gap-1">
@@ -1633,9 +1632,9 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
                 <div 
                   onClick={() => setShowSavedPapersModal(true)}
-                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-gray-200 dark:border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
+                  className="p-5 bg-white dark:bg-brand-card rounded-2xl border border-brand-border border-brand-border shadow-sm hover:shadow-lg transition-all text-center cursor-pointer group active:scale-95"
                 >
-                  <div className="text-3xl font-black text-indigo-500 group-hover:scale-105 transition-transform">
+                  <div className="text-3xl font-black text-brand-accent group-hover:scale-105 transition-transform">
                     {savedPaperIds.length + 2}
                   </div>
                   <div className="text-[11px] text-gray-500 font-extrabold uppercase mt-1 tracking-wider flex items-center justify-center gap-1">
@@ -1651,15 +1650,15 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                 <div className="space-y-3">
                   <div 
                     onClick={() => setSelectedTrialModal(displayTrials[1] || displayTrials[0])}
-                    className="p-4 bg-gray-50/80 dark:bg-brand-bg border border-brand-border rounded-xl flex items-start gap-3.5 hover:border-indigo-500 transition-all cursor-pointer group"
+                    className="p-4 bg-gray-50/80 dark:bg-brand-bg border border-brand-border rounded-xl flex items-start gap-3.5 hover:border-brand-accent transition-all cursor-pointer group"
                   >
                     <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5 group-hover:rotate-12 transition-transform" />
                     <div className="flex-1">
                       <div className="flex justify-between items-center">
-                        <p className="text-sm font-extrabold text-brand-text group-hover:text-indigo-600 transition-colors">
+                        <p className="text-sm font-extrabold text-brand-text group-hover:text-brand-accent transition-colors">
                           New Trial Match: Diabetes Type 2 Management
                         </p>
-                        <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded">
+                        <span className="text-[10px] text-brand-accent dark:text-brand-accent font-bold bg-brand-accent/10 dark:bg-brand-accent/20 px-2 py-0.5 rounded">
                           Click to View
                         </span>
                       </div>
@@ -1672,15 +1671,15 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
                   <div 
                     onClick={() => setSelectedPaperModal(displayPapers[0])}
-                    className="p-4 bg-gray-50/80 dark:bg-brand-bg border border-brand-border rounded-xl flex items-start gap-3.5 hover:border-indigo-500 transition-all cursor-pointer group"
+                    className="p-4 bg-gray-50/80 dark:bg-brand-bg border border-brand-border rounded-xl flex items-start gap-3.5 hover:border-brand-accent transition-all cursor-pointer group"
                   >
-                    <Sparkles className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5 group-hover:rotate-12 transition-transform" />
+                    <Sparkles className="w-5 h-5 text-brand-accent shrink-0 mt-0.5 group-hover:rotate-12 transition-transform" />
                     <div className="flex-1">
                       <div className="flex justify-between items-center">
-                        <p className="text-sm font-extrabold text-brand-text group-hover:text-indigo-600 transition-colors">
+                        <p className="text-sm font-extrabold text-brand-text group-hover:text-brand-accent transition-colors">
                           Recommended Reading: Advancements in NSCLC Immunotherapy
                         </p>
-                        <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded">
+                        <span className="text-[10px] text-brand-accent dark:text-brand-accent font-bold bg-brand-accent/10 dark:bg-brand-accent/20 px-2 py-0.5 rounded">
                           Click to Read
                         </span>
                       </div>
@@ -1799,7 +1798,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                     <Compass className="w-4 h-4 text-brand-accent" /> Preferences
                   </h3>
                   
-                  <div className="flex justify-between items-center p-3 bg-brand-bg rounded-xl border border-brand-border/50">
+                  <div className="flex justify-between items-center p-3 bg-brand-bg rounded-xl border border-brand-border">
                     <div>
                       <span className="font-bold text-brand-text block text-xs">App Theme</span>
                       <span className="text-[10px] text-brand-muted">Switch between light and dark mode.</span>
@@ -1844,14 +1843,14 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                     {uploadedFiles.length > 0 ? (
                       <div className="space-y-2 mt-3">
                         {uploadedFiles.map(f => (
-                          <div key={f.id} className="flex justify-between items-center p-2.5 bg-brand-bg/50 border border-brand-border/40 rounded-xl text-[10px]">
+                          <div key={f.id} className="flex justify-between items-center p-2.5 bg-brand-bg/50 border border-brand-border rounded-xl text-[10px]">
                             <span className="font-bold text-brand-text flex items-center gap-1.5"><FileText className="w-3 h-3 text-brand-muted" /> {f.name}</span>
                             <span className="text-brand-muted font-mono">{f.date}</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-[10px] text-brand-muted italic py-2 text-center bg-brand-bg/30 rounded-xl border border-dashed border-brand-border/50">
+                      <div className="text-[10px] text-brand-muted italic py-2 text-center bg-brand-bg/30 rounded-xl border border-dashed border-brand-border">
                         No files uploaded yet.
                       </div>
                     )}
@@ -1865,7 +1864,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                   </h3>
                   
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto w-full">`n<table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="border-b border-brand-border/80 text-[10px] text-brand-muted font-black uppercase tracking-wider">
                           <th className="py-2.5 px-3">Date</th>
@@ -1876,7 +1875,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                       </thead>
                       <tbody>
                         {pastHistory.map(record => (
-                          <tr key={record.id} className="border-b border-brand-border/40 hover:bg-brand-bg/50 transition">
+                          <tr key={record.id} className="border-b border-brand-border hover:bg-brand-bg/50 transition">
                             <td className="py-2.5 px-3 text-xs font-mono text-brand-muted">{record.date}</td>
                             <td className="py-2.5 px-3 text-xs font-bold text-brand-text">{record.diagnosis}</td>
                             <td className="py-2.5 px-3 text-[11px] font-semibold text-brand-text">{record.doc}</td>
@@ -1884,7 +1883,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </table>`n</div>
                   </div>
                 </div>
 
@@ -1910,7 +1909,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
         {/* Floating Toast Notification */}
         {toastMsg && (
-          <div className="fixed top-5 right-5 z-[100] bg-indigo-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-indigo-400/30 flex items-center gap-3 animate-in slide-in-from-top-5 duration-300">
+          <div className="fixed top-5 right-5 z-[100] bg-brand-accent/20 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-brand-accent/30 flex items-center gap-3 animate-in slide-in-from-top-5 duration-300">
             <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
             <span className="text-xs font-extrabold">{toastMsg}</span>
             <button onClick={() => setToastMsg(null)} className="ml-2 text-indigo-300 hover:text-white cursor-pointer">
@@ -1922,10 +1921,10 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
         {/* Clinical Trial Detail Modal */}
         {selectedTrialModal && (
           <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-brand-card max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
-              <div className="flex justify-between items-start border-b border-gray-100 dark:border-brand-border pb-3">
+            <div className="bg-white dark:bg-brand-card max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-brand-border border-brand-border space-y-4">
+              <div className="flex justify-between items-start border-b border-gray-100 border-brand-border pb-3">
                 <div>
-                  <span className="text-[10px] bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-extrabold px-2.5 py-1 rounded-full uppercase">
+                  <span className="text-[10px] bg-brand-accent/10 dark:bg-brand-accent/20 text-brand-accent dark:text-brand-accent font-extrabold px-2.5 py-1 rounded-full uppercase">
                     {selectedTrialModal.phase || 'Phase 3'} Trial
                   </span>
                   <h3 className="font-black text-lg text-brand-text mt-2">{selectedTrialModal.title}</h3>
@@ -1946,25 +1945,25 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                   <p className="text-gray-700 dark:text-gray-300">{selectedTrialModal.description}</p>
                 </div>
 
-                <div className="p-3.5 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-xl space-y-1 border border-indigo-100 dark:border-indigo-900/40">
-                  <p className="font-extrabold text-indigo-700 dark:text-indigo-400 text-[11px] uppercase">Eligibility Criteria:</p>
+                <div className="p-3.5 bg-brand-accent/5 dark:bg-brand-accent/20 rounded-xl space-y-1 border border-indigo-100 dark:border-indigo-900/40">
+                  <p className="font-extrabold text-indigo-700 dark:text-brand-accent text-[11px] uppercase">Eligibility Criteria:</p>
                   <p className="text-indigo-950 dark:text-indigo-200">{selectedTrialModal.eligibility_criteria || "Adults 18+ with confirmed diagnosis. Patient profile matches 95%."}</p>
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-3 border-t border-gray-100 dark:border-brand-border">
+              <div className="flex gap-3 pt-3 border-t border-gray-100 border-brand-border">
                 <button 
                   onClick={() => {
                     handleApplyTrial(selectedTrialModal);
                     setSelectedTrialModal(null);
                   }}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer"
+                  className="flex-1 bg-brand-accent hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer"
                 >
                   {appliedTrialIds.includes(selectedTrialModal.id) ? '✓ Already Applied' : 'Submit Application Now'}
                 </button>
                 <button 
                   onClick={() => setSelectedTrialModal(null)}
-                  className="px-5 border border-gray-300 dark:border-brand-border text-brand-text font-bold py-2.5 rounded-xl text-xs hover:bg-gray-50 dark:hover:bg-brand-hover cursor-pointer"
+                  className="px-5 border border-brand-border border-brand-border text-brand-text font-bold py-2.5 rounded-xl text-xs hover:bg-gray-50 dark:hover:bg-brand-hover cursor-pointer"
                 >
                   Close
                 </button>
@@ -1976,10 +1975,10 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
         {/* Research Paper Modal */}
         {selectedPaperModal && (
           <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-brand-card max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
-              <div className="flex justify-between items-start border-b border-gray-100 dark:border-brand-border pb-3">
+            <div className="bg-white dark:bg-brand-card max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-brand-border border-brand-border space-y-4">
+              <div className="flex justify-between items-start border-b border-gray-100 border-brand-border pb-3">
                 <div>
-                  <span className="text-[10px] bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-extrabold px-2.5 py-1 rounded-full">
+                  <span className="text-[10px] bg-brand-accent/10 dark:bg-brand-accent/20 text-brand-accent dark:text-brand-accent font-extrabold px-2.5 py-1 rounded-full">
                     {selectedPaperModal.disease_tags || 'Oncology'}
                   </span>
                   <h3 className="font-black text-lg text-brand-text mt-2">{selectedPaperModal.title}</h3>
@@ -1990,27 +1989,27 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                 </button>
               </div>
 
-              <div className="p-4 bg-indigo-50/60 dark:bg-brand-bg rounded-2xl text-xs text-gray-800 dark:text-gray-200 space-y-2 border-l-4 border-indigo-500">
-                <span className="font-extrabold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+              <div className="p-4 bg-brand-accent/5 dark:bg-brand-bg rounded-2xl text-xs text-gray-800 dark:text-gray-200 space-y-2 border-l-4 border-brand-accent">
+                <span className="font-extrabold text-brand-accent dark:text-brand-accent flex items-center gap-1">
                   <Sparkles className="w-4 h-4"/> Full AI Clinical Abstract:
                 </span>
                 <p className="leading-relaxed">{selectedPaperModal.summary}</p>
               </div>
 
-              <div className="flex gap-3 pt-3 border-t border-gray-100 dark:border-brand-border">
+              <div className="flex gap-3 pt-3 border-t border-gray-100 border-brand-border">
                 <button 
                   onClick={() => {
                     handleToggleSavePaper(selectedPaperModal);
                     setSelectedPaperModal(null);
                   }}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                  className="flex-1 bg-brand-accent hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Bookmark className="w-4 h-4" /> 
                   {savedPaperIds.includes(selectedPaperModal.id) ? 'Bookmarked' : 'Bookmark Paper'}
                 </button>
                 <button 
                   onClick={() => setSelectedPaperModal(null)}
-                  className="px-5 border border-gray-300 dark:border-brand-border text-brand-text font-bold py-2.5 rounded-xl text-xs hover:bg-gray-50 dark:hover:bg-brand-hover cursor-pointer"
+                  className="px-5 border border-brand-border border-brand-border text-brand-text font-bold py-2.5 rounded-xl text-xs hover:bg-gray-50 dark:hover:bg-brand-hover cursor-pointer"
                 >
                   Close
                 </button>
@@ -2022,8 +2021,8 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
         {/* Applied Trials List Modal */}
         {showAppliedModal && (
           <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-brand-card max-w-md w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
-              <div className="flex justify-between items-center border-b border-gray-100 dark:border-brand-border pb-3">
+            <div className="bg-white dark:bg-brand-card max-w-md w-full rounded-3xl p-6 shadow-2xl border border-brand-border border-brand-border space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-100 border-brand-border pb-3">
                 <h3 className="font-black text-base text-brand-text flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-emerald-500" /> Applied Clinical Trials ({appliedTrialIds.length})
                 </h3>
@@ -2034,7 +2033,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                 {displayTrials.filter(t => appliedTrialIds.includes(t.id)).map(t => (
-                  <div key={t.id} className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl border border-gray-200 dark:border-brand-border flex justify-between items-center">
+                  <div key={t.id} className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl border border-brand-border border-brand-border flex justify-between items-center">
                     <div>
                       <p className="font-extrabold text-xs text-brand-text">{t.title}</p>
                       <p className="text-[10px] text-gray-400">{t.location} • Status: Application Under Review</p>
@@ -2057,10 +2056,10 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
         {/* Saved Trials List Modal */}
         {showSavedTrialsModal && (
           <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-brand-card max-w-md w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
-              <div className="flex justify-between items-center border-b border-gray-100 dark:border-brand-border pb-3">
+            <div className="bg-white dark:bg-brand-card max-w-md w-full rounded-3xl p-6 shadow-2xl border border-brand-border border-brand-border space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-100 border-brand-border pb-3">
                 <h3 className="font-black text-base text-brand-text flex items-center gap-2">
-                  <Bookmark className="w-5 h-5 text-indigo-500" /> Watchlist Saved Trials
+                  <Bookmark className="w-5 h-5 text-brand-accent" /> Watchlist Saved Trials
                 </h3>
                 <button onClick={() => setShowSavedTrialsModal(false)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-brand-hover text-gray-400 cursor-pointer">
                   <X className="w-5 h-5" />
@@ -2069,7 +2068,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                 {displayTrials.filter(t => savedTrialIds.includes(t.id)).map(t => (
-                  <div key={t.id} className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl border border-gray-200 dark:border-brand-border flex justify-between items-center">
+                  <div key={t.id} className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl border border-brand-border border-brand-border flex justify-between items-center">
                     <div>
                       <p className="font-extrabold text-xs text-brand-text">{t.title}</p>
                       <p className="text-[10px] text-gray-400">{t.location} • Phase: {t.phase}</p>
@@ -2079,7 +2078,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                         handleApplyTrial(t);
                         setShowSavedTrialsModal(false);
                       }}
-                      className="text-[10px] bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold cursor-pointer hover:bg-indigo-700"
+                      className="text-[10px] bg-brand-accent text-white px-2.5 py-1 rounded-lg font-bold cursor-pointer hover:opacity-90"
                     >
                       Apply
                     </button>
@@ -2100,10 +2099,10 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
         {/* Saved Papers List Modal */}
         {showSavedPapersModal && (
           <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-brand-card max-w-md w-full rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-brand-border space-y-4">
-              <div className="flex justify-between items-center border-b border-gray-100 dark:border-brand-border pb-3">
+            <div className="bg-white dark:bg-brand-card max-w-md w-full rounded-3xl p-6 shadow-2xl border border-brand-border border-brand-border space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-100 border-brand-border pb-3">
                 <h3 className="font-black text-base text-brand-text flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-indigo-500" /> Bookmarked Research Papers
+                  <FileText className="w-5 h-5 text-brand-accent" /> Bookmarked Research Papers
                 </h3>
                 <button onClick={() => setShowSavedPapersModal(false)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-brand-hover text-gray-400 cursor-pointer">
                   <X className="w-5 h-5" />
@@ -2112,7 +2111,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
 
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                 {displayPapers.filter(p => savedPaperIds.includes(p.id)).map(p => (
-                  <div key={p.id} className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl border border-gray-200 dark:border-brand-border flex justify-between items-center">
+                  <div key={p.id} className="p-3.5 bg-gray-50 dark:bg-brand-bg rounded-xl border border-brand-border border-brand-border flex justify-between items-center">
                     <div>
                       <p className="font-extrabold text-xs text-brand-text">{p.title}</p>
                       <p className="text-[10px] text-gray-400">By {p.authors}</p>
@@ -2122,7 +2121,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
                         setSelectedPaperModal(p);
                         setShowSavedPapersModal(false);
                       }}
-                      className="text-[10px] bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold cursor-pointer hover:bg-indigo-700"
+                      className="text-[10px] bg-brand-accent text-white px-2.5 py-1 rounded-lg font-bold cursor-pointer hover:opacity-90"
                     >
                       Read
                     </button>
@@ -2143,3 +2142,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
     </div>
   );
 }
+
+
+
+

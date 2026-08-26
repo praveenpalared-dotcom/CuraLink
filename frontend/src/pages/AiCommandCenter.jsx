@@ -71,13 +71,13 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
   const predictedPath = getCurvePath(pointsPredicted);
 
   return (
-    <div className="min-h-screen bg-[#070A13] text-[#F1F5F9] flex flex-col font-sans selection:bg-brand-accent selection:text-white">
+    <div className="min-h-screen bg-brand-bg text-brand-text flex flex-col font-sans selection:bg-brand-accent selection:text-white">
       {/* Background neon visual grids */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,0.08),transparent_50%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" style={{ maskImage: 'radial-gradient(ellipse at center, black, transparent 80%)', WebkitMaskImage: 'radial-gradient(ellipse at center, black, transparent 80%)' }} />
 
       {/* Header bar */}
-      <header className="border-b border-[#141F3B] bg-[#0A0F1D]/80 backdrop-blur px-4 py-3 flex justify-between items-center z-10">
+      <header className="border-b border-brand-border bg-brand-card/80 backdrop-blur px-4 py-3 flex justify-between items-center z-10">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/30 animate-pulse">
             <Cpu className="w-5 h-5 text-red-500" />
@@ -92,7 +92,7 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden md:block text-right">
-            <span className="text-xs font-black block text-[#F1F5F9]">{user?.name || "Dr. Jessica Davis (Head of Hospital)"}</span>
+            <span className="text-xs font-black block text-brand-text">{user?.name || "Dr. Jessica Davis (Head of Hospital)"}</span>
             <span className="text-[8px] text-brand-teal font-mono tracking-widest block uppercase">Telemetry Sync Status: Live</span>
           </div>
           <button 
@@ -109,7 +109,7 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
         
         {/* Row 1: KPI stats stream across top (12 cols) */}
         <div className="lg:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-[#0B1123] border border-[#14234C] p-3 rounded-2xl flex justify-between items-center shadow-lg">
+          <div className="glass-panel p-3 rounded-2xl flex justify-between items-center shadow-lg">
             <div>
               <span className="text-[8px] text-brand-teal uppercase tracking-widest block font-bold font-mono">Predicted Peak Hours</span>
               <strong className="text-lg font-black block mt-1 font-mono">11:30 AM - 01:00 PM</strong>
@@ -118,7 +118,7 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
             <div className="p-2 rounded-xl bg-brand-teal/10 border border-brand-teal/20 text-brand-teal font-mono text-xs font-bold">Peak Risk</div>
           </div>
 
-          <div className="bg-[#0B1123] border border-[#14234C] p-3 rounded-2xl flex justify-between items-center shadow-lg">
+          <div className="glass-panel p-3 rounded-2xl flex justify-between items-center shadow-lg">
             <div>
               <span className="text-[8px] text-red-400 uppercase tracking-widest block font-bold font-mono">Active Bottlenecks</span>
               <strong className="text-lg font-black block mt-1 text-red-400 font-mono">
@@ -129,7 +129,7 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
             <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-mono text-xs font-bold">Alert Red</div>
           </div>
 
-          <div className="bg-[#0B1123] border border-[#14234C] p-3 rounded-2xl flex justify-between items-center shadow-lg">
+          <div className="glass-panel p-3 rounded-2xl flex justify-between items-center shadow-lg">
             <div>
               <span className="text-[8px] text-amber-400 uppercase tracking-widest block font-bold font-mono">Doctor Delay Risk</span>
               <strong className="text-lg font-black block mt-1 text-amber-400 font-mono">HIGH (Dr. Patel)</strong>
@@ -138,7 +138,7 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
             <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 font-mono text-xs font-bold">Delay Advisory</div>
           </div>
 
-          <div className="bg-[#0B1123] border border-[#14234C] p-3 rounded-2xl flex justify-between items-center shadow-lg">
+          <div className="glass-panel p-3 rounded-2xl flex justify-between items-center shadow-lg">
             <div>
               <span className="text-[8px] text-brand-teal uppercase tracking-widest block font-bold font-mono">Staff Strain Index</span>
               <strong className="text-lg font-black block mt-1 font-mono">
@@ -154,8 +154,8 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
         <div className="lg:col-span-8 space-y-4">
           
           {/* SVG line chart: Surge prediction */}
-          <div className="bg-[#0B1123] border border-[#14234C] p-4 rounded-2xl shadow-xl space-y-2">
-            <div className="flex justify-between items-center pb-2 border-b border-[#141F3B]">
+          <div className="glass-panel p-4 rounded-2xl shadow-xl space-y-2">
+            <div className="flex justify-between items-center pb-2 border-b border-brand-border">
               <h3 className="font-extrabold text-xs uppercase tracking-widest text-white font-display flex items-center gap-1.5">
                 <TrendingUp className="w-4 h-4 text-[#10B981]" />
                 Surge Prediction & Flow Telemetry (SVG Actual vs AI Predicted)
@@ -204,8 +204,8 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
           </div>
 
           {/* Department Wing Heatmap matrix */}
-          <div className="bg-[#0B1123] border border-[#14234C] p-4 rounded-2xl shadow-xl space-y-3">
-            <h3 className="font-extrabold text-xs uppercase tracking-widest text-white font-display border-b border-[#141F3B] pb-2">
+          <div className="glass-panel p-4 rounded-2xl shadow-xl space-y-3">
+            <h3 className="font-extrabold text-xs uppercase tracking-widest text-white font-display border-b border-brand-border pb-2">
               Clinical Wings & Heatmap Capacity Loader
             </h3>
 
@@ -262,8 +262,8 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
         <div className="lg:col-span-4 space-y-4">
           
           {/* AI Advisor Dispatch Panel */}
-          <div className="bg-[#0B1123] border border-[#14234C] p-4 rounded-2xl shadow-xl space-y-3.5 text-xs">
-            <h3 className="font-extrabold text-xs uppercase tracking-widest text-white font-display border-b border-[#141F3B] pb-2 flex items-center gap-1.5">
+          <div className="glass-panel p-4 rounded-2xl shadow-xl space-y-3.5 text-xs">
+            <h3 className="font-extrabold text-xs uppercase tracking-widest text-white font-display border-b border-brand-border pb-2 flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-[#10B981]" />
               AI Operations Dispatcher
             </h3>
@@ -318,8 +318,8 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
           </div>
 
           {/* AI Clinical Delay Forecast warnings */}
-          <div className="bg-[#0B1123] border border-[#14234C] p-4 rounded-2xl shadow-xl space-y-3.5 text-xs">
-            <h3 className="font-extrabold text-xs uppercase tracking-widest text-white font-display border-b border-[#141F3B] pb-2">
+          <div className="glass-panel p-4 rounded-2xl shadow-xl space-y-3.5 text-xs">
+            <h3 className="font-extrabold text-xs uppercase tracking-widest text-white font-display border-b border-brand-border pb-2">
               Clinician Delay Risk Forecasts
             </h3>
 
@@ -362,3 +362,6 @@ export default function AiCommandCenter({ user, onLogout, onNavigate }) {
     </div>
   );
 }
+
+
+

@@ -198,7 +198,7 @@ export default function QueueBoard() {
         )}
 
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs text-brand-text">
+          <div className="overflow-x-auto w-full">`n<table className="w-full border-collapse text-left text-xs text-brand-text">
             <thead className="bg-brand-bg/50 text-brand-muted border-b border-brand-border text-[10px] uppercase font-bold tracking-wider">
               <tr>
                 <th className="p-4 pl-5">Position</th>
@@ -213,8 +213,16 @@ export default function QueueBoard() {
             <tbody className="divide-y divide-brand-border/30">
               {filteredQueue.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="p-12 text-center text-brand-muted text-xs">
-                    {searchQuery ? "No matching patients found in current queue." : "No patients are checked in right now."}
+                  <td colSpan="7" className="p-16 text-center">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-brand-bg/50 border border-brand-border flex items-center justify-center mb-2 shadow-sm">
+                        <Users className="w-5 h-5 text-brand-muted" />
+                      </div>
+                      <h4 className="text-sm font-bold text-brand-text">Queue is Empty</h4>
+                      <p className="text-xs text-brand-muted max-w-xs mx-auto">
+                        {searchQuery ? "No matching patients found in the current queue. Try a different search." : "No patients are checked in right now. The lobby is clear."}
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -308,9 +316,13 @@ export default function QueueBoard() {
                 })
               )}
             </tbody>
-          </table>
+          </table>`n</div>
         </div>
       </div>
     </div>
   );
 }
+
+
+
+

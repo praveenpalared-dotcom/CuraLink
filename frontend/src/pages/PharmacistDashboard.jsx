@@ -96,7 +96,7 @@ function PharmacistDashboard({ user, onNavigate, onLogout }) {
       </div>
 
       <div className="space-y-3 mb-4">
-        <div className="bg-brand-card rounded-xl p-3 border border-brand-border/40">
+        <div className="bg-brand-card rounded-xl p-3 border border-brand-border">
           <span className="text-[9px] font-bold uppercase tracking-wider text-brand-muted mb-1.5 flex items-center gap-1">
             <Package className="w-3 h-3" /> What to Deliver
           </span>
@@ -110,7 +110,7 @@ function PharmacistDashboard({ user, onNavigate, onLogout }) {
           </div>
         </div>
 
-        <div className="bg-brand-card rounded-xl p-3 border border-brand-border/40">
+        <div className="bg-brand-card rounded-xl p-3 border border-brand-border">
           <span className="text-[9px] font-bold uppercase tracking-wider text-brand-muted mb-1 flex items-center gap-1">
             <MapPin className="w-3 h-3" /> Where to Deliver
           </span>
@@ -254,3 +254,6 @@ function PharmacistDashboard({ user, onNavigate, onLogout }) {
 }
 
 export default PharmacistDashboard;
+
+
+

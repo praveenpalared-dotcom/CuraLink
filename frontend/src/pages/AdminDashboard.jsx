@@ -276,7 +276,7 @@ export default function AdminDashboard({ user, onLogout, onNavigate }) {
               </h3>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left">
+                <div className="overflow-x-auto w-full">`n<table className="w-full text-left">
                   <thead>
                     <tr className="text-[9px] text-brand-muted uppercase font-black border-b border-brand-border">
                       <th className="pb-1">Department</th>
@@ -300,7 +300,7 @@ export default function AdminDashboard({ user, onLogout, onNavigate }) {
                       </tr>
                     )}
                   </tbody>
-                </table>
+                </table>`n</div>
               </div>
             </div>
 
@@ -506,3 +506,7 @@ export default function AdminDashboard({ user, onLogout, onNavigate }) {
     </div>
   );
 }
+
+
+
+

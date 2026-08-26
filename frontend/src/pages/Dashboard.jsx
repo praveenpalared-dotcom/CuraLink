@@ -875,7 +875,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
                       </div>
                       
                       <div className="overflow-x-auto">
-                        <table className="w-full border-collapse text-left text-xs text-brand-text">
+                        <div className="overflow-x-auto w-full">`n<table className="w-full border-collapse text-left text-xs text-brand-text">
                           <thead className="bg-brand-bg/50 text-brand-muted border-b border-brand-border text-[9px] uppercase font-bold tracking-wider">
                             <tr>
                               <th className="p-3">Patient Details</th>
@@ -922,7 +922,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
                               </tr>
                             ))}
                           </tbody>
-                        </table>
+                        </table>`n</div>
                       </div>
                     </div>
 
@@ -1018,7 +1018,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
                       </div>
 
                       <div className="overflow-x-auto">
-                        <table className="w-full border-collapse text-left text-xs text-brand-text">
+                        <div className="overflow-x-auto w-full">`n<table className="w-full border-collapse text-left text-xs text-brand-text">
                           <thead className="bg-brand-bg/50 text-brand-muted border-b border-brand-border text-[9px] uppercase font-bold tracking-wider">
                             <tr>
                               <th className="p-3">Pos</th>
@@ -1061,7 +1061,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
                               </tr>
                             ))}
                           </tbody>
-                        </table>
+                        </table>`n</div>
                       </div>
                     </div>
 
@@ -1386,7 +1386,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
                             <span className="text-[9px] text-brand-muted font-bold uppercase tracking-wider">{doc.specialty}</span>
                           </div>
                           
-                          <div className="flex items-center justify-between pt-2 border-t border-brand-border/40 mt-2">
+                          <div className="flex items-center justify-between pt-2 border-t border-brand-border mt-2">
                             <span className={`text-[10px] font-bold ${doc.active ? 'text-brand-teal' : 'text-red-500'}`}>
                               {doc.active ? 'On Duty' : 'Off Duty'}
                             </span>
@@ -1423,7 +1423,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
                 <div className="p-12 text-center text-brand-muted text-xs font-semibold">Loading scheduling registry...</div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-left text-xs text-brand-text">
+                  <div className="overflow-x-auto w-full">`n<table className="w-full border-collapse text-left text-xs text-brand-text">
                     <thead className="bg-brand-bg/50 text-brand-muted border-b border-brand-border text-[10px] uppercase font-bold tracking-wider">
                       <tr>
                         <th className="p-4 pl-5">Appt ID</th>
@@ -1484,7 +1484,7 @@ export default function Dashboard({ onNavigate, userRole, setUserRole, sessionTy
                         ))
                       )}
                     </tbody>
-                  </table>
+                  </table>`n</div>
                 </div>
               )}
             </div>
@@ -1780,3 +1780,7 @@ function filteredQueueCount(queue) {
   if (!queue || !Array.isArray(queue)) return 0;
   return queue.filter(q => q.completed_time === null).length;
 }
+
+
+
+

@@ -469,7 +469,7 @@ export default function ReceptionDashboard({ user, onLogout, onNavigate }) {
                     <span className="text-brand-accent font-bold">Requested: {req.requestedTime}</span>
                   </div>
                   
-                  <div className="flex gap-2 justify-end pt-1 border-t border-brand-border/30">
+                  <div className="flex gap-2 justify-end pt-1 border-t border-brand-border">
                     <button 
                       onClick={() => setRescheduleRequests(rescheduleRequests.filter(r => r.id !== req.id))}
                       className="px-2 py-1 text-red-500 hover:bg-red-50 rounded text-[9px] font-bold cursor-pointer"
@@ -578,3 +578,6 @@ export default function ReceptionDashboard({ user, onLogout, onNavigate }) {
     </div>
   );
 }
+
+
+

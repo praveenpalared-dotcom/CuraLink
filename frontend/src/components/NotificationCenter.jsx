@@ -12,8 +12,8 @@ const NotificationCenter = ({ notifications = [], onMarkAsRead, onClearAll, onAc
   });
 
   return (
-    <div className={`bg-white dark:bg-brand-card rounded-2xl shadow-xl border border-gray-200 dark:border-brand-border overflow-hidden flex flex-col min-h-[550px] w-full ${className}`}>
-      <div className="p-4 border-b border-gray-200 dark:border-brand-border bg-gradient-to-r from-indigo-600 to-brand-primary text-white flex justify-between items-center">
+    <div className={`bg-white dark:bg-brand-card rounded-2xl shadow-xl border border-brand-border border-brand-border overflow-hidden flex flex-col min-h-[550px] w-full ${className}`}>
+      <div className="p-4 border-b border-brand-border border-brand-border bg-gradient-to-r from-indigo-600 to-brand-primary text-white flex justify-between items-center">
         <h3 className="font-extrabold text-base flex items-center gap-2">
           <Bell className="h-5 w-5 text-indigo-200 animate-bounce" /> Smart AI Notifications
         </h3>
@@ -21,7 +21,7 @@ const NotificationCenter = ({ notifications = [], onMarkAsRead, onClearAll, onAc
           {onAddNotification && (
             <button 
               onClick={onAddNotification}
-              className="text-xs bg-indigo-500/30 hover:bg-indigo-500/50 text-white font-bold px-2.5 py-1 rounded-lg border border-white/20 flex items-center gap-1 transition cursor-pointer"
+              className="text-xs bg-brand-accent/100/30 hover:bg-brand-accent/100/50 text-white font-bold px-2.5 py-1 rounded-lg border border-white/20 flex items-center gap-1 transition cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" /> + Simulate Alert
             </button>
@@ -35,19 +35,19 @@ const NotificationCenter = ({ notifications = [], onMarkAsRead, onClearAll, onAc
         </div>
       </div>
       
-      <div className="p-3 border-b border-gray-100 dark:border-brand-border bg-gray-50 dark:bg-brand-bg flex flex-col sm:flex-row gap-2">
+      <div className="p-3 border-b border-gray-100 border-brand-border bg-gray-50 dark:bg-brand-bg flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
           <input 
             type="text" 
             placeholder="Search notification messages..." 
-            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-xl text-brand-text focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-brand-card border border-brand-border border-brand-border rounded-xl text-brand-text focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <select 
-          className="text-xs bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-xl px-3 py-1.5 text-brand-text font-semibold focus:outline-none"
+          className="text-xs bg-white dark:bg-brand-card border border-brand-border border-brand-border rounded-xl px-3 py-1.5 text-brand-text font-semibold focus:outline-none"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
@@ -72,12 +72,12 @@ const NotificationCenter = ({ notifications = [], onMarkAsRead, onClearAll, onAc
               key={notif.id || idx} 
               className={`p-4 rounded-xl border transition-all hover:shadow-md ${
                 notif.is_read 
-                  ? 'bg-gray-50/50 dark:bg-brand-bg/50 border-gray-100 dark:border-brand-border opacity-80' 
-                  : 'bg-indigo-50/40 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-900/50'
+                  ? 'bg-gray-50/50 dark:bg-brand-bg/50 border-gray-100 border-brand-border opacity-80' 
+                  : 'bg-brand-accent/10/40 dark:bg-brand-accent/20/20 border-indigo-200 dark:border-brand-accent/50'
               }`}
             >
               <div className="flex justify-between items-start mb-1.5">
-                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider bg-indigo-100 dark:bg-indigo-900/40 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-black text-brand-accent dark:text-brand-accent uppercase tracking-wider bg-brand-accent/10 dark:bg-brand-accent/20 px-2 py-0.5 rounded">
                   {notif.category?.replace('_', ' ') || 'SYSTEM'}
                 </span>
                 <span className="text-[10px] text-gray-400 font-mono">
@@ -88,12 +88,12 @@ const NotificationCenter = ({ notifications = [], onMarkAsRead, onClearAll, onAc
                 {notif.message_body}
               </p>
               
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-brand-border/40">
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100 border-brand-border">
                 <div className="flex gap-2">
                   {notif.action_text && (
                     <button 
                       onClick={() => onAction && onAction(notif.action_text, notif)}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shadow-sm active:scale-95"
+                      className="bg-brand-accent hover:opacity-90 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shadow-sm active:scale-95"
                     >
                       {notif.action_text}
                     </button>
@@ -101,7 +101,7 @@ const NotificationCenter = ({ notifications = [], onMarkAsRead, onClearAll, onAc
                   {notif.category === 'clinical_trial' && !notif.action_text && (
                     <button 
                       onClick={() => onAction && onAction('View Details', notif)}
-                      className="border border-indigo-500 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition cursor-pointer"
+                      className="border border-brand-accent text-brand-accent dark:text-brand-accent text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-brand-accent/10 dark:hover:bg-brand-accent/20/20 transition cursor-pointer"
                     >
                       View Details
                     </button>
@@ -110,7 +110,7 @@ const NotificationCenter = ({ notifications = [], onMarkAsRead, onClearAll, onAc
                 {!notif.is_read && onMarkAsRead && (
                   <button 
                     onClick={() => onMarkAsRead(notif.id)} 
-                    className="text-gray-400 hover:text-emerald-500 text-xs font-bold flex items-center gap-1 cursor-pointer bg-white dark:bg-brand-card px-2 py-1 rounded border border-gray-200 dark:border-brand-border" 
+                    className="text-gray-400 hover:text-emerald-500 text-xs font-bold flex items-center gap-1 cursor-pointer bg-white dark:bg-brand-card px-2 py-1 rounded border border-brand-border border-brand-border" 
                     title="Mark as Read"
                   >
                     <Check className="h-3.5 w-3.5 text-emerald-500" /> Mark Read
@@ -126,3 +126,6 @@ const NotificationCenter = ({ notifications = [], onMarkAsRead, onClearAll, onAc
 };
 
 export default NotificationCenter;
+
+
+
