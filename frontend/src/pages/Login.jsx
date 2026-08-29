@@ -116,7 +116,12 @@ export default function Login({ onLogin }) {
     { name: 'Pharmacist Michael', email: 'michael@gmail.com', role: 'pharmacist' },
     { name: 'Receptionist Michael Scott', email: 'scott@gmail.com', role: 'receptionist' },
     { name: 'Operations Admin Angela', email: 'angela@gmail.com', role: 'admin' },
-    { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica@gmail.com', role: 'command_center' }
+    { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica@gmail.com', role: 'command_center' },
+    { name: 'Dr. Sarah (Trauma)', email: 'sarah@gmail.com', role: 'trauma' },
+    { name: 'Dr. Admin (Blood Bank)', email: 'bloodbank@gmail.com', role: 'blood_bank' },
+    { name: 'Marcus Vance (Lab Tech)', email: 'marcus@gmail.com', role: 'lab_tech' },
+    { name: 'Dr. Emily (Pediatrics)', email: 'pediatrics@gmail.com', role: 'pediatrics' },
+    { name: 'Dr. Olivia (Maternity)', email: 'maternity@gmail.com', role: 'maternity' }
   ];
 
   const staffAccounts = {
@@ -125,7 +130,105 @@ export default function Login({ onLogin }) {
     'scott@gmail.com': { name: 'Receptionist Michael Scott', email: 'scott@gmail.com', role: 'receptionist', password: '123' },
     'michael@gmail.com': { name: 'Pharmacist Michael', email: 'michael@gmail.com', role: 'pharmacist', password: '123' },
     'angela@gmail.com': { name: 'Operations Admin Angela', email: 'angela@gmail.com', role: 'admin', password: '123' },
-    'jessica@gmail.com': { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica@gmail.com', role: 'command_center', password: '123' }
+    'jessica@gmail.com': { name: 'Dr. Jessica Davis (Head of Hospital)', email: 'jessica@gmail.com', role: 'command_center', password: '123' },
+    'sarah@gmail.com': { name: 'Dr. Sarah (Trauma)', email: 'sarah@gmail.com', role: 'trauma', password: '123' },
+    'bloodbank@gmail.com': { name: 'Dr. Admin (Blood Bank)', email: 'bloodbank@gmail.com', role: 'blood_bank', password: '123' },
+    'marcus@gmail.com': { name: 'Marcus Vance (Lab Tech)', email: 'marcus@gmail.com', role: 'lab_tech', password: '123' },
+    'pediatrics@gmail.com': { name: 'Dr. Emily (Pediatrics)', email: 'pediatrics@gmail.com', role: 'pediatrics', password: '123' },
+    'maternity@gmail.com': { name: 'Dr. Olivia (Maternity)', email: 'maternity@gmail.com', role: 'maternity', password: '123' }
+  };
+
+
+  const handleQuickPatientLogin = async (e, patient) => {
+    e.preventDefault();
+    setPatientEmail(patient.email);
+    setPatientPassword('password123');
+    setLoading(true);
+    try {
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: patient.email,
+          password: 'password123',
+          session_type: 'patient',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('curalink_token', data.access_token);
+        setLoading(false);
+        onLogin({
+          sessionType: 'patient',
+          role: 'patient',
+          user: data.user,
+        });
+        return;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    
+    // Offline fallback
+    setLoading(false);
+    onLogin({
+      sessionType: 'patient',
+      role: 'patient',
+      user: {
+        id: Math.floor(Math.random() * 1000),
+        first_name: patient.name.split(' ')[0],
+        last_name: patient.name.split(' ')[1] || '',
+        email: patient.email,
+        medical_record_number: patient.mrn,
+      }
+    });
+  };
+
+  const handleQuickStaffLogin = async (staff) => {
+    const staffPwd = staffAccounts[staff.email]?.password || '123';
+    setHospitalEmail(staff.email);
+    setHospitalRole(staff.role);
+    setHospitalPassword(staffPwd);
+    setLoading(true);
+    try {
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: staff.email,
+          password: staffPwd,
+          session_type: 'hospital',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('curalink_token', data.access_token);
+        setLoading(false);
+        onLogin({
+          sessionType: 'hospital',
+          role: data.role,
+          user: data.user,
+        });
+        return;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    
+    const account = staffAccounts[staff.email];
+    if (account) {
+      setLoading(false);
+      onLogin({
+        sessionType: 'hospital',
+        role: account.role,
+        user: { email: account.email, name: account.name },
+      });
+    } else {
+      setLoading(false);
+      alert("Demo staff login failed.");
+    }
   };
 
   const handlePatientSubmit = async (e) => {
@@ -341,32 +444,6 @@ export default function Login({ onLogin }) {
     }
   };
 
-  const handleQuickPatientLogin = async (e, p) => {
-    e.preventDefault();
-    setLoading(true);
-    // Directly authenticate with mock data to guarantee demo access
-    setTimeout(() => {
-      setLoading(false);
-      onLogin({
-        sessionType: 'patient',
-        role: 'patient',
-        user: p,
-      });
-    }, 600);
-  };
-
-  const handleQuickStaffLogin = async (staff) => {
-    setLoading(true);
-    // Directly authenticate with mock data to guarantee demo access
-    setTimeout(() => {
-      setLoading(false);
-      onLogin({
-        sessionType: 'hospital',
-        role: staff.role,
-        user: { email: staff.email, name: staff.name },
-      });
-    }, 600);
-  };
 
   return (
     <div className="min-h-screen bg-brand-bg text-brand-text flex transition-colors duration-300 relative select-none overflow-hidden font-sans">
@@ -641,6 +718,11 @@ export default function Login({ onLogin }) {
                               <option value="receptionist">Receptionist</option>
                               <option value="pharmacist">Pharmacist</option>
                               <option value="command_center">Head of Hospital (AI Command Center)</option>
+                              <option value="trauma">Trauma / Emergency</option>
+                              <option value="blood_bank">Blood Bank</option>
+                              <option value="lab_tech">Lab Technician</option>
+                              <option value="pediatrics">Pediatrics</option>
+                              <option value="maternity">Maternity & Obstetrics</option>
                             </select>
                           </div>
 
@@ -688,7 +770,19 @@ export default function Login({ onLogin }) {
                               >
                                 <span className="text-[10px] font-extrabold text-brand-text truncate block group-hover:text-brand-accent transition-colors">{staff.name}</span>
                                 <span className="text-[9px] uppercase font-bold tracking-wider mt-0.5" style={{
-                                  color: staff.role === 'admin' ? '#A855F7' : staff.role === 'doctor' ? '#3B82F6' : staff.role === 'nurse' ? '#10B981' : staff.role === 'pharmacist' ? '#F43F5E' : '#F59E0B'
+                                  color: {
+                                    admin: '#A855F7',
+                                    doctor: '#3B82F6',
+                                    nurse: '#10B981',
+                                    pharmacist: '#F43F5E',
+                                    receptionist: '#F97316',
+                                    command_center: '#EAB308',
+                                    trauma: '#EF4444',
+                                    blood_bank: '#DC2626',
+                                    lab_tech: '#6366F1',
+                                    pediatrics: '#EC4899',
+                                    maternity: '#D946EF'
+                                  }[staff.role] || '#F59E0B'
                                 }}>{staff.role}</span>
                               </button>
                             ))}
@@ -910,6 +1004,12 @@ export default function Login({ onLogin }) {
                             <option value="receptionist">Receptionist</option>
                             <option value="pharmacist">Pharmacist</option>
                             <option value="admin">Operations Admin</option>
+                            <option value="command_center">Head of Hospital (AI Command Center)</option>
+                            <option value="trauma">Trauma / Emergency</option>
+                            <option value="blood_bank">Blood Bank</option>
+                            <option value="lab_tech">Lab Technician</option>
+                            <option value="pediatrics">Pediatrics</option>
+                            <option value="maternity">Maternity & Obstetrics</option>
                           </select>
                         </div>
                         <div className="space-y-1">

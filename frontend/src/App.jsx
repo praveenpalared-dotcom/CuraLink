@@ -7,6 +7,11 @@ import ReceptionDashboard from './pages/ReceptionDashboard';
 import PharmacistDashboard from './pages/PharmacistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AiCommandCenter from './pages/AiCommandCenter';
+import TraumaDashboard from './pages/TraumaDashboard';
+import BloodBankDashboard from './pages/BloodBankDashboard';
+import LabTechnicianDashboard from './pages/LabTechnicianDashboard';
+import PediatricsDashboard from './pages/PediatricsDashboard';
+import MaternityDashboard from './pages/MaternityDashboard';
 import Login from './pages/Login';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -51,6 +56,11 @@ function App() {
     if (role === 'pharmacist') return page === 'pharmacist';
     if (role === 'admin') return page === 'admin';
     if (role === 'command_center') return page === 'command_center';
+    if (role === 'trauma') return page === 'trauma';
+    if (role === 'blood_bank') return page === 'blood_bank';
+    if (role === 'lab_tech') return page === 'lab_tech';
+    if (role === 'pediatrics') return page === 'pediatrics';
+    if (role === 'maternity') return page === 'maternity';
     return false;
   };
 
@@ -178,6 +188,41 @@ function App() {
         )}
         {activePage === 'command_center' && (
           <AiCommandCenter 
+            user={staffData}
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {activePage === 'trauma' && (
+          <TraumaDashboard 
+            user={staffData}
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {activePage === 'blood_bank' && (
+          <BloodBankDashboard 
+            user={staffData}
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {activePage === 'lab_tech' && (
+          <LabTechnicianDashboard 
+            user={staffData}
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {activePage === 'pediatrics' && (
+          <PediatricsDashboard 
+            user={staffData}
+            onNavigate={navigate} 
+            onLogout={handleLogout}
+          />
+        )}
+        {activePage === 'maternity' && (
+          <MaternityDashboard 
             user={staffData}
             onNavigate={navigate} 
             onLogout={handleLogout}
