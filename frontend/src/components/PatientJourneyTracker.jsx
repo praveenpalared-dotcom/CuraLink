@@ -141,7 +141,7 @@ export default function PatientJourneyTracker({ patientId, isDemoMode = false })
                 </div>
                 <div>
                   <div className="text-sm font-medium text-gray-800">{evt.event_type.replace(/_/g, ' ')}</div>
-                  <div className="text-xs text-gray-500">{new Date(evt.timestamp).toLocaleTimeString()} {evt.details && `- ${evt.details}`}</div>
+                  <div className="text-xs text-gray-500">{new Date(evt.timestamp + (evt.timestamp.endsWith('Z') ? '' : 'Z')).toLocaleTimeString()} {evt.details && `- ${evt.details}`}</div>
                 </div>
               </div>
             ))}
