@@ -4,7 +4,7 @@ try:
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
     from backend.app.database import engine, Base, SessionLocal
-    from backend.app.routers import appointments, queue, notifications, post_recovery, research
+    from backend.app.routers import appointments, queue, notifications, post_recovery, research, orchestration, pathology, pharmacy, emergency
     from backend.app.auth.security import hash_password
     from backend.app.auth.router import router as auth_router
     from backend.app.models.models import HospitalDepartment, Doctor, Patient, Appointment, AppointmentStatus, QueueStatus
@@ -37,7 +37,10 @@ try:
     app.include_router(notifications.router, prefix="/api/v1")
     app.include_router(post_recovery.router, prefix="/api/v1")
     app.include_router(research.router, prefix="/api/v1")
-
+    app.include_router(orchestration.router, prefix="/api/v1/orchestration")
+    app.include_router(pathology.router, prefix="/api/v1/pathology")
+    app.include_router(pharmacy.router, prefix="/api/v1/pharmacy")
+    app.include_router(emergency.router, prefix="/api/v1/emergency")
     # Middleware to ensure database is seeded on the first request (safe for serverless imports)
     IS_SEEDED = False
     DEMO_PASSWORD_HASH = hash_password("password123")

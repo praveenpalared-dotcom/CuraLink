@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr
-from backend.app.models.models import AppointmentStatus, NotificationType, NotificationCategory, StaffRole
+from backend.app.models.models import AppointmentStatus, NotificationType, NotificationCategory, StaffRole, PatientJourneyStatus
 
 # Department schemas
 class DepartmentBase(BaseModel):
@@ -218,3 +218,108 @@ class CollaborationRequestResponse(CollaborationRequestBase):
 class CollaborationRequestCreate(CollaborationRequestBase):
     sender_id: int
     receiver_id: int
+
+# --- Orchestration Schemas ---
+
+class PatientJourneyResponse(BaseModel):
+    id: int
+    patient_id: int
+    status: PatientJourneyStatus
+    current_department_id: Optional[int] = None
+    emergency_status: bool
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+class HospitalEventResponse(BaseModel):
+    id: int
+    patient_id: Optional[int] = None
+    event_type: str
+    department_id: Optional[int] = None
+    agent_name: Optional[str] = None
+    details: Optional[str] = None
+    timestamp: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+class DiagnosticRequestCreate(BaseModel):
+    patient_id: int
+    doctor_id: int
+    test_name: str
+    priority: Optional[str] = "routine"
+
+class DiagnosticRequestResponse(DiagnosticRequestCreate):
+    id: int
+    status: str
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+class DiagnosticResultCreate(BaseModel):
+    request_id: int
+    result_value: str
+    notes: Optional[str] = None
+
+class DiagnosticResultResponse(DiagnosticResultCreate):
+    id: int
+    completed_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+class PrescriptionCreate(BaseModel):
+    patient_id: int
+    doctor_id: int
+    medication_name: str
+    dosage: str
+    instructions: Optional[str] = None
+
+class PrescriptionResponse(PrescriptionCreate):
+    id: int
+    status: str
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+class MedicationOrderResponse(BaseModel):
+    id: int
+    prescription_id: int
+    status: str
+    dispatched_at: Optional[datetime.datetime] = None
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+class BloodRequestCreate(BaseModel):
+    patient_id: int
+    blood_group: str
+    units_required: int
+    urgency: Optional[str] = "routine"
+
+class BloodRequestResponse(BloodRequestCreate):
+    id: int
+    status: str
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+class EmergencyCaseCreate(BaseModel):
+    patient_id: Optional[int] = None
+    chief_complaint: str
+    severity_level: str
+
+class EmergencyCaseResponse(EmergencyCaseCreate):
+    id: int
+    status: str
+    assigned_bed: Optional[str] = None
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True

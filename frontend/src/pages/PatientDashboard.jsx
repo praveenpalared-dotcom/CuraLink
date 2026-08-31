@@ -4,6 +4,7 @@ import AgentChat from '../components/AgentChat';
 import NotificationBell from '../components/NotificationBell';
 import NotificationCenter from '../components/NotificationCenter';
 import SavedSearches from '../components/SavedSearches';
+import PatientJourneyTracker from '../components/PatientJourneyTracker';
 import { 
   Calendar, User, Clock, ChevronLeft, ChevronRight, RefreshCw, AlertCircle, CheckCircle, 
   Activity, Star, DollarSign, ArrowRight, ShieldAlert, Award, FileText,
@@ -704,6 +705,7 @@ export default function PatientDashboard({ onNavigate, userRole, setUserRole, se
           {/* Tab: HOME (Modern Premium Dashboard Grid) */}
           {activeTab === 'home' && (
             <div className="space-y-5 animate-in fade-in duration-300">
+              <PatientJourneyTracker patientId={1} isDemoMode={true} />
               {/* Hero welcome banner */}
               <div className="p-6 rounded-2xl bg-gradient-to-r from-brand-accent/10 via-brand-teal/5 to-brand-bg border border-brand-accent/15 relative overflow-hidden">
                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-accent/10 rounded-full blur-3xl"></div>

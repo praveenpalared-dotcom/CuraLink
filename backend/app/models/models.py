@@ -258,3 +258,95 @@ class CollaborationRequest(Base):
 
     sender = relationship("Staff", foreign_keys=[sender_id])
     receiver = relationship("Staff", foreign_keys=[receiver_id])
+
+# --- Orchestration & Integration Models ---
+
+class PatientJourneyStatus(str, enum.Enum):
+    registered = "registered"
+    triage = "triage"
+    waiting = "waiting"
+    in_consultation = "in_consultation"
+    diagnostics = "diagnostics"
+    pharmacy = "pharmacy"
+    admitted = "admitted"
+    discharged = "discharged"
+
+class PatientJourney(Base):
+    __tablename__ = "patient_journeys"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False)
+    status = Column(Enum(PatientJourneyStatus), default=PatientJourneyStatus.registered)
+    current_department_id = Column(Integer, ForeignKey("hospital_departments.id", ondelete="SET NULL"), nullable=True)
+    emergency_status = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    patient = relationship("Patient")
+    department = relationship("HospitalDepartment")
+
+class HospitalEvent(Base):
+    __tablename__ = "hospital_events"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=True)
+    event_type = Column(String(100), nullable=False) # e.g. PATIENT_REGISTERED, TRIAGE_COMPLETED
+    department_id = Column(Integer, ForeignKey("hospital_departments.id", ondelete="SET NULL"), nullable=True)
+    agent_name = Column(String(100), nullable=True) # e.g. Triage Agent
+    details = Column(Text, nullable=True) # JSON payload
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+
+class DiagnosticRequest(Base):
+    __tablename__ = "diagnostic_requests"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("doctors.id", ondelete="CASCADE"), nullable=False)
+    test_name = Column(String(200), nullable=False)
+    priority = Column(String(50), default="routine") # routine, urgent, stat
+    status = Column(String(50), default="requested") # requested, processing, completed
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class DiagnosticResult(Base):
+    __tablename__ = "diagnostic_results"
+    id = Column(Integer, primary_key=True, index=True)
+    request_id = Column(Integer, ForeignKey("diagnostic_requests.id", ondelete="CASCADE"), nullable=False)
+    result_value = Column(Text, nullable=False)
+    notes = Column(Text, nullable=True)
+    completed_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class Prescription(Base):
+    __tablename__ = "prescriptions"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("doctors.id", ondelete="CASCADE"), nullable=False)
+    medication_name = Column(String(200), nullable=False)
+    dosage = Column(String(100), nullable=False)
+    instructions = Column(Text, nullable=True)
+    status = Column(String(50), default="active")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class MedicationOrder(Base):
+    __tablename__ = "medication_orders"
+    id = Column(Integer, primary_key=True, index=True)
+    prescription_id = Column(Integer, ForeignKey("prescriptions.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String(50), default="new") # new, packing, dispatched
+    dispatched_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class BloodRequest(Base):
+    __tablename__ = "blood_requests"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False)
+    blood_group = Column(String(10), nullable=False)
+    units_required = Column(Integer, nullable=False)
+    urgency = Column(String(50), default="routine") # routine, urgent, critical
+    status = Column(String(50), default="requested") # requested, reserved, dispatched
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class EmergencyCase(Base):
+    __tablename__ = "emergency_cases"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=True)
+    chief_complaint = Column(Text, nullable=False)
+    severity_level = Column(String(50), nullable=False) # low, medium, high, critical
+    status = Column(String(50), default="active") # active, stabilized, admitted, discharged
+    assigned_bed = Column(String(50), nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
