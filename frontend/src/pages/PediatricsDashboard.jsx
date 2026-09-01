@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Baby, Activity, Syringe, ClipboardList, CheckCircle, Clock } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
 export default function PediatricsDashboard({ user, onLogout, onNavigate }) {
-  const [patients, setPatients] = useState([
-    { id: 'PED-401', name: 'Lily Anderson', age: '4 months', reason: 'Routine Vaccination', time: '10:00 AM', status: 'Checked In', parent: 'Sarah Anderson' },
-    { id: 'PED-402', name: 'James Wilson Jr.', age: '6 years', reason: 'Fever & Cough', time: '10:30 AM', status: 'Waiting', parent: 'James Wilson Sr.' },
-    { id: 'PED-403', name: 'Emma Davis', age: '2 years', reason: 'Growth Check', time: '11:00 AM', status: 'Scheduled', parent: 'Michael Davis' }
-  ]);
+  const [patients, setPatients] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/pediatrics/patients');
+      if (res.ok) setPatients(await res.json());
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    const timer = setInterval(fetchData, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const getStatusStyle = (status) => {
     if (status === 'Checked In') return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';

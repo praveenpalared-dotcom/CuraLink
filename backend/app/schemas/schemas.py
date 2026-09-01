@@ -254,6 +254,8 @@ class DiagnosticRequestCreate(BaseModel):
 class DiagnosticRequestResponse(DiagnosticRequestCreate):
     id: int
     status: str
+    patient_name: Optional[str] = None
+    doctor_name: Optional[str] = None
     created_at: datetime.datetime
 
     class Config:
@@ -281,6 +283,8 @@ class PrescriptionCreate(BaseModel):
 class PrescriptionResponse(PrescriptionCreate):
     id: int
     status: str
+    patient_name: Optional[str] = None
+    doctor_name: Optional[str] = None
     created_at: datetime.datetime
 
     class Config:
@@ -321,5 +325,83 @@ class EmergencyCaseResponse(EmergencyCaseCreate):
     assigned_bed: Optional[str] = None
     created_at: datetime.datetime
 
+    class Config:
+        from_attributes = True
+
+class BloodInventoryBase(BaseModel):
+    blood_group: str
+    units_available: int
+    status: str
+
+class BloodInventoryResponse(BloodInventoryBase):
+    id: int
+    updated_at: datetime.datetime
+    class Config:
+        from_attributes = True
+
+class IncomingAmbulanceBase(BaseModel):
+    id: str
+    eta: str
+    priority: str
+    issue: str
+    hr: int
+    bp: str
+    o2: str
+
+class IncomingAmbulanceResponse(IncomingAmbulanceBase):
+    created_at: datetime.datetime
+    class Config:
+        from_attributes = True
+
+class ResuscitationBayBase(BaseModel):
+    bed_name: str
+    patient_name: str
+    status: str
+    team_lead: str
+    time_in_bay: str
+
+class ResuscitationBayResponse(ResuscitationBayBase):
+    id: int
+    created_at: datetime.datetime
+    class Config:
+        from_attributes = True
+
+class TraumaQueueBase(BaseModel):
+    patient_name: str
+    triage_level: str
+    complaint: str
+    wait_time: str
+
+class TraumaQueueResponse(TraumaQueueBase):
+    id: int
+    created_at: datetime.datetime
+    class Config:
+        from_attributes = True
+
+class PediatricPatientBase(BaseModel):
+    id: str
+    name: str
+    age: str
+    reason: str
+    time: str
+    status: str
+    parent: str
+
+class PediatricPatientResponse(PediatricPatientBase):
+    created_at: datetime.datetime
+    class Config:
+        from_attributes = True
+
+class MaternityPatientBase(BaseModel):
+    id: str
+    name: str
+    weeks: str
+    status: str
+    edd: str
+    room: str
+    fhr: str
+
+class MaternityPatientResponse(MaternityPatientBase):
+    created_at: datetime.datetime
     class Config:
         from_attributes = True

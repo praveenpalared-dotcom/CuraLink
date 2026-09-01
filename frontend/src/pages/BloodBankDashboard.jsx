@@ -1,24 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Droplet, Activity, AlertCircle, CheckCircle, Search, RefreshCw } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
 export default function BloodBankDashboard({ user, onLogout, onNavigate }) {
-  const [inventory, setInventory] = useState([
-    { type: 'A+', units: 45, status: 'Optimal' },
-    { type: 'A-', units: 12, status: 'Low' },
-    { type: 'B+', units: 30, status: 'Optimal' },
-    { type: 'B-', units: 5, status: 'Critical' },
-    { type: 'O+', units: 50, status: 'Optimal' },
-    { type: 'O-', units: 8, status: 'Critical' },
-    { type: 'AB+', units: 25, status: 'Optimal' },
-    { type: 'AB-', units: 15, status: 'Optimal' }
-  ]);
+  const [inventory, setInventory] = useState([]);
+  const [requests, setRequests] = useState([]);
 
-  const requests = [
-    { id: 'REQ-882', department: 'Trauma', type: 'O-', units: 4, urgency: 'Immediate (Code Red)', patient: 'Unknown (RTA)' },
-    { id: 'REQ-883', department: 'Maternity', type: 'B-', units: 2, urgency: 'High', patient: 'Sarah Jenkins (PPH)' },
-    { id: 'REQ-884', department: 'Surgery', type: 'A+', units: 3, urgency: 'Routine', patient: 'Tom Hanks (CABG)' }
-  ];
+  const fetchData = async () => {
+    try {
+      const invRes = await fetch('http://localhost:8000/api/v1/blood-bank/inventory');
+      const reqRes = await fetch('http://localhost:8000/api/v1/blood-bank/requests');
+      if (invRes.ok) setInventory(await invRes.json());
+      if (reqRes.ok) {
+        const reqs = await reqRes.json();
+        setRequests(reqs.filter(r => r.status === 'requested'));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleDispatch = async (req) => {
+    try {
+      const invItem = inventory.find(i => i.blood_group === req.blood_group);
+      if (invItem) {
+        await fetch(`http://localhost:8000/api/v1/blood-bank/inventory/${invItem.id}/dispatch?units=${req.units_required}`, { method: 'PUT' });
+      }
+      await fetch(`http://localhost:8000/api/v1/blood-bank/requests/${req.id}/status?status=dispatched`, { method: 'PUT' });
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const getStatusColor = (status) => {
     if (status === 'Critical') return 'text-red-500 bg-red-500/20 border-red-500/30';
@@ -59,15 +78,15 @@ export default function BloodBankDashboard({ user, onLogout, onNavigate }) {
           <div className="glass-panel p-4 rounded-xl border border-brand-border space-y-3">
             <h3 className="font-extrabold text-xs uppercase tracking-wider text-brand-text flex items-center justify-between border-b border-brand-border pb-2">
               <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-brand-accent" /> Live Blood Inventory</div>
-              <button className="flex items-center gap-1 text-[9px] text-brand-muted hover:text-brand-text transition"><RefreshCw className="w-3 h-3"/> Refresh</button>
+              <button onClick={fetchData} className="flex items-center gap-1 text-[9px] text-brand-muted hover:text-brand-text transition cursor-pointer"><RefreshCw className="w-3 h-3"/> Refresh</button>
             </h3>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {inventory.map((item, i) => (
                 <div key={i} className="p-3 bg-brand-bg rounded-xl border border-brand-border flex flex-col justify-between items-center text-center">
-                  <span className="text-3xl font-black text-red-500 font-display">{item.type}</span>
+                  <span className="text-3xl font-black text-red-500 font-display">{item.blood_group}</span>
                   <div className="mt-2 space-y-1 w-full">
-                    <span className="block text-lg font-mono font-bold text-brand-text">{item.units} <span className="text-[10px] text-brand-muted uppercase">units</span></span>
+                    <span className="block text-lg font-mono font-bold text-brand-text">{item.units_available} <span className="text-[10px] text-brand-muted uppercase">units</span></span>
                     <span className={`block text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${getStatusColor(item.status)}`}>
                       {item.status}
                     </span>
@@ -96,16 +115,16 @@ export default function BloodBankDashboard({ user, onLogout, onNavigate }) {
                   
                   <div className="flex justify-between items-end">
                     <div className="text-[10px] text-brand-muted space-y-0.5">
-                      <div>Dept: <span className="text-brand-text font-bold">{req.department}</span></div>
-                      <div>Patient: <span className="text-brand-text font-bold">{req.patient}</span></div>
+                      <div>Dept: <span className="text-brand-text font-bold">General</span></div>
+                      <div>Patient: <span className="text-brand-text font-bold">{req.patient_name}</span></div>
                     </div>
                     <div className="text-right">
                       <span className="text-[10px] text-brand-muted uppercase block">Required</span>
-                      <span className="font-mono font-black text-red-500 text-base">{req.units}x <span className="text-white">{req.type}</span></span>
+                      <span className="font-mono font-black text-red-500 text-base">{req.units_required}x <span className="text-white">{req.blood_group}</span></span>
                     </div>
                   </div>
                   
-                  <button className="w-full mt-1 py-1.5 bg-brand-card hover:bg-brand-hover border border-brand-border rounded-lg text-[10px] font-bold text-brand-text transition flex items-center justify-center gap-1">
+                  <button onClick={() => handleDispatch(req)} className="w-full mt-1 py-1.5 bg-brand-card hover:bg-brand-hover border border-brand-border rounded-lg text-[10px] font-bold text-brand-text transition flex items-center justify-center gap-1 cursor-pointer">
                     <CheckCircle className="w-3 h-3"/> Dispatch Units
                   </button>
                 </div>

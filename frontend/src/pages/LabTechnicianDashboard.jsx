@@ -1,14 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TestTube, FlaskConical, CheckCircle2, Clock, Search, Filter, AlertTriangle } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
 export default function LabTechnicianDashboard({ user, onLogout, onNavigate }) {
-  const [labTests, setLabTests] = useState([
-    { id: 'LAB-1021', patient: 'Tom Johnson', test: 'Complete Blood Count (CBC)', urgency: 'STAT', status: 'Processing', time: '10 mins ago', dept: 'Trauma' },
-    { id: 'LAB-1022', patient: 'Jane Smith', test: 'Lipid Panel', urgency: 'Routine', status: 'Pending', time: '2 hrs ago', dept: 'General Medicine' },
-    { id: 'LAB-1023', patient: 'David Kim', test: 'Comprehensive Metabolic Panel', urgency: 'Urgent', status: 'Completed', time: '5 hrs ago', dept: 'Orthopedics' },
-    { id: 'LAB-1024', patient: 'Sarah Jenkins', test: 'Urinalysis', urgency: 'STAT', status: 'Pending', time: '15 mins ago', dept: 'Maternity' }
-  ]);
+  const [labTests, setLabTests] = useState([]);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/v1/pathology/requests');
+        if (res.ok) {
+          const data = await res.json();
+          const formatted = data.map(req => ({
+            id: req.id,
+            patient: req.patient_name || `Patient #${req.patient_id}`,
+            test: req.test_name,
+            urgency: (req.priority || 'routine').toUpperCase(),
+            status: req.status === 'requested' ? 'Pending' : req.status === 'processing' ? 'Processing' : 'Completed',
+            time: new Date(req.created_at + (req.created_at.endsWith('Z') ? '' : 'Z')).toLocaleTimeString(),
+            dept: 'Hospital'
+          }));
+          setLabTests(formatted);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchRequests();
+    const interval = setInterval(fetchRequests, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleAction = async (test) => {
+    try {
+      if (test.status === 'Pending') {
+        await fetch(`http://localhost:8000/api/v1/pathology/requests/${test.id}/status?status=processing`, { method: 'PUT' });
+      } else if (test.status === 'Processing') {
+        await fetch(`http://localhost:8000/api/v1/pathology/results`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ request_id: test.id, result_value: 'Completed - Normal', notes: 'Processed by Lab Tech' })
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const getStatusColor = (status) => {
     if (status === 'Completed') return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
@@ -57,7 +94,7 @@ export default function LabTechnicianDashboard({ user, onLogout, onNavigate }) {
             </div>
             <div>
               <div className="text-[10px] text-brand-muted font-bold uppercase tracking-wider">Total Pending</div>
-              <div className="text-2xl font-black text-brand-text font-mono">24</div>
+              <div className="text-2xl font-black text-brand-text font-mono">{labTests.filter(t => t.status === 'Pending').length}</div>
             </div>
           </div>
           <div className="glass-panel p-4 rounded-xl border border-red-500/20 flex items-center gap-4">
@@ -66,7 +103,7 @@ export default function LabTechnicianDashboard({ user, onLogout, onNavigate }) {
             </div>
             <div>
               <div className="text-[10px] text-red-500 font-bold uppercase tracking-wider">STAT Requests</div>
-              <div className="text-2xl font-black text-red-500 font-mono">2</div>
+              <div className="text-2xl font-black text-red-500 font-mono">{labTests.filter(t => t.urgency === 'STAT').length}</div>
             </div>
           </div>
           <div className="glass-panel p-4 rounded-xl border border-blue-500/20 flex items-center gap-4">
@@ -75,7 +112,7 @@ export default function LabTechnicianDashboard({ user, onLogout, onNavigate }) {
             </div>
             <div>
               <div className="text-[10px] text-blue-500 font-bold uppercase tracking-wider">Processing</div>
-              <div className="text-2xl font-black text-blue-500 font-mono">8</div>
+              <div className="text-2xl font-black text-blue-500 font-mono">{labTests.filter(t => t.status === 'Processing').length}</div>
             </div>
           </div>
           <div className="glass-panel p-4 rounded-xl border border-emerald-500/20 flex items-center gap-4">
@@ -84,7 +121,7 @@ export default function LabTechnicianDashboard({ user, onLogout, onNavigate }) {
             </div>
             <div>
               <div className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Completed Today</div>
-              <div className="text-2xl font-black text-emerald-500 font-mono">142</div>
+              <div className="text-2xl font-black text-emerald-500 font-mono">{labTests.filter(t => t.status === 'Completed').length}</div>
             </div>
           </div>
         </div>
@@ -140,7 +177,7 @@ export default function LabTechnicianDashboard({ user, onLogout, onNavigate }) {
                       {test.status === 'Completed' ? (
                         <button className="px-3 py-1 bg-brand-bg border border-brand-border text-brand-muted rounded-md text-[10px] font-bold">View</button>
                       ) : (
-                        <button className="px-3 py-1 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white border border-indigo-500/20 rounded-md text-[10px] font-bold transition">
+                        <button onClick={() => handleAction(test)} className="px-3 py-1 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white border border-indigo-500/20 rounded-md text-[10px] font-bold transition cursor-pointer">
                           {test.status === 'Pending' ? 'Start Processing' : 'Enter Results'}
                         </button>
                       )}

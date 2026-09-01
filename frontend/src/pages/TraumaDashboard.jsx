@@ -5,26 +5,29 @@ import NotificationBell from '../components/NotificationBell';
 export default function TraumaDashboard({ user, onLogout, onNavigate }) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const [incomingAmbulances, setIncomingAmbulances] = useState([]);
+  const [activeResus, setActiveResus] = useState([]);
+  const [traumaQueue, setTraumaQueue] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const ambRes = await fetch('http://localhost:8000/api/v1/trauma/ambulances');
+      const resusRes = await fetch('http://localhost:8000/api/v1/trauma/bays');
+      const queueRes = await fetch('http://localhost:8000/api/v1/trauma/queue');
+      if (ambRes.ok) setIncomingAmbulances(await ambRes.json());
+      if (resusRes.ok) setActiveResus(await resusRes.json());
+      if (queueRes.ok) setTraumaQueue(await queueRes.json());
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
+    fetchData();
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    const dataTimer = setInterval(fetchData, 5000);
+    return () => { clearInterval(timer); clearInterval(dataTimer); };
   }, []);
-
-  const incomingAmbulances = [
-    { id: 'AMB-104', eta: '2 mins', priority: 'Critical', issue: 'Multiple Trauma - RTA', hr: 142, bp: '80/50', o2: '88%' },
-    { id: 'AMB-209', eta: '8 mins', priority: 'High', issue: 'Suspected Myocardial Infarction', hr: 110, bp: '160/95', o2: '94%' }
-  ];
-
-  const activeResus = [
-    { bed: 'Resus Bay 1', patient: 'Unknown Male (~40s)', status: 'Active CPR', teamLead: 'Dr. Sarah Jenkins', timeInBay: '14 mins' },
-    { bed: 'Resus Bay 2', patient: 'Maria Garcia', status: 'Stabilizing', teamLead: 'Dr. Marcus Vance', timeInBay: '42 mins' }
-  ];
-
-  const traumaQueue = [
-    { id: 1, name: 'James Wilson', triage: 'Red (Immediate)', complaint: 'Severe Chest Pain', waitTime: '4 mins' },
-    { id: 2, name: 'Lisa Ray', triage: 'Yellow (Urgent)', complaint: 'Deep Laceration Arm', waitTime: '12 mins' },
-    { id: 3, name: 'David Kim', triage: 'Yellow (Urgent)', complaint: 'Closed Fracture Leg', waitTime: '25 mins' }
-  ];
 
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col">
@@ -121,13 +124,13 @@ export default function TraumaDashboard({ user, onLogout, onNavigate }) {
               {activeResus.map((bay, i) => (
                 <div key={i} className="p-3 bg-brand-bg rounded-xl border border-brand-border">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-black text-white text-sm">{bay.bed}</span>
+                    <span className="font-black text-white text-sm">{bay.bed_name}</span>
                     <span className="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded font-bold animate-pulse">{bay.status}</span>
                   </div>
                   <div className="space-y-1 mt-3">
-                    <div className="text-[10px] flex justify-between"><span className="text-brand-muted">Patient:</span> <span className="text-white font-bold">{bay.patient}</span></div>
-                    <div className="text-[10px] flex justify-between"><span className="text-brand-muted">Lead:</span> <span className="text-brand-teal font-bold">{bay.teamLead}</span></div>
-                    <div className="text-[10px] flex justify-between"><span className="text-brand-muted">Time:</span> <span className="text-amber-500 font-mono font-bold">{bay.timeInBay}</span></div>
+                    <div className="text-[10px] flex justify-between"><span className="text-brand-muted">Patient:</span> <span className="text-white font-bold">{bay.patient_name}</span></div>
+                    <div className="text-[10px] flex justify-between"><span className="text-brand-muted">Lead:</span> <span className="text-brand-teal font-bold">{bay.team_lead}</span></div>
+                    <div className="text-[10px] flex justify-between"><span className="text-brand-muted">Time:</span> <span className="text-amber-500 font-mono font-bold">{bay.time_in_bay}</span></div>
                   </div>
                 </div>
               ))}
@@ -149,14 +152,14 @@ export default function TraumaDashboard({ user, onLogout, onNavigate }) {
               {traumaQueue.map(patient => (
                 <div key={patient.id} className="p-3 bg-brand-bg rounded-xl border border-brand-border/60 hover:border-brand-border transition-colors cursor-pointer flex justify-between items-center">
                   <div>
-                    <div className="font-bold text-white text-sm">{patient.name}</div>
+                    <div className="font-bold text-white text-sm">{patient.patient_name}</div>
                     <div className="text-[10px] text-brand-muted font-semibold mt-0.5">{patient.complaint}</div>
                   </div>
                   <div className="text-right">
-                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${patient.triage.includes('Red') ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-amber-500/20 text-amber-500 border border-amber-500/30'}`}>
-                      {patient.triage}
+                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${patient.triage_level.includes('Red') ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-amber-500/20 text-amber-500 border border-amber-500/30'}`}>
+                      {patient.triage_level}
                     </span>
-                    <span className="block text-[10px] text-brand-muted font-mono mt-1">{patient.waitTime}</span>
+                    <span className="block text-[10px] text-brand-muted font-mono mt-1">{patient.wait_time}</span>
                   </div>
                 </div>
               ))}

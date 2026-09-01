@@ -350,3 +350,63 @@ class EmergencyCase(Base):
     status = Column(String(50), default="active") # active, stabilized, admitted, discharged
     assigned_bed = Column(String(50), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class BloodInventory(Base):
+    __tablename__ = "blood_inventory"
+    id = Column(Integer, primary_key=True, index=True)
+    blood_group = Column(String(10), unique=True, nullable=False)
+    units_available = Column(Integer, default=0)
+    status = Column(String(50), default="Optimal") # Optimal, Low, Critical
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+class IncomingAmbulance(Base):
+    __tablename__ = "incoming_ambulances"
+    id = Column(String(50), primary_key=True, index=True) # e.g. AMB-104
+    eta = Column(String(50)) # e.g. 2 mins
+    priority = Column(String(50)) # Critical, High
+    issue = Column(String(200))
+    hr = Column(Integer)
+    bp = Column(String(20))
+    o2 = Column(String(20))
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class ResuscitationBay(Base):
+    __tablename__ = "resuscitation_bays"
+    id = Column(Integer, primary_key=True, index=True)
+    bed_name = Column(String(50)) # Resus Bay 1
+    patient_name = Column(String(100))
+    status = Column(String(50))
+    team_lead = Column(String(100))
+    time_in_bay = Column(String(50))
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class TraumaQueue(Base):
+    __tablename__ = "trauma_queue"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_name = Column(String(100))
+    triage_level = Column(String(50)) # Red (Immediate), Yellow (Urgent)
+    complaint = Column(String(200))
+    wait_time = Column(String(50))
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class PediatricPatient(Base):
+    __tablename__ = "pediatric_patients"
+    id = Column(String(50), primary_key=True, index=True) # PED-401
+    name = Column(String(100))
+    age = Column(String(50))
+    reason = Column(String(200))
+    time = Column(String(50))
+    status = Column(String(50)) # Checked In, Waiting, Scheduled
+    parent = Column(String(100))
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class MaternityPatient(Base):
+    __tablename__ = "maternity_patients"
+    id = Column(String(50), primary_key=True, index=True) # MAT-201
+    name = Column(String(100))
+    weeks = Column(String(50))
+    status = Column(String(50))
+    edd = Column(String(50))
+    room = Column(String(50))
+    fhr = Column(String(50))
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)

@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, Activity, Calendar, Clock, CheckCircle2, UserCircle2, AlertCircle } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
 export default function MaternityDashboard({ user, onLogout, onNavigate }) {
-  const [patients, setPatients] = useState([
-    { id: 'MAT-201', name: 'Emily Clark', weeks: '38w 2d', status: 'Active Labor', edd: '2026-09-10', room: 'Labor Room 1', fhr: '142 bpm' },
-    { id: 'MAT-202', name: 'Sophia Turner', weeks: '12w 5d', status: 'Routine Scan', edd: '2027-03-05', room: 'Scan Room A', fhr: 'N/A' },
-    { id: 'MAT-203', name: 'Rachel Green', weeks: '40w 1d', status: 'Post-Op Recovery', edd: '2026-08-25', room: 'Ward 4B', fhr: 'Delivered' }
-  ]);
+  const [patients, setPatients] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/maternity/patients');
+      if (res.ok) setPatients(await res.json());
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    const timer = setInterval(fetchData, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const getStatusStyle = (status) => {
     if (status === 'Active Labor') return 'bg-purple-500/20 text-purple-400 border-purple-500/30 animate-pulse';
