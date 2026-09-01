@@ -246,7 +246,7 @@ try:
                         db.add(ResearchPaper(title="Wearable Sensors for Glycemic Control", authors="Dr. Richard Patel", summary="Wearable CGMs reduce HbA1c levels significantly over 6 months.", disease_tags="Diabetes", published_date=now - datetime.timedelta(days=10)))
                         db.add(SavedSearch(patient_id=1, query="Lung Cancer Trials", category="Clinical Trials"))
                         db.commit()
-                    from backend.app.models.models import BloodInventory, IncomingAmbulance, ResuscitationBay, TraumaQueue, PediatricPatient, MaternityPatient, BloodRequest
+                from backend.app.models.models import BloodInventory, IncomingAmbulance, ResuscitationBay, TraumaQueue, PediatricPatient, MaternityPatient, BloodRequest
                 if db.query(BloodInventory).count() == 0:
                     db.add_all([
                         BloodInventory(blood_group="A+", units_available=45, status="Optimal"),
